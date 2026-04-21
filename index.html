@@ -107,15 +107,32 @@
     .lang-switch button.active { background:#0f4fd6; color:#fff; }
     .bilingual { line-height:1.15; }
     .bilingual .cn { display:block; font-size:.78em; color:var(--muted); font-weight:700; margin-top:4px; }
+    /* Small desktop (≤1280px): 2-column, tighten nav */
     @media (max-width: 1280px) {
-      .app-shell { grid-template-columns: 280px minmax(0,1fr) 320px; }
+      .app-shell { grid-template-columns: minmax(0, 1fr) 300px; }
       .top-nav { gap:20px; font-size:18px; }
+      .topbar { padding:0 20px 44px; }
     }
+    /* Tablet (≤1024px): keep 2-column, scale down components */
     @media (max-width: 1024px) {
-      .app-shell { grid-template-columns: 1fr; grid-template-rows:auto auto auto auto auto; }
+      .app-shell { grid-template-columns: minmax(0, 1fr) 260px; }
+      .topbar { padding:0 14px 44px; }
+      .top-nav { gap:12px; font-size:15px; }
+      .brand { font-size:24px; }
+      .right { padding:16px 12px; }
+      .right-card { padding:16px; }
+      .map-card { min-height:calc(100vh - 80px - 24px); }
+      .route-card { min-width:260px; max-width:260px; }
+      .hero-chat { padding:12px; }
+      .chat-pill { font-size:14px; padding:9px 13px; }
+    }
+    /* Mobile (≤768px): single-column stack */
+    @media (max-width: 768px) {
+      .app-shell { grid-template-columns:1fr; grid-template-rows:auto auto auto auto auto; }
       .left, .right { border:none; }
       .main { padding:0 12px 12px; }
-      .map-card { min-height: 68vh; border-radius:24px; }
+      .map-card { min-height:68vh; border-radius:24px; }
+      .route-card { min-width:280px; max-width:280px; }
     }
   </style>
 </head>
