@@ -97,7 +97,7 @@
     .small-label { color:#64748b; font-size:14px; }
     .status-dot { width:10px; height:10px; border-radius:999px; background:#17a34a; display:inline-block; }
     /* ── Timeline trip summary (Google Maps style) ── */
-    .trip-summary { padding:14px 18px; width:min(460px, 100%); align-self:flex-start; pointer-events:auto; }
+    .trip-summary { position:absolute; top:20px; right:20px; width:min(380px, calc(50% - 28px)); padding:14px 18px; pointer-events:auto; z-index:4; }
     .tl-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; gap:8px; flex-wrap:wrap; }
     .tl-timerange { font-size:17px; font-weight:800; color:#0f172a; }
     .tl-duration { display:inline-block; font-size:13px; font-weight:700; color:#64748b; background:#f1f5f9; padding:3px 10px; border-radius:999px; margin-top:4px; }
@@ -146,7 +146,7 @@
       .route-card { min-width:240px; max-width:240px; }
       .hero-chat { padding:12px; width:min(100%, 580px); }
       .chat-pill { font-size:13px; padding:8px 12px; }
-      .trip-summary { width:min(400px, 100%); }
+      .trip-summary { top:14px; right:14px; width:min(300px, calc(55% - 20px)); }
       .tl-timerange { font-size:15px; }
     }
     /* Mobile (≤768px): single-column stack */
@@ -158,7 +158,7 @@
       .map-overlay { padding:12px 12px 10px; gap:8px; }
       .route-card { min-width:calc(75vw); max-width:calc(75vw); }
       .hero-chat { width:100%; border-radius:18px; padding:10px; }
-      .trip-summary { width:100%; }
+      .trip-summary { top:auto; bottom:10px; right:10px; left:10px; width:auto; }
       .chat-pill { font-size:12px; padding:7px 10px; gap:6px; }
       .tl-row { grid-template-columns:46px 14px 1fr; gap:7px; }
       .tl-leg { grid-template-columns:46px 14px 1fr; gap:7px; }
