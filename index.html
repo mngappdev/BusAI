@@ -70,8 +70,11 @@
     .chat-pill.primary { background:#0c4fb2; color:white; }
     .chat-pill.secondary { background:#fff; color:#1f2937; border:1px solid #e2e8f0; }
     .voice-btn { pointer-events:auto; width:40px; height:40px; border-radius:12px; background:#136f2c; color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(19,111,44,.3); }
-    .route-cards { display:flex; gap:12px; overflow-x:auto; overflow-y:visible; pointer-events:auto; padding-bottom:4px; scroll-snap-type:x mandatory; }
-    .route-card { min-width:340px; max-width:340px; background:#fff; border-radius:22px; padding:16px; box-shadow:0 8px 20px rgba(20,30,58,.16); scroll-snap-align:start; flex-shrink:0; }
+    .route-cards-dock { padding:12px 16px 8px; background:var(--bg); border-top:1px solid var(--border); }
+    .route-cards { display:flex; gap:12px; overflow-x:auto; overflow-y:visible; padding-bottom:6px; scroll-snap-type:x mandatory; }
+    .route-cards::-webkit-scrollbar { height:4px; }
+    .route-cards::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:999px; }
+    .route-card { min-width:320px; max-width:320px; background:#fff; border-radius:22px; padding:16px; box-shadow:0 4px 16px rgba(20,30,58,.10); scroll-snap-align:start; flex-shrink:0; }
     .route-card.best { border:2px solid #0f4fd6; box-shadow:0 16px 34px rgba(15,79,214,.18); }
     .route-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
     .route-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:999px; background:#f1f5f9; color:#334155; font-size:13px; font-weight:700; }
@@ -144,6 +147,7 @@
       .map-card { min-height:calc(100vh - 80px - 24px); }
       .map-overlay { padding:14px 14px 12px; gap:8px; }
       .route-card { min-width:240px; max-width:240px; }
+      .route-cards-dock { padding:10px 12px 6px; }
       .hero-chat { padding:12px; width:min(100%, 580px); }
       .chat-pill { font-size:13px; padding:8px 12px; }
       .trip-summary { top:14px; right:14px; width:min(300px, calc(55% - 20px)); }
@@ -156,7 +160,8 @@
       .main { padding:0 8px 8px; }
       .map-card { min-height:75vh; border-radius:20px; }
       .map-overlay { padding:12px 12px 10px; gap:8px; }
-      .route-card { min-width:calc(75vw); max-width:calc(75vw); }
+      .route-card { min-width:calc(80vw); max-width:calc(80vw); }
+      .route-cards-dock { padding:8px 10px 4px; }
       .hero-chat { width:100%; border-radius:18px; padding:10px; }
       .trip-summary { top:auto; bottom:10px; right:10px; left:10px; width:auto; }
       .chat-pill { font-size:12px; padding:7px 10px; gap:6px; }
@@ -259,9 +264,13 @@
             </div>
           </div>
 
-          <div class="route-cards" id="route-cards"></div>
         </div>
       </section>
+
+      <!-- Route cards live below the map, never overlapping it -->
+      <div class="route-cards-dock">
+        <div class="route-cards" id="route-cards"></div>
+      </div>
     </main>
 
     <aside class="right">
@@ -1209,7 +1218,7 @@
           const el = document.createElement('div');
           el.id = 'trip-summary';
           el.className = 'panel trip-summary';
-          routeCardsEl.parentElement.insertBefore(el, routeCardsEl);
+          document.querySelector('.map-overlay').appendChild(el);
           return el;
         })();
 
