@@ -790,6 +790,7 @@
       }
       state.routeOptions.forEach((opt, idx) => {
         const live = opt.live;
+        const isTransfer = !!opt.transfer_at;
         const card = document.createElement('div');
         card.className = `route-card ${idx === 0 ? 'best' : ''}`;
         card.innerHTML = `
@@ -797,6 +798,7 @@
             <div class="flex flex-col gap-2">
               <div class="badge yellow">${opt.service}</div>
               ${idx === 0 ? `<div class="badge blue">Best Match | 最佳推荐</div>` : ''}
+              ${isTransfer ? `<div class="badge blue" style="background:#d1fae5;color:#065f46;">Transfer | 转乘</div>` : ''}
             </div>
             <div class="text-right">
               <div class="text-3xl font-extrabold text-blue-700">${live ? `${live.minutes}m` : 'Due'}</div>
@@ -804,7 +806,7 @@
             </div>
           </div>
           <div class="mt-4 text-2xl font-extrabold">${opt.from_name}</div>
-          <div class="text-slate-500 mt-1">${t('terminal')}: ${opt.to_name}</div>
+          <div class="text-slate-500 mt-1">${isTransfer ? `Transfer at: ${opt.transfer_at}` : `${t('terminal')}: ${opt.to_name}`}</div>
           <div class="route-meta">
             <span class="route-chip">${opt.stops} stops</span>
             <span class="route-chip">${opt.dist_km} km</span>
@@ -1038,22 +1040,41 @@
           return;
         }
 
+        // Transfer mode: flatten leg1/leg2 into displayable cards
+        if (data.mode === 'transfer') {
+          const firstOpt = data.options?.[0];
+          const leg1 = firstOpt?.leg1;
+          const leg2 = firstOpt?.leg2;
+          summary.innerHTML = `
+            <div class="title">${stateLang.ui === 'zh' ? '转乘方案' : 'Transfer route'}</div>
+            <div class="desc">${leg1 ? `${leg1.service} → ${leg2?.service} · ${leg1.from_name} ⇒ ${leg1.to_name} ⇒ ${leg2?.to_name}` : (data.message || t('tryAnother'))}</div>
+            <div class="mt-4 rounded-2xl bg-blue-50 p-4 border border-blue-100">
+              <div class="font-bold text-blue-800">${stateLang.ui === 'zh' ? '乘 ' + (leg1?.service || '') + ' 至 ' + (leg1?.to_name || '') + '，再转乘 ' + (leg2?.service || '') : 'Take ' + (leg1?.service || '') + ' to ' + (leg1?.to_name || '') + ', then transfer to ' + (leg2?.service || '')}</div>
+            </div>`;
+          const flatOptions = (data.options || []).map(opt => ({
+            service: `${opt.leg1.service} → ${opt.leg2.service}`,
+            from_name: opt.leg1.from_name,
+            to_name: opt.leg2.to_name,
+            stops: opt.total_stops,
+            dist_km: parseFloat((opt.leg1.dist_km + opt.leg2.dist_km).toFixed(2)),
+            live: opt.leg1.live,
+            transfer_at: opt.leg1.to_name,
+          }));
+          renderRouteCards(flatOptions);
+          if (leg1) {
+            speak(stateLang.ui === 'zh'
+              ? `建议乘坐 ${leg1.service} 路，在 ${leg1.to_name} 换乘 ${leg2?.service} 路。`
+              : `Take bus ${leg1.service} to ${leg1.to_name}, then transfer to bus ${leg2?.service}.`);
+            showToast(`${leg1.service} → ${leg2?.service}`);
+          }
+          return;
+        }
+
+        // Direct mode
         const best = data.best || data.options?.[0];
         summary.innerHTML = `
           <div class="title">${stateLang.ui === 'zh' ? '最佳推荐路线' : 'Best route recommendation'}</div>
           <div class="desc">${best ? `${best.service} · ${best.from_name} → ${best.to_name} · ${best.live ? `${best.live.minutes} min, ${best.live.load}` : t('noLiveData')}` : (data.message || t('tryAnother'))}</div>
-          <div class="mt-4 grid gap-3 md:grid-cols-2 text-sm">
-            <div class="rounded-2xl bg-slate-50 p-4 border border-slate-200">
-              <div class="font-bold text-slate-600">${t('startCoords')}</div>
-              <div class="mt-1 font-mono text-slate-900">s_lat: ${Number(state.current.lat).toFixed(6)}</div>
-              <div class="font-mono text-slate-900">s_lon: ${Number(state.current.lon).toFixed(6)}</div>
-            </div>
-            <div class="rounded-2xl bg-slate-50 p-4 border border-slate-200">
-              <div class="font-bold text-slate-600">${t('endCoords')}</div>
-              <div class="mt-1 font-mono text-slate-900">e_lat: ${Number(state.destination.lat).toFixed(6)}</div>
-              <div class="font-mono text-slate-900">e_lon: ${Number(state.destination.lon).toFixed(6)}</div>
-            </div>
-          </div>
           <div class="mt-4 rounded-2xl bg-blue-50 p-4 border border-blue-100">
             <div class="font-bold text-blue-800">${t('suggestedRoute')}</div>
             <div class="mt-1 text-slate-800">${best ? `${best.service} · ${best.from_name} → ${best.to_name}` : (data.message || t('tryAnother'))}</div>

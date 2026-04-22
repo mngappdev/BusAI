@@ -9,78 +9,105 @@ LTA_API_BASE = "https://datamall2.mytransport.sg/ltaodataservice"
 
 class BusSmartEngine:
     def __init__(self):
-        # 路径确保在当前目录下     
-        base_path = os.path.dirname(__file__)
+        base_path = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(base_path, "bus_routes.json"), 'r', encoding='utf-8') as f:
             self.routes = json.load(f)
         with open(os.path.join(base_path, "bus_stops.json"), 'r', encoding='utf-8') as f:
             self.stops = json.load(f)
-        
-        self.stop_map = {s['BusStopCode']: s for s in self.stops}
+
+        self.stop_map = {s['BusStopCode']: s for s in self.stops if 'BusStopCode' in s}
         self.stop_to_routes = defaultdict(list)
         for r in self.routes:
             self.stop_to_routes[r['BusStopCode']].append(r)
         self._arrival_cache = {}
 
-    def _route_key(self, route):
-        return (route.get("ServiceNo"), route.get("Direction"))
+        self._initialize_data()
 
-    def _stop_payload(self, stop, user_lat=None, user_lon=None):
-        payload = {
-            "code": stop["BusStopCode"],
-            "name": stop.get("Description", ""),
-            "latitude": float(stop["Latitude"]),
-            "longitude": float(stop["Longitude"]),
-        }
-        if user_lat is not None and user_lon is not None:
-            payload["distance_m"] = int(round(self.haversine(user_lat, user_lon, stop["Latitude"], stop["Longitude"])))
-        return payload
+    def _initialize_data(self):
+        # Build service_to_route: {(ServiceNo, Direction): [{ BusStopCode, StopSequence, Distance, Latitude, Longitude }]}
+        self.service_to_route = {}
+        for r in self.routes:
+            key = (r['ServiceNo'], r['Direction'])
+            if key not in self.service_to_route:
+                self.service_to_route[key] = []
+            stop_info = self.stop_map.get(r['BusStopCode'], {})
+            self.service_to_route[key].append({
+                'BusStopCode': r['BusStopCode'],
+                'StopSequence': int(r['StopSequence']),
+                'Distance': float(r.get('Distance', 0)),
+                'Latitude': float(stop_info.get('Latitude', 0)),
+                'Longitude': float(stop_info.get('Longitude', 0)),
+            })
+        for key in self.service_to_route:
+            self.service_to_route[key].sort(key=lambda x: x['StopSequence'])
+
+    # ─── Utilities ────────────────────────────────────────────────────────────
+
+    def _route_key(self, route):
+        return (route.get('ServiceNo'), route.get('Direction'))
 
     def haversine(self, lat1, lon1, lat2, lon2):
         R = 6371000
         p1, p2 = math.radians(float(lat1)), math.radians(float(lat2))
-        dphi, dlamb = math.radians(float(lat2-lat1)), math.radians(float(lon2-lon1))
-        a = math.sin(dphi/2)**2 + math.cos(p1)*math.cos(p2)*math.sin(dlamb/2)**2
-        return 2 * R * math.atan2(math.sqrt(a), math.sqrt(1-a))
-   
+        dphi  = math.radians(float(lat2) - float(lat1))
+        dlamb = math.radians(float(lon2) - float(lon1))
+        a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlamb / 2) ** 2
+        return 2 * R * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    def _stop_payload(self, stop, user_lat=None, user_lon=None):
+        payload = {
+            'code': stop['BusStopCode'],
+            'name': stop.get('Description', ''),
+            'latitude': float(stop['Latitude']),
+            'longitude': float(stop['Longitude']),
+        }
+        if user_lat is not None and user_lon is not None:
+            payload['distance_m'] = int(round(self.haversine(user_lat, user_lon, stop['Latitude'], stop['Longitude'])))
+        return payload
+
+    def _candidate_stops(self, lat, lon, radius_m=400):
+        return [
+            s['BusStopCode']
+            for s in self.stops
+            if self.haversine(lat, lon, s['Latitude'], s['Longitude']) <= radius_m
+        ]
+
+    # ─── Real-time arrivals ───────────────────────────────────────────────────
+
     def _parse_arrival_payload(self, payload):
-        services = payload.get("Services", []) if isinstance(payload, dict) else []
+        services = payload.get('Services', []) if isinstance(payload, dict) else []
         arrival_map = {}
         for svc in services:
-            service_no = svc.get("ServiceNo")
-            next_bus = svc.get("NextBus", {}) or {}
-            est_time = next_bus.get("EstimatedArrival")
+            service_no = svc.get('ServiceNo')
+            next_bus = svc.get('NextBus', {}) or {}
+            est_time = next_bus.get('EstimatedArrival')
             if not service_no or not est_time:
                 continue
             try:
-                eta_dt = datetime.fromisoformat(est_time.replace("Z", "+00:00"))
+                eta_dt = datetime.fromisoformat(est_time.replace('Z', '+00:00'))
                 diff = (eta_dt - datetime.now(timezone.utc)).total_seconds() / 60
             except Exception:
                 continue
-
-            load_map = {"SEA": "有座", "SDA": "较挤", "LSD": "拥挤"}
+            load_map = {'SEA': '有座', 'SDA': '较挤', 'LSD': '拥挤'}
             arrival_map[str(service_no)] = {
-                "minutes": max(0, int(diff)),
-                "load": load_map.get(next_bus.get("Load"), "未知"),
-                "is_wab": next_bus.get("Feature") == "WAB",
-                "raw_eta": est_time,
+                'minutes': max(0, int(diff)),
+                'load': load_map.get(next_bus.get('Load'), '未知'),
+                'is_wab': next_bus.get('Feature') == 'WAB',
+                'raw_eta': est_time,
             }
         return arrival_map
 
     def get_realtime_arrivals(self, stop_code):
-        api_key = os.getenv("LTA_API_KEY")
+        api_key = os.getenv('LTA_API_KEY')
         if not api_key:
             return {}
-
         cached = self._arrival_cache.get(stop_code)
         if cached and (datetime.now(timezone.utc) - cached[0]).total_seconds() < 20:
             return cached[1]
-
-        headers = {"AccountKey": api_key, "Accept": "application/json"}
-        url = f"https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival"
-        params = {"BusStopCode": stop_code}
+        headers = {'AccountKey': api_key, 'Accept': 'application/json'}
+        url = 'https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival'
         try:
-            r = requests.get(url, headers=headers, params=params, timeout=5)
+            r = requests.get(url, headers=headers, params={'BusStopCode': stop_code}, timeout=5)
             r.raise_for_status()
             arrivals = self._parse_arrival_payload(r.json())
             self._arrival_cache[stop_code] = (datetime.now(timezone.utc), arrivals)
@@ -89,320 +116,296 @@ class BusSmartEngine:
             return {}
 
     def get_realtime_v3(self, stop_code, service_no):
-        arrivals = self.get_realtime_arrivals(stop_code)
-        return arrivals.get(str(service_no))
+        return self.get_realtime_arrivals(stop_code).get(str(service_no))
 
-    def _candidate_stops(self, lat, lon, radius_m=400):
-        return [
-            s["BusStopCode"]
-            for s in self.stops
-            if self.haversine(lat, lon, s["Latitude"], s["Longitude"]) <= radius_m
-        ]
+    # ─── Nearby stops ─────────────────────────────────────────────────────────
 
     def nearby_stops(self, lat, lon, radius_m=600, limit=8):
         nearby = []
         for stop in self.stops:
-            distance = self.haversine(lat, lon, stop["Latitude"], stop["Longitude"])
-            if distance <= radius_m:
+            d = self.haversine(lat, lon, stop['Latitude'], stop['Longitude'])
+            if d <= radius_m:
                 nearby.append(self._stop_payload(stop, lat, lon))
-
-        nearby.sort(key=lambda item: item["distance_m"])
-
+        nearby.sort(key=lambda x: x['distance_m'])
         for stop in nearby[:limit]:
-            services = sorted({route["ServiceNo"] for route in self.stop_to_routes.get(stop["code"], [])}, key=lambda x: (len(x), x))
-            stop["services"] = services
-
-            arrivals_by_service = self.get_realtime_arrivals(stop["code"])
-            arrivals = []
-            seen = set()
+            services = sorted(
+                {r['ServiceNo'] for r in self.stop_to_routes.get(stop['code'], [])},
+                key=lambda x: (len(x), x)
+            )
+            stop['services'] = services
+            arrivals_by_svc = self.get_realtime_arrivals(stop['code'])
+            arrivals, seen = [], set()
             for svc in services:
                 if svc in seen:
                     continue
                 seen.add(svc)
-                live = arrivals_by_service.get(svc)
+                live = arrivals_by_svc.get(svc)
                 arrivals.append({
-                    "service": svc,
-                    "minutes": live["minutes"] if live else None,
-                    "load": live["load"] if live else None,
-                    "is_wab": live["is_wab"] if live else False,
+                    'service': svc,
+                    'minutes': live['minutes'] if live else None,
+                    'load': live['load'] if live else None,
+                    'is_wab': live['is_wab'] if live else False,
                 })
-
-            arrivals.sort(key=lambda item: (item["minutes"] is None, item["minutes"] if item["minutes"] is not None else 9999, item["service"]))
-            stop["nearest_arrival"] = arrivals[0] if arrivals else None
-            stop["arrivals"] = arrivals[:3]
+            arrivals.sort(key=lambda x: (x['minutes'] is None, x['minutes'] if x['minutes'] is not None else 9999, x['service']))
+            stop['nearest_arrival'] = arrivals[0] if arrivals else None
+            stop['arrivals'] = arrivals[:3]
         return nearby[:limit]
+
+    # ─── Route planning ───────────────────────────────────────────────────────
+
+    def _format_leg(self, s_code, e_code, r_start, r_end):
+        """Build one journey leg including the stop-by-stop polyline for map drawing."""
+        svc = r_start['ServiceNo']
+        direction = r_start['Direction']
+        start_seq = int(r_start['StopSequence'])
+        end_seq = int(r_end['StopSequence'])
+
+        full_path = self.service_to_route.get((svc, direction), [])
+        polyline = [
+            [stop['Latitude'], stop['Longitude']]
+            for stop in full_path
+            if start_seq <= stop['StopSequence'] <= end_seq
+            and stop['Latitude'] != 0 and stop['Longitude'] != 0
+        ]
+
+        live = self.get_realtime_arrivals(s_code).get(str(svc))
+        return {
+            'service': svc,
+            'from_code': s_code,
+            'from_name': self.stop_map[s_code]['Description'],
+            'to_code': e_code,
+            'to_name': self.stop_map[e_code]['Description'],
+            'stops': end_seq - start_seq,
+            'dist_km': round(float(r_end['Distance']) - float(r_start['Distance']), 2),
+            'polyline': polyline,
+            'live': live,
+        }
+
+    def _find_direct_routes(self, start_cluster, end_cluster):
+        raw = []
+        for s_code in start_cluster:
+            s_routes = {self._route_key(r): r for r in self.stop_to_routes.get(s_code, [])}
+            for e_code in end_cluster:
+                if s_code == e_code:
+                    continue
+                for r_end in self.stop_to_routes.get(e_code, []):
+                    key = self._route_key(r_end)
+                    if key in s_routes:
+                        r_start = s_routes[key]
+                        if int(r_end['StopSequence']) > int(r_start['StopSequence']):
+                            raw.append(self._format_leg(s_code, e_code, r_start, r_end))
+        return raw
+
+    def _find_transfer_routes(self, start_cluster, end_cluster):
+        results = []
+        # Index which routes can reach the end cluster
+        target_routes = {}
+        for e_code in end_cluster:
+            for r in self.stop_to_routes.get(e_code, []):
+                target_routes[self._route_key(r)] = (e_code, r)
+
+        for s_code in start_cluster:
+            for r_start_a in self.stop_to_routes.get(s_code, []):
+                key_a = self._route_key(r_start_a)
+                full_route_a = self.service_to_route.get(key_a, [])
+
+                for hub in full_route_a:
+                    if int(hub['StopSequence']) <= int(r_start_a['StopSequence']):
+                        continue
+                    hub_code = hub['BusStopCode']
+
+                    for r_start_b in self.stop_to_routes.get(hub_code, []):
+                        key_b = self._route_key(r_start_b)
+                        if key_b == key_a:
+                            continue
+                        if key_b not in target_routes:
+                            continue
+                        e_code, r_end_b = target_routes[key_b]
+                        if int(r_end_b['StopSequence']) <= int(r_start_b['StopSequence']):
+                            continue
+
+                        leg1 = self._format_leg(s_code, hub_code, r_start_a, hub)
+                        leg2 = self._format_leg(hub_code, e_code, r_start_b, r_end_b)
+                        results.append({
+                            'leg1': leg1,
+                            'leg2': leg2,
+                            'total_stops': leg1['stops'] + leg2['stops'],
+                        })
+                        if len(results) >= 5:
+                            results.sort(key=lambda x: x['total_stops'])
+                            return results
+
+        results.sort(key=lambda x: x['total_stops'])
+        return results
+
+    def _process_options(self, raw_options):
+        if not raw_options:
+            return []
+        # Dedup: keep fewest stops per service
+        unique = {}
+        for opt in raw_options:
+            svc = opt['service']
+            if svc not in unique or opt['stops'] < unique[svc]['stops']:
+                unique[svc] = opt
+
+        final = list(unique.values())
+        for opt in final:
+            if opt.get('live') is None:
+                opt['live'] = self.get_realtime_v3(opt['from_code'], opt['service'])
+            wait = opt['live']['minutes'] if opt.get('live') and opt['live']['minutes'] is not None else 18
+            opt['confidence'] = max(0, 100 - opt['stops'] * 8 - wait)
+
+        final.sort(key=lambda x: (
+            0 if x.get('live') and x['live']['minutes'] is not None else 1,
+            x['live']['minutes'] if x.get('live') and x['live']['minutes'] is not None else 999,
+            x['stops'],
+        ))
+        return final
 
     def best_route_candidates(self, s_lat, s_lon, e_lat, e_lon):
         dist = self.haversine(s_lat, s_lon, e_lat, e_lon)
         if dist < 800:
-            return {"type": "walk", "dist_m": round(dist), "minutes": max(1, round(dist / 80))}
+            return {
+                'type': 'walk',
+                'dist_m': round(dist),
+                'minutes': max(1, round(dist / 80)),
+                'message': '目的地很近，建议步行。',
+            }
 
         start_cluster = self._candidate_stops(s_lat, s_lon, 400)
-        end_cluster = self._candidate_stops(e_lat, e_lon, 400)
+        end_cluster   = self._candidate_stops(e_lat, e_lon, 400)
         if not start_cluster or not end_cluster:
-            return {"type": "none", "message": "范围内无可用站点。"}
+            return {'type': 'none', 'message': '起点或终点周边暂无可用巴士站。'}
 
-        # --- 1. 直达搜索 (Direct Search) ---
-        direct_options = []
-        for s_code in start_cluster:
-            s_map = {self._route_key(r): r for r in self.stop_to_routes[s_code]}
-            for e_code in end_cluster:
-                for r_e in self.stop_to_routes[e_code]:
-                    key = self._route_key(r_e)
-                    if key in s_map:
-                        r_s = s_map[key]
-                        if int(r_e['StopSequence']) > int(r_s['StopSequence']):
-                            direct_options.append({
-                                "service": r_e['ServiceNo'],
-                                "from_name": self.stop_map[s_code]['Description'],
-                                "from_code": s_code,
-                                "to_name": self.stop_map[e_code]['Description'],
-                                "stops": int(r_e['StopSequence']) - int(r_s['StopSequence']),
-                                "dist_km": round(float(r_e['Distance']) - float(r_s['Distance']), 2)
-                            })
-        
-        if direct_options:
-            unique = {}
-            for opt in direct_options:
-                if opt['service'] not in unique or opt['stops'] < unique[opt['service']]['stops']:
-                    unique[opt['service']] = opt
-
-            final_list = list(unique.values())
-
-            # --- 核心修改：打散并注入数据 ---
-            flattened_options = []
-            for opt in final_list:
-                stop_code = str(opt['from_code']).strip()
-                svc_no = str(opt['service']).strip().upper()
-                
-                # 获取该站点的实时数据池
-                arrivals = self.get_realtime_arrivals(stop_code)
-                
-                # 弹性匹配 (36 vs 036)
-                #live = arrivals.get(svc_no) or arrivals.get(svc_no.zfill(2))
-                live = arrivals.get('36')
-                print(f"DEBUG: 站点bbbbb {svc_no} bus:{arrivals} ")
-                # 构造扁平化对象，不再使用嵌套的 'live' 字典
-                flat_opt = {
-                    "service": opt['service'],
-                    "from_name": opt['from_name'],
-                    "from_code": opt['from_code'],
-                    "to_name": opt['to_name'],
-                    "stops": opt['stops'],
-                    "dist_km": opt['dist_km'],
-                    
-                    # 💡 直接提取实时字段，确保序列化 100% 成功
-                    "live_minutes": live.get('minutes') if live else None,
-                    #"live_minutes": 100,
-                    "live_load": live.get('load') if live else "N/A",
-                    "live_is_wab": live.get('is_wab') if live else False,
-                    "live_next_minutes": live.get('next_minutes') if live else None
-                }
-                flattened_options.append(flat_opt)
-
-            # --- 基于实时分钟数排序 ---
-            # flattened_options.sort(key=lambda x: (
-            #     0 if x['live_minutes'] is not None else 1, 
-            #     x['live_minutes'] if x['live_minutes'] is not None else 999
-            # ))
-
+        direct = self._find_direct_routes(start_cluster, end_cluster)
+        if direct:
+            processed = self._process_options(direct)
             return {
-                "status": "success",
-                "type": "bus",
-                "options": flattened_options[:3], # 取前 3 个最快的
-                "message": "找到直达方案。"
+                'type': 'bus',
+                'mode': 'direct',
+                'best': processed[0] if processed else None,
+                'options': processed[:3],
+                'message': '为您找到直达巴士方案。',
             }
-        # --- 2. 转乘搜索 (Intersection Search) ---
-        # 逻辑：Leg1 线路经过的站点 ∩ Leg2 线路经过的站点
-        for s_code in start_cluster:
-            for r_s in self.stop_to_routes[s_code]:
-                svc_a = r_s['ServiceNo']
-                dir_a = r_s.get('Direction', '1')
-                full_route_a = self.service_to_route[(svc_a, dir_a)]
-                
-                # 遍历线路 A 的后续站点作为“潜在转乘点”
-                for node_a in full_route_a:
-                    if int(node_a['StopSequence']) <= int(r_s['StopSequence']): continue
-                    
-                    t_code = node_a['BusStopCode'] # 潜在转乘站
-                    # 检查转乘站是否有线路直达终点簇
-                    for r_t in self.stop_to_routes[t_code]:
-                        svc_b = r_t['ServiceNo']
-                        dir_b = r_t.get('Direction', '1')
-                        full_route_b = self.service_to_route[(svc_b, dir_b)]
-                        
-                        for node_b_end in full_route_b:
-                            if node_b_end['BusStopCode'] in end_cluster and int(node_b_end['StopSequence']) > int(r_t['StopSequence']):
-                                # 命中转乘点！
-                                return {
-                                    "type": "transfer",
-                                    "message": "未找到直达，建议转乘方案。",
-                                    "options": [{
-                                        "leg1": {"service": svc_a, "from_name": self.stop_map[s_code]['Description'], "transfer_at": self.stop_map[t_code]['Description']},
-                                        "leg2": {"service": svc_b, "to_name": self.stop_map[node_b_end['BusStopCode']]['Description']}
-                                    }]
-                                }
-        return {"type": "none", "message": "未找到可行方案。"}
-    
 
-    def route_summary(self, service_no):
-        entries = [r for r in self.routes if r["ServiceNo"] == service_no]
-        if not entries:
-            return None
+        transfer = self._find_transfer_routes(start_cluster, end_cluster)
+        if transfer:
+            return {
+                'type': 'bus',
+                'mode': 'transfer',
+                'options': transfer[:2],
+                'message': '直达不可行，已为您计算转乘方案。',
+            }
 
-        # 保留较简洁的线路信息，按顺序排列
-        entries.sort(key=lambda item: (int(item.get("Direction", 0)), int(item.get("StopSequence", 0))))
-        grouped = {}
-        for r in entries:
-            key = str(r.get("Direction", "1"))
-            grouped.setdefault(key, []).append({
-                "stop_code": r["BusStopCode"],
-                "stop_name": self.stop_map.get(r["BusStopCode"], {}).get("Description", ""),
-                "sequence": int(r.get("StopSequence", 0)),
-                "distance_km": float(r.get("Distance", 0)),
-            })
-
-        return {
-            "service": service_no,
-            "directions": grouped,
-        }
+        return {'type': 'none', 'message': '暂无直达或一次转乘的巴士方案。'}
 
     def plan_trip(self, s_lat, s_lon, e_lat, e_lon):
         return self.best_route_candidates(s_lat, s_lon, e_lat, e_lon)
 
+    # ─── Route summary ────────────────────────────────────────────────────────
+
+    def route_summary(self, service_no):
+        entries = [r for r in self.routes if r['ServiceNo'] == service_no]
+        if not entries:
+            return None
+        entries.sort(key=lambda x: (int(x.get('Direction', 0)), int(x.get('StopSequence', 0))))
+        grouped = {}
+        for r in entries:
+            key = str(r.get('Direction', '1'))
+            grouped.setdefault(key, []).append({
+                'stop_code': r['BusStopCode'],
+                'stop_name': self.stop_map.get(r['BusStopCode'], {}).get('Description', ''),
+                'sequence': int(r.get('StopSequence', 0)),
+                'distance_km': float(r.get('Distance', 0)),
+            })
+        return {'service': service_no, 'directions': grouped}
+
+    # ─── External API helpers ─────────────────────────────────────────────────
+
     def get_traffic_incidents(self):
-        api_key = os.getenv("LTA_API_KEY")
+        api_key = os.getenv('LTA_API_KEY')
         if not api_key:
             return []
-        headers = {"AccountKey": api_key, "Accept": "application/json"}
+        headers = {'AccountKey': api_key, 'Accept': 'application/json'}
         try:
-            r = requests.get(f"{LTA_API_BASE}/TrafficIncidents", headers=headers, timeout=5)
+            r = requests.get(f'{LTA_API_BASE}/TrafficIncidents', headers=headers, timeout=5)
             r.raise_for_status()
-            data = r.json()
-            return data.get("value", [])
+            return r.json().get('value', [])
         except Exception:
             return []
 
     def get_train_service_alerts(self):
-        api_key = os.getenv("LTA_API_KEY")
+        api_key = os.getenv('LTA_API_KEY')
         if not api_key:
             return []
-        headers = {"AccountKey": api_key, "Accept": "application/json"}
+        headers = {'AccountKey': api_key, 'Accept': 'application/json'}
         try:
-            r = requests.get(f"{LTA_API_BASE}/TrainServiceAlerts", headers=headers, timeout=5)
+            r = requests.get(f'{LTA_API_BASE}/TrainServiceAlerts', headers=headers, timeout=5)
             r.raise_for_status()
-            data = r.json()
-            return data.get("value", [])
+            return r.json().get('value', [])
         except Exception:
             return []
 
     def get_facilities_maintenance(self):
-        api_key = os.getenv("LTA_API_KEY")
+        api_key = os.getenv('LTA_API_KEY')
         if not api_key:
             return []
-        headers = {"AccountKey": api_key, "Accept": "application/json"}
+        headers = {'AccountKey': api_key, 'Accept': 'application/json'}
         try:
-            r = requests.get(f"{LTA_API_BASE}/v2/FacilitiesMaintenance", headers=headers, timeout=5)
+            r = requests.get(f'{LTA_API_BASE}/v2/FacilitiesMaintenance', headers=headers, timeout=5)
             r.raise_for_status()
-            data = r.json()
-            return data.get("value", [])
+            return r.json().get('value', [])
         except Exception:
             return []
 
     def get_air_temperature(self, lat=None, lon=None):
-        """
-        Fetch real-time air temperature data and return the temperature at the nearest station to the given lat/lon.
-        Returns None if unavailable.
-        """
-
-   
-        # Use DATAGOVSG key or fallback to LTA_API_KEY for compatibility
-        api_key = os.getenv("DATAGOVSG") or os.getenv("LTA_API_KEY")
-        #if not api_key:
-        #    return None
-        # Use correct header name for Data.gov.sg API
-        api_key = "v2:c301d3e632007d24480125f32e20315e53467c6bca4707f4cc08a8dbe9353a74:uR417bu2gr6LnnYc14EzFWgRT9iHKsgb"
-        headers = {"api-key": api_key}
+        api_key = 'v2:c301d3e632007d24480125f32e20315e53467c6bca4707f4cc08a8dbe9353a74:uR417bu2gr6LnnYc14EzFWgRT9iHKsgb'
+        headers = {'api-key': api_key}
         try:
-            r = requests.get(f"https://api-open.data.gov.sg/v2/real-time/api/air-temperature", headers=headers, timeout=5)
+            r = requests.get(
+                'https://api-open.data.gov.sg/v2/real-time/api/air-temperature',
+                headers=headers, timeout=5
+            )
             r.raise_for_status()
-            #data = r.json().get("items", [])[0]
-            #readings = data.get("readings", [])
-                        
-            # Navigate to the readings list
-            data = r.json()
-            readings = data['data']['readings'][0]['data']
-            value = next((rec['value'] for rec in readings if rec.get('stationId') == 'S24'), None)
-            print(value)  # 30.5
-        
-            if not readings:
-                return None
-            # Prefer reading from station S24 if available
+            readings = r.json()['data']['readings'][0]['data']
             for rec in readings:
                 if rec.get('stationId') == 'S24':
                     return rec.get('value')
-            # If lat/lon provided, find nearest; else, average
             if lat is not None and lon is not None:
-                def dist(r):
-                    return self.haversine(lat, lon, r.get('latitude'), r.get('longitude'))
-                nearest = min(readings, key=dist)
+                nearest = min(readings, key=lambda rec: self.haversine(
+                    lat, lon, rec.get('latitude', 0), rec.get('longitude', 0)
+                ))
                 return nearest.get('value')
-            # fallback to average
-            vals = [r.get('value') for r in readings if 'value' in r]
-            return sum(vals)/len(vals) if vals else None
+            vals = [rec.get('value') for rec in readings if 'value' in rec]
+            return sum(vals) / len(vals) if vals else None
         except Exception:
             return None
 
     def get_two_hr_forecast(self, lat=None, lon=None):
-        """
-        Fetch 2-hour weather forecast for Singapore regions.
-        If lat and lon are provided, returns the forecast of the nearest region.
-        Otherwise returns list of {'area': ..., 'forecast': ...}.
-        """
-        # Use DATAGOVSG key or fallback to LTA_API_KEY for compatibility
-        api_key = os.getenv("DATAGOVSG") or os.getenv("LTA_API_KEY")
-        #if not api_key:
-        #    return []
-        # Use correct header name for Data.gov.sg API
-        api_key = "v2:c301d3e632007d24480125f32e20315e53467c6bca4707f4cc08a8dbe9353a74:uR417bu2gr6LnnYc14EzFWgRT9iHKsgb"
-        headers = {"api-key": api_key}
-
+        api_key = 'v2:c301d3e632007d24480125f32e20315e53467c6bca4707f4cc08a8dbe9353a74:uR417bu2gr6LnnYc14EzFWgRT9iHKsgb'
+        headers = {'api-key': api_key}
         try:
-            
-             # ✅ Fetch data FIRST
-            r = requests.get("https://api-open.data.gov.sg/v2/real-time/api/two-hr-forecast", headers=headers, timeout=5)
+            r = requests.get(
+                'https://api-open.data.gov.sg/v2/real-time/api/two-hr-forecast',
+                headers=headers, timeout=5
+            )
             r.raise_for_status()
             data = r.json()
-
-            # ✅ Access data AFTER fetching
             area_metadata = data['data']['area_metadata']
-            forecasts     = data['data']['items'][0]['forecasts']  # ✅ correct path
-
-            # Build lookup dict: area name → forecast
+            forecasts = data['data']['items'][0]['forecasts']
             forecast_lookup = {f['area']: f['forecast'] for f in forecasts}
-
-            # Find closest area by distance
-            closest_area = min(
-                area_metadata,
-                key=lambda a: self.haversine(lat, lon, a['label_location']['latitude'], a['label_location']['longitude'])
-            )
-
-            area_name = closest_area['name']
-
-            area_name = 'Changi'
-            forecast  = forecast_lookup.get(area_name, 'N/A')
-            #return area_name, forecast
-
-            #eturn forecast
-            # ✅ Return format that matches forecastData.value[0]
-            #return {[{"area": area_name, "forecast": forecast}]}
-            # ✅ 改成返回对象
-            return [{"area": area_name, "forecast": forecast}]
-            # → {"value": [{"area": "Changi", "forecast": "Cloudy"}]}
-
+            if lat is not None and lon is not None:
+                closest = min(
+                    area_metadata,
+                    key=lambda a: self.haversine(
+                        lat, lon,
+                        a['label_location']['latitude'],
+                        a['label_location']['longitude']
+                    )
+                )
+                area_name = closest['name']
+            else:
+                area_name = 'Changi'
+            return [{'area': area_name, 'forecast': forecast_lookup.get(area_name, 'N/A')}]
         except Exception:
-            print(f"Forecast error: {e}")
-            return {"value": []}   # ✅ empty array so forecastItem becomes null safely
-            
-
-
+            return [{'area': 'N/A', 'forecast': 'N/A'}]
