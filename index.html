@@ -95,9 +95,28 @@
     .footer { grid-column:1 / -1; height:58px; display:flex; align-items:center; justify-content:space-between; padding:0 26px; color:#64748b; border-top:1px solid var(--border); font-size:14px; letter-spacing:.08em; }
     .small-label { color:#64748b; font-size:14px; }
     .status-dot { width:10px; height:10px; border-radius:999px; background:#17a34a; display:inline-block; }
-    .trip-summary { padding:18px 22px; margin-bottom:16px; }
-    .trip-summary .title { font-size:20px; font-weight:800; }
-    .trip-summary .desc { color:var(--muted); margin-top:6px; }
+    /* ── Timeline trip summary (Google Maps style) ── */
+    .trip-summary { padding:16px 20px; margin-bottom:16px; }
+    .tl-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; gap:8px; flex-wrap:wrap; }
+    .tl-timerange { font-size:17px; font-weight:800; color:#0f172a; }
+    .tl-duration { display:inline-block; font-size:13px; font-weight:700; color:#64748b; background:#f1f5f9; padding:3px 10px; border-radius:999px; margin-top:4px; }
+    .tl-modes { display:flex; gap:6px; flex-shrink:0; }
+    .tl-mode { width:28px; height:28px; border-radius:7px; background:#0f4fd6; color:#fff; display:grid; place-items:center; font-size:13px; }
+    .tl-mode.walk { background:#10b981; }
+    .tl-steps { display:flex; flex-direction:column; }
+    .tl-row { display:grid; grid-template-columns:54px 16px 1fr; align-items:center; gap:10px; min-height:22px; }
+    .tl-time { font-size:11px; font-weight:700; color:#64748b; text-align:right; white-space:nowrap; }
+    .tl-dot { width:13px; height:13px; border-radius:50%; border:2.5px solid #0f4fd6; background:#fff; margin:0 auto; }
+    .tl-dot.origin { background:#0f4fd6; }
+    .tl-dot.dest { background:#ef4444; border-color:#ef4444; }
+    .tl-dot.transfer { background:#10b981; border-color:#10b981; }
+    .tl-stop { font-size:13px; font-weight:700; color:#0f172a; line-height:1.3; }
+    .tl-leg { display:grid; grid-template-columns:54px 16px 1fr; align-items:center; gap:10px; padding:3px 0; }
+    .tl-vline { width:2px; height:34px; margin:0 auto; border-radius:999px; background:#0f4fd6; }
+    .tl-vline.walk { background:transparent; border-left:2px dashed #94a3b8; width:0; margin-left:50%; }
+    .tl-leg-info { display:flex; align-items:center; gap:8px; }
+    .tl-bus-badge { display:inline-flex; align-items:center; justify-content:center; background:#0f4fd6; color:#fff; font-weight:800; font-size:12px; padding:3px 9px; border-radius:6px; letter-spacing:.02em; min-width:28px; }
+    .tl-leg-detail { font-size:12px; font-weight:600; color:#475569; }
     .floating-search { position:absolute; top:22px; right:22px; z-index:3; }
     .map-pin { position:absolute; z-index:3; pointer-events:none; }
     .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); padding:12px 16px; background:#0f172a; color:#fff; border-radius:999px; opacity:0; transition:.25s ease; z-index:9999; }
@@ -147,7 +166,7 @@
         <span id="nav-accessibility">Accessibility</span>
       </nav>
       <div class="news-ticker" id="news-ticker">
-        <span class="news-label">Transit Alerts</span>
+        <span class="news-label">Alerts</span>
         <div class="news-track"><div class="news-track-inner" id="news-track"></div></div>
         <div class="news-track" style="flex:0 0 auto;"><span class="news-type" id="news-updated">Fetching…</span></div>
       </div>
@@ -298,7 +317,14 @@
     });
 
     const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([defaultLocation.lat, defaultLocation.lon], 15);
-    L.tileLayer('https://www.onemap.gov.sg/maps/tiles/Default/{z}/{x}/{y}.png', { detectRetina: true }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+    }).addTo(map);
+    // Street label overlay on top of satellite
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19, opacity: 0.8
+    }).addTo(map);
 
     //const userIcon = L.divIcon({ className: '', html: '<div style="width:18px;height:18px;border-radius:999px;background:#0f4fd6;border:3px solid white;box-shadow:0 0 0 4px rgba(15,79,214,.2)"></div>', iconSize: [18,18], iconAnchor: [9,9] });
     //const destIcon = L.divIcon({ className: '', html: '<div style="width:18px;height:18px;border-radius:999px;background:#cf1717;border:3px solid white;box-shadow:0 0 0 4px rgba(207,23,23,.18)"></div>', iconSize: [18,18], iconAnchor: [9,9] });
@@ -963,6 +989,140 @@
       // 在 state 中管理路线图层
     state.routeLayers = L.featureGroup().addTo(map); 
 
+    function fmtTime(date) {
+      return date.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function buildDirectTimeline(best, isZh) {
+      const now = new Date();
+      const waitMins  = best?.live?.minutes ?? 5;
+      const travelMins = Math.max(4, (best?.stops ?? 5) * 2);
+      const walkMins  = Math.round((best?.dist_km ?? 0.5) * 12);
+      const departT   = new Date(now.getTime() + waitMins  * 60000);
+      const alightT   = new Date(departT.getTime()  + travelMins * 60000);
+      const arriveT   = new Date(alightT.getTime()  + walkMins   * 60000);
+      const totalMins = travelMins + walkMins;
+      const stopsLabel = isZh
+        ? `${best.stops} 站 · ${travelMins} 分钟`
+        : `${best.stops} stops · ${travelMins} min`;
+      const walkLabel = isZh
+        ? `步行约 ${walkMins} 分钟`
+        : `Walk ~${walkMins} min`;
+      return `
+        <div class="tl-header">
+          <div>
+            <div class="tl-timerange">${fmtTime(departT)} – ${fmtTime(arriveT)}</div>
+            <span class="tl-duration">${totalMins} min</span>
+          </div>
+          <div class="tl-modes">
+            <div class="tl-mode">🚌</div>
+            <div class="tl-mode walk">🚶</div>
+          </div>
+        </div>
+        <div class="tl-steps">
+          <div class="tl-row">
+            <span class="tl-time">${fmtTime(departT)}</span>
+            <div class="tl-dot origin"></div>
+            <span class="tl-stop">${best.from_name}</span>
+          </div>
+          <div class="tl-leg">
+            <span></span>
+            <div class="tl-vline"></div>
+            <div class="tl-leg-info">
+              <span class="tl-bus-badge">${best.service}</span>
+              <span class="tl-leg-detail">${stopsLabel}</span>
+            </div>
+          </div>
+          <div class="tl-row">
+            <span class="tl-time">${fmtTime(alightT)}</span>
+            <div class="tl-dot transfer"></div>
+            <span class="tl-stop">${best.to_name}</span>
+          </div>
+          <div class="tl-leg">
+            <span></span>
+            <div class="tl-vline walk"></div>
+            <div class="tl-leg-info">
+              <span style="font-size:14px">🚶</span>
+              <span class="tl-leg-detail">${walkLabel}</span>
+            </div>
+          </div>
+          <div class="tl-row">
+            <span class="tl-time">${fmtTime(arriveT)}</span>
+            <div class="tl-dot dest"></div>
+            <span class="tl-stop">${state.destination.label || best.to_name}</span>
+          </div>
+        </div>`;
+    }
+
+    function buildTransferTimeline(leg1, leg2, isZh) {
+      const now = new Date();
+      const waitMins  = leg1?.live?.minutes ?? 5;
+      const travel1   = Math.max(4, leg1.stops * 2);
+      const travel2   = Math.max(4, leg2.stops * 2);
+      const walkMins  = 5;
+      const departT   = new Date(now.getTime()    + waitMins  * 60000);
+      const transferT = new Date(departT.getTime()  + travel1   * 60000);
+      const alightT   = new Date(transferT.getTime()+ travel2   * 60000);
+      const arriveT   = new Date(alightT.getTime()  + walkMins  * 60000);
+      const totalMins = travel1 + travel2 + walkMins;
+      return `
+        <div class="tl-header">
+          <div>
+            <div class="tl-timerange">${fmtTime(departT)} – ${fmtTime(arriveT)}</div>
+            <span class="tl-duration">${totalMins} min</span>
+          </div>
+          <div class="tl-modes">
+            <div class="tl-mode">🚌</div>
+            <div class="tl-mode">🚌</div>
+            <div class="tl-mode walk">🚶</div>
+          </div>
+        </div>
+        <div class="tl-steps">
+          <div class="tl-row">
+            <span class="tl-time">${fmtTime(departT)}</span>
+            <div class="tl-dot origin"></div>
+            <span class="tl-stop">${leg1.from_name}</span>
+          </div>
+          <div class="tl-leg">
+            <span></span><div class="tl-vline"></div>
+            <div class="tl-leg-info">
+              <span class="tl-bus-badge">${leg1.service}</span>
+              <span class="tl-leg-detail">${leg1.stops} stops · ${travel1} min</span>
+            </div>
+          </div>
+          <div class="tl-row">
+            <span class="tl-time">${fmtTime(transferT)}</span>
+            <div class="tl-dot transfer"></div>
+            <span class="tl-stop">${leg1.to_name} <span style="font-size:10px;color:#10b981;font-weight:800;background:#d1fae5;padding:1px 6px;border-radius:4px;">${isZh ? '换乘' : 'Transfer'}</span></span>
+          </div>
+          <div class="tl-leg">
+            <span></span><div class="tl-vline" style="background:#10b981"></div>
+            <div class="tl-leg-info">
+              <span class="tl-bus-badge" style="background:#10b981">${leg2.service}</span>
+              <span class="tl-leg-detail">${leg2.stops} stops · ${travel2} min</span>
+            </div>
+          </div>
+          <div class="tl-row">
+            <span class="tl-time">${fmtTime(alightT)}</span>
+            <div class="tl-dot transfer" style="background:#10b981;border-color:#10b981"></div>
+            <span class="tl-stop">${leg2.to_name}</span>
+          </div>
+          <div class="tl-leg">
+            <span></span>
+            <div class="tl-vline walk"></div>
+            <div class="tl-leg-info">
+              <span style="font-size:14px">🚶</span>
+              <span class="tl-leg-detail">${isZh ? '步行约 5 分钟' : 'Walk ~5 min'}</span>
+            </div>
+          </div>
+          <div class="tl-row">
+            <span class="tl-time">${fmtTime(arriveT)}</span>
+            <div class="tl-dot dest"></div>
+            <span class="tl-stop">${state.destination.label || leg2.to_name}</span>
+          </div>
+        </div>`;
+    }
+
     function drawRoute(tripData) {
         state.routeLayers.clearLayers(); // 清除旧路线
         let allCoords = [];
@@ -1021,36 +1181,40 @@
           return el;
         })();
 
+        const isZh = stateLang.ui === 'zh';
+
         if (data.type === 'walk') {
           summary.innerHTML = `
-            <div class="title">${stateLang.ui === 'zh' ? '建议步行' : 'Walk recommended'}</div>
-            <div class="desc">${stateLang.ui === 'zh' ? `目的地较近，步行约 ${data.minutes} 分钟（${data.dist_m}m）` : `Destination is nearby. Walk about ${data.minutes} min (${data.dist_m}m).`}</div>`;
-          routeCardsEl.innerHTML = `<div class="route-card best"><div class="font-extrabold text-xl mb-2">${stateLang.ui === 'zh' ? '无需巴士' : 'No bus needed'}</div><div class="text-slate-500">${data.message || t('tryAnother')}</div></div>`;
-          speak(stateLang.ui === 'zh' ? `目的地很近，建议步行约 ${data.minutes} 分钟。` : `Destination is nearby. Walk about ${data.minutes} minutes.`);
-          showToast(stateLang.ui === 'zh' ? '建议步行' : 'Walk recommended');
+            <div class="tl-header">
+              <div>
+                <div class="tl-timerange">${isZh ? '建议步行' : 'Walk recommended'}</div>
+                <span class="tl-duration">${data.minutes} min · ${data.dist_m}m</span>
+              </div>
+              <div class="tl-modes"><div class="tl-mode walk">🚶</div></div>
+            </div>`;
+          routeCardsEl.innerHTML = `<div class="route-card best"><div class="font-extrabold text-xl mb-2">${isZh ? '无需巴士' : 'No bus needed'}</div><div class="text-slate-500">${data.message || t('tryAnother')}</div></div>`;
+          speak(isZh ? `目的地很近，建议步行约 ${data.minutes} 分钟。` : `Destination is nearby. Walk about ${data.minutes} minutes.`);
+          showToast(isZh ? '建议步行' : 'Walk recommended');
           return;
         }
 
         if (data.type === 'none') {
           summary.innerHTML = `
-            <div class="title">${stateLang.ui === 'zh' ? '暂无直达巴士' : 'No direct bus'}</div>
-            <div class="desc">${data.message || t('tryAnother')}</div>`;
+            <div class="tl-header">
+              <div class="tl-timerange">${isZh ? '暂无路线' : 'No route found'}</div>
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px">${data.message || t('tryAnother')}</div>`;
           renderRouteCards([]);
           showToast(t('noRoute'));
           return;
         }
 
-        // Transfer mode: flatten leg1/leg2 into displayable cards
+        // Transfer mode
         if (data.mode === 'transfer') {
           const firstOpt = data.options?.[0];
           const leg1 = firstOpt?.leg1;
           const leg2 = firstOpt?.leg2;
-          summary.innerHTML = `
-            <div class="title">${stateLang.ui === 'zh' ? '转乘方案' : 'Transfer route'}</div>
-            <div class="desc">${leg1 ? `${leg1.service} → ${leg2?.service} · ${leg1.from_name} ⇒ ${leg1.to_name} ⇒ ${leg2?.to_name}` : (data.message || t('tryAnother'))}</div>
-            <div class="mt-4 rounded-2xl bg-blue-50 p-4 border border-blue-100">
-              <div class="font-bold text-blue-800">${stateLang.ui === 'zh' ? '乘 ' + (leg1?.service || '') + ' 至 ' + (leg1?.to_name || '') + '，再转乘 ' + (leg2?.service || '') : 'Take ' + (leg1?.service || '') + ' to ' + (leg1?.to_name || '') + ', then transfer to ' + (leg2?.service || '')}</div>
-            </div>`;
+          summary.innerHTML = buildTransferTimeline(leg1, leg2, isZh);
           const flatOptions = (data.options || []).map(opt => ({
             service: `${opt.leg1.service} → ${opt.leg2.service}`,
             from_name: opt.leg1.from_name,
@@ -1062,7 +1226,7 @@
           }));
           renderRouteCards(flatOptions);
           if (leg1) {
-            speak(stateLang.ui === 'zh'
+            speak(isZh
               ? `建议乘坐 ${leg1.service} 路，在 ${leg1.to_name} 换乘 ${leg2?.service} 路。`
               : `Take bus ${leg1.service} to ${leg1.to_name}, then transfer to bus ${leg2?.service}.`);
             showToast(`${leg1.service} → ${leg2?.service}`);
@@ -1072,17 +1236,11 @@
 
         // Direct mode
         const best = data.best || data.options?.[0];
-        summary.innerHTML = `
-          <div class="title">${stateLang.ui === 'zh' ? '最佳推荐路线' : 'Best route recommendation'}</div>
-          <div class="desc">${best ? `${best.service} · ${best.from_name} → ${best.to_name} · ${best.live ? `${best.live.minutes} min, ${best.live.load}` : t('noLiveData')}` : (data.message || t('tryAnother'))}</div>
-          <div class="mt-4 rounded-2xl bg-blue-50 p-4 border border-blue-100">
-            <div class="font-bold text-blue-800">${t('suggestedRoute')}</div>
-            <div class="mt-1 text-slate-800">${best ? `${best.service} · ${best.from_name} → ${best.to_name}` : (data.message || t('tryAnother'))}</div>
-          </div>`;
+        summary.innerHTML = buildDirectTimeline(best, isZh);
 
         renderRouteCards(data.options || []);
         if (best) {
-          const etaText = best.live ? best.live.minutes : (stateLang.ui === 'zh' ? '未知' : 'unknown');
+          const etaText = best.live ? best.live.minutes : (isZh ? '未知' : 'unknown');
           speak(t('welcomeSpeak', best.service, etaText));
           showToast(t('bestOption', best.service));
         } else {
