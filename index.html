@@ -734,6 +734,24 @@
         .trim();
     }
 
+    async function searchStopAsLocation(query) {
+      try {
+        const stopRes = await fetch(`${apiBase}/api/v1/search-stops?q=${encodeURIComponent(query)}&limit=1`);
+        const stopData = await stopRes.json();
+        const firstStop = stopData?.results?.[0];
+        if (firstStop?.latitude != null && firstStop?.longitude != null) {
+          return {
+            lat: Number(firstStop.latitude),
+            lon: Number(firstStop.longitude),
+            label: firstStop.name || firstStop.code || query,
+          };
+        }
+      } catch (err) {
+        console.warn('stop search failed', err);
+      }
+      return null;
+    }
+
     async function resolveLocationFromText(text) {
       const query = normalizeVoiceQuery(text);
       if (!query) return null;
@@ -757,22 +775,7 @@
         console.warn('geocode failed', err);
       }
 
-      try {
-        const stopRes = await fetch(`${apiBase}/api/v1/search-stops?q=${encodeURIComponent(query)}&limit=1`);
-        const stopData = await stopRes.json();
-        const firstStop = stopData?.results?.[0];
-        if (firstStop?.latitude != null && firstStop?.longitude != null) {
-          return {
-            lat: Number(firstStop.latitude),
-            lon: Number(firstStop.longitude),
-            label: firstStop.name || firstStop.code || query,
-          };
-        }
-      } catch (err) {
-        console.warn('stop search failed', err);
-      }
-
-      return null;
+      return searchStopAsLocation(query);
     }
 
     async function setDestinationLocation(location, sourceText = '') {
@@ -1118,7 +1121,10 @@
     async function updateCurrentLocationFromPostcode(postcode) {
       try {
         setAssistantStatus(stateLang.ui === 'zh' ? `正在搜索邮编 ${postcode}…` : `Searching postcode ${postcode}…`);
-        const location = await geocodePostcode(postcode);
+        let location = await geocodePostcode(postcode);
+        if (!location) {
+          location = await searchStopAsLocation(postcode);
+        }
         if (!location) {
           showToast(t('postcodeNotFound'));
           setAssistantStatus(stateLang.ui === 'zh' ? '未找到该邮编的位置。' : 'No location found for that postcode.');
