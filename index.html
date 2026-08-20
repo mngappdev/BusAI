@@ -285,6 +285,7 @@
                   <div id="pill-where" class="chat-pill primary">Where to go?｜您要去哪里?</div>
                   <div id="pill-arrival" class="chat-pill secondary">Which bus arrives when?｜哪辆巴士什么时候到?</div>
                 </div>
+                <div id="quick-dest-row" class="flex gap-2 flex-wrap"></div>
                 <div class="flex items-center gap-3">
                   <div id="voice-bars" class="flex gap-1 items-end h-6">
                     <span class="w-1.5 rounded-full bg-blue-400 h-4"></span>
@@ -385,6 +386,7 @@
   <script src="/static/js/accessibility.js"></script>
   <script src="/static/js/crowding.js"></script>
   <script src="/static/js/berth-schematic.js"></script>
+  <script src="/static/js/quick-destinations.js"></script>
   <script>
     const apiBase = '';
     const defaultLocation = { lat: 1.3542, lon: 103.9436, label: 'Tampines Bus Interchange'};
@@ -697,6 +699,7 @@
       document.getElementById('fullscreen-btn').setAttribute('aria-label', t('a11yFullscreen'));
       renderNearbyStops(state.nearby);
       renderRouteCards(state.routeOptions);
+      renderQuickDestinations();
     }
 
     function showToast(message) {
@@ -987,6 +990,22 @@
           </div>`;
         card.querySelector('button').addEventListener('click', () => loadRouteDetails(opt.service));
         routeCardsEl.appendChild(card);
+      });
+    }
+
+    function renderQuickDestinations() {
+      const row = document.getElementById('quick-dest-row');
+      row.innerHTML = '';
+      KioskQuickDestinations.QUICK_DESTINATIONS.forEach((dest) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chat-pill secondary';
+        btn.textContent = `${dest.icon} ${t(dest.labelKey)}`;
+        btn.addEventListener('click', async () => {
+          await setDestinationLocation({ lat: dest.lat, lon: dest.lon, label: t(dest.labelKey) });
+          await planJourney();
+        });
+        row.appendChild(btn);
       });
     }
 

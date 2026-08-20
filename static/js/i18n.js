@@ -82,6 +82,11 @@
       crowded: '拥挤',
       berthLabel: '泊位',
       berthUnavailable: '暂无泊位信息',
+      quickDestHeading: '热门直达',
+      quickDestChangi: '樟宜机场 T2',
+      quickDestHospital: '樟宜综合医院',
+      quickDestMall: '白沙购物广场',
+      quickDestCC: '巴西立民众俱乐部',
     },
     en: {
       brand: 'Bus Concierge',
@@ -159,6 +164,11 @@
       crowded: 'Crowded',
       berthLabel: 'Berth',
       berthUnavailable: 'No berth info',
+      quickDestHeading: 'Popular Destinations',
+      quickDestChangi: 'Changi Airport T2',
+      quickDestHospital: 'Changi General Hospital',
+      quickDestMall: 'White Sands Mall',
+      quickDestCC: 'Elias Community Club',
     },
   };
 
