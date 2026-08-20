@@ -95,10 +95,6 @@
     .badge { display:inline-flex; align-items:center; padding:8px 14px; border-radius:999px; font-weight:800; font-size:17px; }
     .badge.yellow { background:#ffd400; color:#825f00; }
     .badge.blue { background:#d9e6ff; color:#2451c2; }
-    .quiet-dots { display:flex; gap:6px; align-items:center; }
-    .quiet-dots span { width:20px; height:20px; border-radius:999px; background:#e5e7eb; display:inline-block; }
-    .quiet-dots span.active { background:#0f6a2f; }
-    .quiet-dots span.mid { background:#8a6a00; }
     .right-card { padding:24px; }
     .search-box { display:flex; align-items:center; gap:10px; background:#f3f5f9; border-radius:999px; padding:14px 18px; color:#64748b; }
     .stop-list { display:flex; flex-direction:column; gap:18px; }
@@ -396,10 +392,11 @@
     const apiBase = '';
     const defaultLocation = { lat: 1.373696, lon: 103.94845, label: 'Pasir Ris Bus Interchange'};
     const demoDestination = { lat: 1.3575, lon: 103.9885, label: 'Changi Airport T2' };
+    const defaultDestination = { lat: 1.37438650022455, lon: 103.93147946559002, label: 'IKEA Tampines' };
 
     const state = {
       current: defaultLocation,
-      destination: demoDestination,
+      destination: defaultDestination,
       nearby: [],
       markers: [],
       routeOptions: [],
@@ -987,13 +984,7 @@
             })()}</span>
             ${typeof opt.confidence === 'number' ? `<span class="route-chip">Confidence ${opt.confidence}%</span>` : ''}
           </div>
-          <div class="mt-4 flex items-center justify-between">
-            <div>
-              <div class="quiet-dots">
-                <span class="active"></span><span class="${idx === 0 ? 'active' : 'mid'}"></span><span></span>
-              </div>
-              <div class="mt-2 text-base font-bold text-slate-700">${idx === 0 ? `${t('quiet')} | Quiet` : `${t('moderate')} | Moderate`}</div>
-            </div>
+          <div class="mt-4 flex items-center justify-end">
             <button class="rounded-full bg-blue-700 text-white px-5 py-3 text-lg font-extrabold" data-service="${opt.service}">${t('details')}</button>
           </div>`;
         card.querySelector('button').addEventListener('click', () => loadRouteDetails(opt.service));
@@ -1021,6 +1012,12 @@
       const container = document.getElementById('trip-qr-code');
       if (!container) return;
       container.innerHTML = '';
+      if (typeof qrcode === 'undefined') return;
+      if (!qrcode.__utf8Registered) {
+        qrcode.stringToBytesFuncs['UTF-8'] = KioskQrPayload.utf8ToBytes;
+        qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+        qrcode.__utf8Registered = true;
+      }
       const qr = qrcode(0, 'L');
       qr.addData(text);
       qr.make();
@@ -1422,6 +1419,11 @@
               toName: leg2.to_name,
               stops: leg1.stops + leg2.stops,
               berth: leg1.berth,
+            }, {
+              bus: t('qrBusLabel'),
+              to: isZh ? '→' : '->',
+              stops: t('qrStopsLabel'),
+              berth: t('berthLabel'),
             }));
           }
           const flatOptions = (data.options || []).map(opt => ({
@@ -1453,6 +1455,11 @@
             toName: best.to_name,
             stops: best.stops,
             berth: best.berth,
+          }, {
+            bus: t('qrBusLabel'),
+            to: isZh ? '→' : '->',
+            stops: t('qrStopsLabel'),
+            berth: t('berthLabel'),
           }));
         }
 

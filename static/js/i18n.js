@@ -89,6 +89,8 @@
       quickDestCC: '巴西立民众俱乐部',
       qrTakeaway: '扫码带走路线',
       qrHint: '用手机扫描保存路线信息',
+      qrBusLabel: '巴士',
+      qrStopsLabel: '站',
     },
     en: {
       brand: 'Bus Concierge',
@@ -173,6 +175,8 @@
       quickDestCC: 'Elias Community Club',
       qrTakeaway: 'Scan to take route',
       qrHint: 'Scan with your phone to save this trip',
+      qrBusLabel: 'Bus',
+      qrStopsLabel: 'stops',
     },
   };
 
