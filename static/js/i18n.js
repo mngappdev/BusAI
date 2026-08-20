@@ -79,6 +79,7 @@
       a11yFontDecrease: '缩小字体',
       a11yReadAloud: '朗读开关',
       a11yFullscreen: '全屏切换',
+      crowded: '拥挤',
     },
     en: {
       brand: 'Bus Concierge',
@@ -153,6 +154,7 @@
       a11yFontDecrease: 'Decrease text size',
       a11yReadAloud: 'Toggle read aloud',
       a11yFullscreen: 'Toggle fullscreen',
+      crowded: 'Crowded',
     },
   };
 

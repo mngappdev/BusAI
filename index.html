@@ -80,6 +80,11 @@
     .route-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border-radius:999px; background:#f1f5f9; color:#334155; font-size:13px; font-weight:700; }
     .route-chip.good { background:#e9f8ef; color:#166534; }
     .route-chip.warn { background:#fff7ed; color:#9a3412; }
+    .crowd-dot { width:10px; height:10px; border-radius:999px; display:inline-block; margin-right:6px; vertical-align:middle; }
+    .crowd-dot.green { background:#16a34a; }
+    .crowd-dot.amber { background:#d97706; }
+    .crowd-dot.red { background:#dc2626; }
+    .crowd-dot.gray { background:#94a3b8; }
     .badge { display:inline-flex; align-items:center; padding:8px 14px; border-radius:999px; font-weight:800; font-size:17px; }
     .badge.yellow { background:#ffd400; color:#825f00; }
     .badge.blue { background:#d9e6ff; color:#2451c2; }
@@ -375,6 +380,7 @@
   <script src="/static/js/i18n.js"></script>
   <script src="/static/js/view-router.js"></script>
   <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/crowding.js"></script>
   <script>
     const apiBase = '';
     const defaultLocation = { lat: 1.3542, lon: 103.9436, label: 'Tampines Bus Interchange'};
@@ -916,7 +922,7 @@
               <div class="mt-3 text-sm text-slate-500">${t('services')}: ${services || '—'}</div>
               <div class="stop-arrival">
                 <span class="stop-arrival-badge">${stateLang.ui === 'zh' ? '最近到站巴士' : 'Next bus'}</span>
-                <span class="stop-arrival-time">${nearestLabel} · ${arrivalLine}</span>
+                <span class="stop-arrival-time"><span class="crowd-dot ${KioskCrowding.levelForLoad(nearest ? nearest.load : null)}"></span>${nearestLabel} · ${arrivalLine}</span>
               </div>
             </div>
             <div class="text-right">
@@ -960,7 +966,10 @@
             <span class="route-chip">${opt.stops} stops</span>
             <span class="route-chip">${opt.dist_km} km</span>
             <span class="route-chip ${live?.is_wab ? 'good' : ''}">${live?.is_wab ? 'WAB ♿' : 'Standard'}</span>
-            <span class="route-chip ${live ? 'good' : 'warn'}">${live ? `Load: ${live.load}` : t('noLiveData')}</span>
+            <span class="route-chip ${live ? 'good' : 'warn'}">${(() => {
+              const level = KioskCrowding.levelForLoad(live ? live.load : null);
+              return `<span class="crowd-dot ${level}"></span>${t(KioskCrowding.labelKeyForLevel(level))}`;
+            })()}</span>
             ${typeof opt.confidence === 'number' ? `<span class="route-chip">Confidence ${opt.confidence}%</span>` : ''}
           </div>
           <div class="mt-4 flex items-center justify-between">
