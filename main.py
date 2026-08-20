@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from bus_engine import BusSmartEngine
 
@@ -18,6 +19,7 @@ app.add_middleware(
 
 engine = BusSmartEngine()
 BASE_DIR = Path(__file__).resolve().parent
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 class TripRequest(BaseModel):
     s_lat: float
