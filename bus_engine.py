@@ -200,6 +200,7 @@ class BusSmartEngine:
             'dist_km': round(float(r_end['Distance']) - float(r_start['Distance']), 2),
             'polyline': polyline,
             'live': live,
+            'berth': self.get_berth(s_code, svc),
         }
 
     def _find_direct_routes(self, start_cluster, end_cluster):
