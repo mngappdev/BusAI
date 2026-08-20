@@ -1,0 +1,23 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { translate, DICTIONARIES } = require('./i18n.js');
+
+test('translate returns the zh string for a static key', () => {
+  assert.equal(translate('zh', 'homeTileWayfindingTitle'), '路线指引');
+});
+
+test('translate returns the en string for a static key', () => {
+  assert.equal(translate('en', 'homeTileWayfindingTitle'), 'Wayfinding');
+});
+
+test('translate calls a function-valued key with the given args', () => {
+  assert.equal(translate('zh', 'loadRoute', '118'), '已加载线路 118');
+});
+
+test('translate falls back to the key itself when missing from both dictionaries', () => {
+  assert.equal(translate('zh', 'thisKeyDoesNotExist'), 'thisKeyDoesNotExist');
+});
+
+test('translate falls back to zh dictionary when the language is unknown', () => {
+  assert.equal(translate('fr', 'homeTileWayfindingTitle'), DICTIONARIES.zh.homeTileWayfindingTitle);
+});
