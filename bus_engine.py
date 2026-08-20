@@ -21,6 +21,9 @@ class BusSmartEngine:
             self.stop_to_routes[r['BusStopCode']].append(r)
         self._arrival_cache = {}
 
+        self.berth_map = self._load_berth_map(base_path)
+        self.berth_lookup = self._build_berth_lookup()
+
         self._initialize_data()
 
     def _initialize_data(self):
@@ -40,6 +43,24 @@ class BusSmartEngine:
             })
         for key in self.service_to_route:
             self.service_to_route[key].sort(key=lambda x: x['StopSequence'])
+
+    def _load_berth_map(self, base_path):
+        try:
+            with open(os.path.join(base_path, "berth_map.json"), 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+
+    def _build_berth_lookup(self):
+        lookup = {}
+        for stop_code, info in self.berth_map.items():
+            for entry in info.get('boarding', []):
+                for svc in entry.get('services', []):
+                    lookup[(stop_code, svc)] = entry['berth']
+        return lookup
+
+    def get_berth(self, stop_code, service_no):
+        return self.berth_lookup.get((stop_code, str(service_no)))
 
     # ─── Utilities ────────────────────────────────────────────────────────────
 

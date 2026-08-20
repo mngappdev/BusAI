@@ -1,0 +1,19 @@
+{
+  "77009": {
+    "nameEn": "Pasir Ris Bus Interchange",
+    "nameZh": "巴西立巴士转换站",
+    "boarding": [
+      { "berth": "B1", "services": ["58", "58B", "88"] },
+      { "berth": "B2", "services": ["12", "12e", "21"] },
+      { "berth": "B3", "services": ["17", "68"] },
+      { "berth": "B4", "services": ["359", "403"] },
+      { "berth": "B5", "services": ["358", "46"] },
+      { "berth": "B6", "services": ["354"] },
+      { "berth": "B7", "services": ["3"] },
+      { "berth": "B8", "services": ["5", "6"] },
+      { "berth": "B9", "services": ["15", "15A", "518", "518A"] },
+      { "berth": "B10", "services": [] }
+    ],
+    "alighting": ["A1", "A2", "A3", "A4", "A5"]
+  }
+}
