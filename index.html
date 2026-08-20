@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
@@ -88,6 +89,9 @@
     .berth-schematic { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; max-width:360px; margin:10px 0 0; }
     .berth-cell { padding:10px 0; text-align:center; border-radius:10px; background:#f1f5f9; color:#334155; font-weight:800; font-size:13px; border:2px solid transparent; }
     .berth-cell.active { background:#0f4fd6; color:#fff; border-color:#0c3fa8; box-shadow:0 4px 12px rgba(15,79,214,.3); }
+    .trip-qr-block { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+    .trip-qr-block svg { width:72px; height:72px; flex-shrink:0; }
+    .trip-qr-label { font-size:13px; font-weight:700; color:var(--muted); }
     .badge { display:inline-flex; align-items:center; padding:8px 14px; border-radius:999px; font-weight:800; font-size:17px; }
     .badge.yellow { background:#ffd400; color:#825f00; }
     .badge.blue { background:#d9e6ff; color:#2451c2; }
@@ -387,9 +391,10 @@
   <script src="/static/js/crowding.js"></script>
   <script src="/static/js/berth-schematic.js"></script>
   <script src="/static/js/quick-destinations.js"></script>
+  <script src="/static/js/qr-payload.js"></script>
   <script>
     const apiBase = '';
-    const defaultLocation = { lat: 1.3542, lon: 103.9436, label: 'Tampines Bus Interchange'};
+    const defaultLocation = { lat: 1.373696, lon: 103.94845, label: 'Pasir Ris Bus Interchange'};
     const demoDestination = { lat: 1.3575, lon: 103.9885, label: 'Changi Airport T2' };
 
     const state = {
@@ -1012,6 +1017,16 @@
       });
     }
 
+    function renderTripQr(text) {
+      const container = document.getElementById('trip-qr-code');
+      if (!container) return;
+      container.innerHTML = '';
+      const qr = qrcode(0, 'L');
+      qr.addData(text);
+      qr.make();
+      container.innerHTML = qr.createSvgTag(3);
+    }
+
     const stopIcon = L.divIcon({ 
       className: '', 
       html: '<div style="width:12px;height:12px;border-radius:999px;background:#17a34a;border:2px solid white;box-shadow:0 0 10px rgba(0,0,0,0.2)"></div>', 
@@ -1214,7 +1229,14 @@
         <div class="mt-3">
           <span class="route-chip good">${t('berthLabel')}: ${best.berth}</span>
           ${KioskBerthSchematic.buildSchematicHtml(best.berth)}
-        </div>` : ''}`;
+        </div>` : ''}
+        <div class="trip-qr-block">
+          <div id="trip-qr-code"></div>
+          <div>
+            <div class="trip-qr-label">${t('qrTakeaway')}</div>
+            <div class="small-label">${t('qrHint')}</div>
+          </div>
+        </div>`;
     }
 
     function buildTransferTimeline(leg1, leg2, isZh) {
@@ -1288,7 +1310,14 @@
         <div class="mt-3">
           <span class="route-chip good">${t('berthLabel')}: ${leg1.berth}</span>
           ${KioskBerthSchematic.buildSchematicHtml(leg1.berth)}
-        </div>` : ''}`;
+        </div>` : ''}
+        <div class="trip-qr-block">
+          <div id="trip-qr-code"></div>
+          <div>
+            <div class="trip-qr-label">${t('qrTakeaway')}</div>
+            <div class="small-label">${t('qrHint')}</div>
+          </div>
+        </div>`;
     }
 
     function drawRoute(tripData) {
@@ -1386,6 +1415,15 @@
           const leg1 = firstOpt?.leg1;
           const leg2 = firstOpt?.leg2;
           summary.innerHTML = buildTransferTimeline(leg1, leg2, isZh);
+          if (leg1 && leg2) {
+            renderTripQr(KioskQrPayload.buildDirectTripPayload({
+              service: `${leg1.service} -> ${leg2.service}`,
+              fromName: leg1.from_name,
+              toName: leg2.to_name,
+              stops: leg1.stops + leg2.stops,
+              berth: leg1.berth,
+            }));
+          }
           const flatOptions = (data.options || []).map(opt => ({
             service: `${opt.leg1.service} → ${opt.leg2.service}`,
             from_name: opt.leg1.from_name,
@@ -1408,6 +1446,15 @@
         // Direct mode
         const best = data.best || data.options?.[0];
         summary.innerHTML = buildDirectTimeline(best, isZh);
+        if (best) {
+          renderTripQr(KioskQrPayload.buildDirectTripPayload({
+            service: best.service,
+            fromName: best.from_name,
+            toName: best.to_name,
+            stops: best.stops,
+            berth: best.berth,
+          }));
+        }
 
         renderRouteCards(data.options || []);
         if (best) {

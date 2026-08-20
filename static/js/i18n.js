@@ -87,6 +87,8 @@
       quickDestHospital: '樟宜综合医院',
       quickDestMall: '白沙购物广场',
       quickDestCC: '巴西立民众俱乐部',
+      qrTakeaway: '扫码带走路线',
+      qrHint: '用手机扫描保存路线信息',
     },
     en: {
       brand: 'Bus Concierge',
@@ -169,6 +171,8 @@
       quickDestHospital: 'Changi General Hospital',
       quickDestMall: 'White Sands Mall',
       quickDestCC: 'Elias Community Club',
+      qrTakeaway: 'Scan to take route',
+      qrHint: 'Scan with your phone to save this trip',
     },
   };
 
