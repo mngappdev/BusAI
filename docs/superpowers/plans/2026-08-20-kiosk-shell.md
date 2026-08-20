@@ -1058,7 +1058,7 @@ Run:
 
 ```bash
 pytest -v
-node --test static/js/
+node --test "static/js/*.test.js"
 ```
 
 Expected: all backend and JS tests PASS.

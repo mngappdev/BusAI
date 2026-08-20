@@ -22,7 +22,7 @@
     }
     html, body { height:100%; }
     body { margin:0; font-family: Inter, system-ui, sans-serif; background:var(--bg); color:var(--text); }
-    .app-shell { min-height:100vh; display:grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows:auto 1fr auto; }
+    .app-shell { min-height:100dvh; display:grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows:auto 1fr auto; }
     .topbar { position:relative; z-index: 40; /* 确保顶栏整体在主内容区之上 */grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; padding:0 28px 48px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.8); backdrop-filter: blur(10px); }
     .news-ticker { position:absolute; z-index: 50; /* 显著高于地图的 z-index */left:50%; bottom:-28px; transform:translateX(-50%); width:min(980px, calc(100% - 48px)); background:rgba(15,23,42,.92); border:1px solid rgba(255,255,255,.35); border-radius:999px; padding:7px 20px; display:flex; align-items:center; gap:18px; color:#fff; box-shadow:0 18px 40px rgba(15,23,42,.35); z-index:3; }
     .news-ticker:not(.has-content) { opacity:.75; }
@@ -61,7 +61,7 @@
     .sidebar-item.active { background:#edf4ff; color:#0f3fa7; font-weight:800; }
     .sidebar-item svg { flex:0 0 auto; }
     .main { padding:0 16px 16px; }
-    .map-card { position:relative; z-index: 10;height:100%; min-height: calc(100vh - 88px - 32px); border-radius:0; overflow:hidden; background:linear-gradient(180deg,#e65b55 0%, #d84f47 100%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+    .map-card { position:relative; z-index: 10;height:100%; min-height: calc(100dvh - 88px - 32px); border-radius:0; overflow:hidden; background:linear-gradient(180deg,#e65b55 0%, #d84f47 100%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
     #map { position:absolute; inset:0; height:100%; width:100%; z-index:0; filter:saturate(.85) contrast(1.05); }
     /* ── Map overlay: stack items from top, no hollow middle gap ── */
     .map-overlay { position:absolute; inset:0; z-index:2; pointer-events:none; padding:20px 20px 16px; display:flex; flex-direction:column; gap:10px; }
@@ -436,13 +436,20 @@
     function applyFontScale(scale) {
       accessibilityState.fontScale = scale;
       document.body.style.zoom = String(scale);
-      localStorage.setItem('kiosk_font_scale', String(scale));
+      if (currentView === 'wayfinding') {
+        setTimeout(() => map.invalidateSize(), 50);
+      }
+      try {
+        localStorage.setItem('kiosk_font_scale', String(scale));
+      } catch (_) {}
     }
 
     function applyReadAloud(enabled) {
       accessibilityState.readAloudEnabled = enabled;
       document.getElementById('read-aloud-btn').classList.toggle('active', enabled);
-      localStorage.setItem('kiosk_read_aloud', enabled ? '1' : '0');
+      try {
+        localStorage.setItem('kiosk_read_aloud', enabled ? '1' : '0');
+      } catch (_) {}
     }
 
     function viewTitleFor(viewId) {
@@ -452,13 +459,20 @@
     }
 
     function initAccessibility() {
-      const storedScale = parseFloat(localStorage.getItem('kiosk_font_scale'));
-      applyFontScale(
-        Number.isFinite(storedScale)
-          ? KioskAccessibility.clampFontScale(storedScale)
-          : KioskAccessibility.FONT_SCALE_DEFAULT
-      );
-      applyReadAloud(localStorage.getItem('kiosk_read_aloud') === '1');
+      let storedScale = KioskAccessibility.FONT_SCALE_DEFAULT;
+      let storedReadAloud = false;
+      try {
+        const parsedScale = parseFloat(localStorage.getItem('kiosk_font_scale'));
+        storedScale = Number.isFinite(parsedScale)
+          ? KioskAccessibility.clampFontScale(parsedScale)
+          : KioskAccessibility.FONT_SCALE_DEFAULT;
+        storedReadAloud = localStorage.getItem('kiosk_read_aloud') === '1';
+      } catch (_) {
+        storedScale = KioskAccessibility.FONT_SCALE_DEFAULT;
+        storedReadAloud = false;
+      }
+      applyFontScale(storedScale);
+      applyReadAloud(storedReadAloud);
 
       document.getElementById('font-increase-btn').addEventListener('click', () => {
         applyFontScale(KioskAccessibility.nextFontScale(accessibilityState.fontScale, 'increase'));
@@ -1261,6 +1275,7 @@
     }
 
     async function planJourney() {
+      const shouldAnnounce = () => currentView === 'wayfinding';
       try {
         setAssistantStatus(t('planning'));
         const res = await fetch(`${apiBase}/api/v1/plan`, {
@@ -1299,8 +1314,10 @@
               <div class="tl-modes"><div class="tl-mode walk">🚶</div></div>
             </div>`;
           routeCardsEl.innerHTML = `<div class="route-card best"><div class="font-extrabold text-xl mb-2">${isZh ? '无需巴士' : 'No bus needed'}</div><div class="text-slate-500">${data.message || t('tryAnother')}</div></div>`;
-          speak(isZh ? `目的地很近，建议步行约 ${data.minutes} 分钟。` : `Destination is nearby. Walk about ${data.minutes} minutes.`);
-          showToast(isZh ? '建议步行' : 'Walk recommended');
+          if (shouldAnnounce()) {
+            speak(isZh ? `目的地很近，建议步行约 ${data.minutes} 分钟。` : `Destination is nearby. Walk about ${data.minutes} minutes.`);
+            showToast(isZh ? '建议步行' : 'Walk recommended');
+          }
           return;
         }
 
@@ -1311,7 +1328,7 @@
             </div>
             <div style="font-size:13px;color:var(--muted);margin-top:4px">${data.message || t('tryAnother')}</div>`;
           renderRouteCards([]);
-          showToast(t('noRoute'));
+          if (shouldAnnounce()) showToast(t('noRoute'));
           return;
         }
 
@@ -1331,7 +1348,7 @@
             transfer_at: opt.leg1.to_name,
           }));
           renderRouteCards(flatOptions);
-          if (leg1) {
+          if (leg1 && shouldAnnounce()) {
             speak(isZh
               ? `建议乘坐 ${leg1.service} 路，在 ${leg1.to_name} 换乘 ${leg2?.service} 路。`
               : `Take bus ${leg1.service} to ${leg1.to_name}, then transfer to bus ${leg2?.service}.`);
@@ -1346,16 +1363,18 @@
 
         renderRouteCards(data.options || []);
         if (best) {
-          const etaText = best.live ? best.live.minutes : (isZh ? '未知' : 'unknown');
-          speak(t('welcomeSpeak', best.service, etaText));
-          showToast(t('bestOption', best.service));
-        } else {
+          if (shouldAnnounce()) {
+            const etaText = best.live ? best.live.minutes : (isZh ? '未知' : 'unknown');
+            speak(t('welcomeSpeak', best.service, etaText));
+            showToast(t('bestOption', best.service));
+          }
+        } else if (shouldAnnounce()) {
           showToast(t('noRoute'));
         }
       } catch (err) {
         console.error(err);
         setAssistantStatus(stateLang.ui === 'zh' ? '路线规划失败。' : 'Route planning failed.');
-        showToast(stateLang.ui === 'zh' ? '规划失败' : 'Plan failed');
+        if (shouldAnnounce()) showToast(stateLang.ui === 'zh' ? '规划失败' : 'Plan failed');
       }
     }
 
