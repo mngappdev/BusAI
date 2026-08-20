@@ -333,6 +333,33 @@
       <div class="tile-grid" id="tile-grid"></div>
     </section>
 
+    <section class="kiosk-view-full" data-view="lost-found" id="view-lost-found">
+      <div class="panel coming-soon-card">
+        <div class="coming-soon-icon">🎒</div>
+        <div id="coming-soon-lost-found-title" class="text-2xl font-extrabold mb-2"></div>
+        <p id="coming-soon-lost-found-body" class="text-slate-500 mb-6"></p>
+        <button class="rounded-full bg-blue-700 text-white px-6 py-3 text-lg font-extrabold back-home-btn" type="button"></button>
+      </div>
+    </section>
+
+    <section class="kiosk-view-full" data-view="feedback" id="view-feedback">
+      <div class="panel coming-soon-card">
+        <div class="coming-soon-icon">💬</div>
+        <div id="coming-soon-feedback-title" class="text-2xl font-extrabold mb-2"></div>
+        <p id="coming-soon-feedback-body" class="text-slate-500 mb-6"></p>
+        <button class="rounded-full bg-blue-700 text-white px-6 py-3 text-lg font-extrabold back-home-btn" type="button"></button>
+      </div>
+    </section>
+
+    <section class="kiosk-view-full" data-view="nearby" id="view-nearby">
+      <div class="panel coming-soon-card">
+        <div class="coming-soon-icon">📍</div>
+        <div id="coming-soon-nearby-title" class="text-2xl font-extrabold mb-2"></div>
+        <p id="coming-soon-nearby-body" class="text-slate-500 mb-6"></p>
+        <button class="rounded-full bg-blue-700 text-white px-6 py-3 text-lg font-extrabold back-home-btn" type="button"></button>
+      </div>
+    </section>
+
     <footer class="footer">
       <div>© 2024 ZenMatrix Pte Ltd. BILINGUAL SUPPORT EN/CN.</div>
       <div class="flex gap-8">
@@ -380,6 +407,9 @@
       if (nextViewId === 'wayfinding' && !wasWayfinding) {
         setTimeout(() => map.invalidateSize(), 50);
       }
+      if (accessibilityState.readAloudEnabled) {
+        speak(viewTitleFor(nextViewId));
+      }
     }
 
     function renderHomeTiles() {
@@ -398,7 +428,64 @@
       });
     }
 
+    const accessibilityState = {
+      fontScale: KioskAccessibility.FONT_SCALE_DEFAULT,
+      readAloudEnabled: false,
+    };
+
+    function applyFontScale(scale) {
+      accessibilityState.fontScale = scale;
+      document.body.style.zoom = String(scale);
+      localStorage.setItem('kiosk_font_scale', String(scale));
+    }
+
+    function applyReadAloud(enabled) {
+      accessibilityState.readAloudEnabled = enabled;
+      document.getElementById('read-aloud-btn').classList.toggle('active', enabled);
+      localStorage.setItem('kiosk_read_aloud', enabled ? '1' : '0');
+    }
+
+    function viewTitleFor(viewId) {
+      if (viewId === 'home') return t('homeHeading');
+      const tile = KioskViewRouter.TILES.find((item) => item.id === viewId);
+      return tile ? t(tile.titleKey) : '';
+    }
+
+    function initAccessibility() {
+      const storedScale = parseFloat(localStorage.getItem('kiosk_font_scale'));
+      applyFontScale(
+        Number.isFinite(storedScale)
+          ? KioskAccessibility.clampFontScale(storedScale)
+          : KioskAccessibility.FONT_SCALE_DEFAULT
+      );
+      applyReadAloud(localStorage.getItem('kiosk_read_aloud') === '1');
+
+      document.getElementById('font-increase-btn').addEventListener('click', () => {
+        applyFontScale(KioskAccessibility.nextFontScale(accessibilityState.fontScale, 'increase'));
+      });
+      document.getElementById('font-decrease-btn').addEventListener('click', () => {
+        applyFontScale(KioskAccessibility.nextFontScale(accessibilityState.fontScale, 'decrease'));
+      });
+      document.getElementById('read-aloud-btn').addEventListener('click', () => {
+        applyReadAloud(!accessibilityState.readAloudEnabled);
+      });
+      document.getElementById('fullscreen-btn').addEventListener('click', () => {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        document.getElementById('fullscreen-btn').classList.toggle('active', !!document.fullscreenElement);
+      });
+    }
+
     document.getElementById('home-btn').addEventListener('click', () => showView('home'));
+
+    document.querySelectorAll('.back-home-btn').forEach((btn) => {
+      btn.addEventListener('click', () => showView('home'));
+    });
 
     // 2. 初始化图标 (放在最前面，防止 ReferenceError)
     const userIcon = L.divIcon({ 
@@ -571,6 +658,19 @@
       document.getElementById('home-subheading').textContent = t('homeSubheading');
       document.getElementById('home-btn').setAttribute('title', t('home'));
       renderHomeTiles();
+      document.getElementById('coming-soon-lost-found-title').textContent = t('comingSoonLostFoundTitle');
+      document.getElementById('coming-soon-lost-found-body').textContent = t('comingSoonBody');
+      document.getElementById('coming-soon-feedback-title').textContent = t('comingSoonFeedbackTitle');
+      document.getElementById('coming-soon-feedback-body').textContent = t('comingSoonBody');
+      document.getElementById('coming-soon-nearby-title').textContent = t('comingSoonNearbyTitle');
+      document.getElementById('coming-soon-nearby-body').textContent = t('comingSoonBody');
+      document.querySelectorAll('.back-home-btn').forEach((btn) => {
+        btn.textContent = t('backToHome');
+      });
+      document.getElementById('font-increase-btn').setAttribute('aria-label', t('a11yFontIncrease'));
+      document.getElementById('font-decrease-btn').setAttribute('aria-label', t('a11yFontDecrease'));
+      document.getElementById('read-aloud-btn').setAttribute('aria-label', t('a11yReadAloud'));
+      document.getElementById('fullscreen-btn').setAttribute('aria-label', t('a11yFullscreen'));
       renderNearbyStops(state.nearby);
       renderRouteCards(state.routeOptions);
     }
@@ -1330,6 +1430,7 @@
     postcodeInput.addEventListener('change', () => updateCurrentLocationFromPostcode(postcodeInput.value));
     startJourneyBtn.addEventListener('click', planJourney);
 
+    initAccessibility();
     initVoice();
     setLanguage('zh');
     showView('home');
