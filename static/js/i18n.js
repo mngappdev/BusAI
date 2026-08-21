@@ -102,6 +102,9 @@
       berthCheckDirection: (service, berths) =>
         `${service} 路为环线，两个方向泊位不同（${berths}）。请查看车头方向指示牌确认。`,
       berthPlanHeading: '站内平面图',
+      berthLookupLabel: '找泊位',
+      berthLookupTitle: '我的巴士在哪个泊位？',
+      berthLookupSubtitle: '点击车号查看泊位',
     },
     en: {
       brand: 'Bus Concierge',
@@ -199,6 +202,9 @@
       berthCheckDirection: (service, berths) =>
         `Bus ${service} is a loop service and boards at ${berths} depending on direction. Check the destination sign on the bus.`,
       berthPlanHeading: 'Station Floor Plan',
+      berthLookupLabel: 'Find My Berth',
+      berthLookupTitle: 'Which berth is my bus?',
+      berthLookupSubtitle: 'Tap your service number to see its berth',
     },
   };
 

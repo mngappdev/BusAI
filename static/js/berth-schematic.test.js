@@ -7,6 +7,8 @@ const {
   BOARDING_POSITIONS,
   KIOSK_POSITION,
   ROUTE_WAYPOINTS,
+  ALL_SERVICES,
+  findBerthForService,
   buildFloorPlanSvg,
 } = require('./berth-schematic.js');
 
@@ -113,6 +115,34 @@ test('buildFloorPlanSvg still renders the full plan when nothing is active', () 
   BOARDING_BERTHS.forEach((berth) => {
     assert.ok(svg.includes(`>${berth}<`), `expected a ${berth} label`);
   });
+});
+
+// ── Service picker (for the standalone "Which berth is my bus?" browser) ────
+
+test('ALL_SERVICES flattens every berth\'s labels in berth order (B1..B10)', () => {
+  const expected = BOARDING_BERTHS.reduce((acc, b) => acc.concat(BERTH_SERVICES[b]), []);
+  assert.deepEqual(ALL_SERVICES, expected);
+  assert.equal(ALL_SERVICES.length, 20);
+});
+
+test('ALL_SERVICES has no duplicates', () => {
+  assert.equal(new Set(ALL_SERVICES).size, ALL_SERVICES.length);
+});
+
+test('findBerthForService resolves a plain-numbered service to its one berth', () => {
+  assert.equal(findBerthForService('58'), 'B1');
+  assert.equal(findBerthForService('12e'), 'B2');
+});
+
+test('findBerthForService resolves a directional label to its exact berth', () => {
+  assert.equal(findBerthForService('359W'), 'B4');
+  assert.equal(findBerthForService('359E'), 'B6');
+  assert.equal(findBerthForService('358W'), 'B5');
+  assert.equal(findBerthForService('358E'), 'B7');
+});
+
+test('findBerthForService returns null for an unknown label', () => {
+  assert.equal(findBerthForService('999'), null);
 });
 
 test('buildFloorPlanSvg emits well-formed, complete markup', () => {

@@ -75,6 +75,18 @@
     return Math.max(34, 13 + 9 * label.length);
   }
 
+  // Every signage label in physical berth order, for a "which berth is my
+  // bus?" picker. Unlike BERTH_SERVICES this is a flat list, so a directional
+  // pair like 359W/359E shows up as two separate, unambiguous choices.
+  const ALL_SERVICES = BOARDING_BERTHS.reduce((acc, b) => acc.concat(BERTH_SERVICES[b]), []);
+
+  function findBerthForService(label) {
+    for (const berth of BOARDING_BERTHS) {
+      if (BERTH_SERVICES[berth].indexOf(label) !== -1) return berth;
+    }
+    return null;
+  }
+
   function normaliseActive(active) {
     const list = active == null ? [] : [].concat(active);
     return list.filter((berth) => Object.prototype.hasOwnProperty.call(BOARDING_POSITIONS, berth));
@@ -162,6 +174,8 @@
     BOARDING_POSITIONS,
     KIOSK_POSITION,
     ROUTE_WAYPOINTS,
+    ALL_SERVICES,
+    findBerthForService,
     buildFloorPlanSvg,
   };
 });

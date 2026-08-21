@@ -140,6 +140,8 @@
     .search-box { display:flex; align-items:center; gap:12px; background:#f3f5f9; border-radius:999px; padding:18px 22px; color:#64748b; min-height:56px; }
     .search-hint-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
     .search-hint-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:999px; background:#eef4ff; color:#2451c2; font-size:13px; font-weight:700; }
+    .berth-lookup-chip { min-width:64px; min-height:52px; padding:10px 16px; border-radius:14px; border:2px solid #dbe4f3; background:#fff; color:#0f172a; font-size:18px; font-weight:800; cursor:pointer; }
+    .berth-lookup-chip:hover, .berth-lookup-chip:focus-visible { border-color:#0f4fd6; background:#eef4ff; }
     .stop-list { display:flex; flex-direction:column; gap:18px; }
     .stop-card { padding:22px; border-radius:24px; background:#f8fafc; border:1px solid #eef2f7; cursor:pointer; transition:.15s transform ease; min-height:64px; }
     .stop-card:hover { transform: translateY(-1px); }
@@ -351,10 +353,25 @@
         </div>
 
         <div id="map-overlay-right" class="map-overlay-right">
+          <button id="berth-lookup-toggle" class="search-toggle-btn" type="button">
+            <span>🚏</span><span id="berth-lookup-label">Find My Berth</span>
+          </button>
           <button id="search-panel-toggle" class="search-toggle-btn" type="button">
             <span>🔎</span><span id="search-toggle-label">Search</span>
           </button>
         </div>
+
+        <aside id="berth-lookup-panel" class="search-panel">
+          <button id="berth-lookup-close" class="search-panel-close" type="button">✕</button>
+          <div class="flex items-start gap-3">
+            <div class="mt-1 text-blue-700 text-2xl">🚏</div>
+            <div class="flex-1">
+              <div id="berth-lookup-title" class="text-2xl font-extrabold">Which berth is my bus?</div>
+              <div id="berth-lookup-subtitle" class="small-label">我的巴士在哪个泊位？</div>
+              <div id="berth-lookup-grid" class="search-hint-row" style="margin-top:16px;"></div>
+            </div>
+          </div>
+        </aside>
 
         <aside id="search-panel" class="search-panel">
           <button id="search-panel-close" class="search-panel-close" type="button">✕</button>
@@ -601,10 +618,33 @@
 
     const searchPanelEl = document.getElementById('search-panel');
     document.getElementById('search-panel-toggle').addEventListener('click', () => {
+      berthLookupPanelEl.classList.remove('open');
       searchPanelEl.classList.toggle('open');
     });
     document.getElementById('search-panel-close').addEventListener('click', () => {
       searchPanelEl.classList.remove('open');
+    });
+
+    // "Find My Berth": a passenger who already knows their service number
+    // jumps straight to the floor plan, no trip planning required.
+    const berthLookupPanelEl = document.getElementById('berth-lookup-panel');
+    document.getElementById('berth-lookup-toggle').addEventListener('click', () => {
+      searchPanelEl.classList.remove('open');
+      berthLookupPanelEl.classList.toggle('open');
+    });
+    document.getElementById('berth-lookup-close').addEventListener('click', () => {
+      berthLookupPanelEl.classList.remove('open');
+    });
+    document.getElementById('berth-lookup-grid').innerHTML = KioskBerthSchematic.ALL_SERVICES
+      .map((svc) => `<button type="button" class="berth-lookup-chip" data-service="${svc}">${svc}</button>`)
+      .join('');
+    document.getElementById('berth-lookup-grid').addEventListener('click', (evt) => {
+      const btn = evt.target.closest('.berth-lookup-chip');
+      if (!btn) return;
+      const svc = btn.dataset.service;
+      const berth = KioskBerthSchematic.findBerthForService(svc);
+      renderBerthCard(berth, berth ? [berth] : [], svc);
+      berthLookupPanelEl.classList.remove('open');
     });
 
     // 2. 初始化图标 (放在最前面，防止 ReferenceError)
@@ -807,6 +847,9 @@
       document.getElementById('read-aloud-btn').setAttribute('aria-label', t('a11yReadAloud'));
       document.getElementById('fullscreen-btn').setAttribute('aria-label', t('a11yFullscreen'));
       document.getElementById('search-toggle-label').textContent = t('searchToggleLabel');
+      document.getElementById('berth-lookup-label').textContent = t('berthLookupLabel');
+      document.getElementById('berth-lookup-title').textContent = t('berthLookupTitle');
+      document.getElementById('berth-lookup-subtitle').textContent = t('berthLookupSubtitle');
       document.getElementById('quick-dest-heading').textContent = t('quickDestHeading');
       document.getElementById('search-hint-row').innerHTML = [
         'searchHintPostcode',

@@ -21,3 +21,10 @@ test('translate falls back to the key itself when missing from both dictionaries
 test('translate falls back to zh dictionary when the language is unknown', () => {
   assert.equal(translate('fr', 'homeTileWayfindingTitle'), DICTIONARIES.zh.homeTileWayfindingTitle);
 });
+
+test('both dictionaries define every "Find My Berth" key', () => {
+  ['berthLookupLabel', 'berthLookupTitle', 'berthLookupSubtitle'].forEach((key) => {
+    assert.ok(DICTIONARIES.en[key], `en.${key} missing`);
+    assert.ok(DICTIONARIES.zh[key], `zh.${key} missing`);
+  });
+});
