@@ -257,12 +257,14 @@
     .nearby-place-list { display:flex; flex-direction:column; gap:14px; }
     .nearby-place-card { display:flex; align-items:center; gap:18px; padding:20px 22px; border-radius:20px; background:#f8fafc; border:1px solid #eef2f7; }
     .nearby-place-icon { font-size:30px; flex-shrink:0; width:52px; height:52px; display:grid; place-items:center; background:#fff; border-radius:14px; box-shadow:0 2px 8px rgba(20,30,58,.08); }
+    .nearby-place-photo { width:72px; height:72px; object-fit:cover; }
     .nearby-place-info { flex:1; min-width:0; }
     .nearby-place-name { font-size:18px; font-weight:800; color:var(--text); }
     .nearby-place-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
     .nearby-place-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:999px; background:#eaf2ff; color:#1d4ed8; font-size:13px; font-weight:700; }
     .nearby-place-chip.accessible { background:#ecfdf5; color:#166534; }
     .nearby-place-chip.approx { background:#fff7ed; color:#9a3412; }
+    .nearby-place-chip.hours { background:#f1f5f9; color:#475569; }
     @media (max-width:768px) {
       .tile-grid { grid-template-columns:1fr; }
     }
@@ -1353,16 +1355,23 @@
       const lang = stateLang.ui;
       const name = lang === 'zh' ? place.nameZh : place.nameEn;
       const walkLabel = KioskNearbyPlaces.formatWalkLabel(place.distance_m, place.walk_minutes, lang);
-      const chips = [`<span class="nearby-place-chip">${walkLabel}</span>`];
+      const closingLabel = KioskNearbyPlaces.formatClosingLabel(place.closesAt, lang);
+      const chips = [
+        `<span class="nearby-place-chip">${walkLabel}</span>`,
+        `<span class="nearby-place-chip hours">${closingLabel}</span>`,
+      ];
       if (place.accessible) {
         chips.push(`<span class="nearby-place-chip accessible">${t('nearbyPlacesAccessible')}</span>`);
       }
       if (!place.precise) {
         chips.push(`<span class="nearby-place-chip approx">${t('nearbyPlacesApprox')}</span>`);
       }
+      const media = place.photoUrl
+        ? `<img class="nearby-place-icon nearby-place-photo" src="${place.photoUrl}" alt="" loading="lazy" />`
+        : `<div class="nearby-place-icon">${place.icon}</div>`;
       return `
         <div class="nearby-place-card">
-          <div class="nearby-place-icon">${place.icon}</div>
+          ${media}
           <div class="nearby-place-info">
             <div class="nearby-place-name">${name}</div>
             <div class="nearby-place-meta">${chips.join('')}</div>

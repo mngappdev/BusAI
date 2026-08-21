@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { groupByCategory, formatWalkLabel } = require('./nearby-places.js');
+const { groupByCategory, formatWalkLabel, formatClosingLabel } = require('./nearby-places.js');
 
 const CATEGORIES = [
   { id: 'food-mall', icon: '🍽️', nameEn: 'Food & Mall', nameZh: '美食与商场' },
@@ -51,4 +51,24 @@ test('formatWalkLabel rounds down to "arrived" for essentially zero distance', (
 test('formatWalkLabel shows walk minutes otherwise', () => {
   assert.equal(formatWalkLabel(320, 4, 'en'), '320m · 4 min walk');
   assert.equal(formatWalkLabel(320, 4, 'zh'), '320米 · 步行4分钟');
+});
+
+test('formatClosingLabel converts 24h "HH:MM" to a 12h closing time, per spec\'s xx.xxpm format', () => {
+  assert.equal(formatClosingLabel('22:00', 'en'), 'Closes 10:00pm');
+  assert.equal(formatClosingLabel('16:30', 'en'), 'Closes 4:30pm');
+  assert.equal(formatClosingLabel('23:30', 'en'), 'Closes 11:30pm');
+});
+
+test('formatClosingLabel handles morning closing times with am', () => {
+  assert.equal(formatClosingLabel('00:30', 'en'), 'Closes 12:30am');
+  assert.equal(formatClosingLabel('09:00', 'en'), 'Closes 9:00am');
+});
+
+test('formatClosingLabel in zh', () => {
+  assert.equal(formatClosingLabel('22:00', 'zh'), '22:00 打烊');
+});
+
+test('formatClosingLabel returns "open 24 hours" when closesAt is null', () => {
+  assert.equal(formatClosingLabel(null, 'en'), 'Open 24 hours');
+  assert.equal(formatClosingLabel(null, 'zh'), '24小时开放');
 });

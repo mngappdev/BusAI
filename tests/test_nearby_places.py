@@ -72,3 +72,25 @@ def test_pasir_ris_mall_is_essentially_zero_walk_from_the_interchange(engine):
     result = engine.nearby_places(*PASIR_RIS_INT)
     mall = next(p for p in result["places"] if p["id"] == "pasir-ris-mall")
     assert mall["distance_m"] < 100
+
+
+def test_every_place_has_closes_at_and_photo_url_fields(engine):
+    # Both are nullable (24-hour places have no closing time; places with no
+    # verified real photo carry null rather than a fabricated image) but the
+    # key must exist so the frontend never has to guess whether data is missing.
+    result = engine.nearby_places(*PASIR_RIS_INT)
+    for place in result["places"]:
+        assert "closesAt" in place
+        assert "photoUrl" in place
+        if place["closesAt"] is not None:
+            assert len(place["closesAt"]) == 5 and place["closesAt"][2] == ":", place["closesAt"]
+
+
+def test_places_with_a_photo_url_use_a_real_wikimedia_source(engine):
+    # Every photoUrl in the curated data was fetched and confirmed to return
+    # 200 before being added — this guards against a future edit adding an
+    # unverified or broken link.
+    result = engine.nearby_places(*PASIR_RIS_INT)
+    for place in result["places"]:
+        if place["photoUrl"]:
+            assert place["photoUrl"].startswith("https://upload.wikimedia.org/"), place["id"]

@@ -23,5 +23,19 @@
       : `${distanceM}m · ${walkMinutes} min walk`;
   }
 
-  return { groupByCategory, formatWalkLabel };
+  function formatClosingLabel(closesAt, lang) {
+    if (!closesAt) {
+      return lang === 'zh' ? '24小时开放' : 'Open 24 hours';
+    }
+    if (lang === 'zh') {
+      return `${closesAt} 打烊`;
+    }
+    const [hStr, mStr] = closesAt.split(':');
+    const h24 = parseInt(hStr, 10);
+    const period = h24 < 12 ? 'am' : 'pm';
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    return `Closes ${h12}:${mStr}${period}`;
+  }
+
+  return { groupByCategory, formatWalkLabel, formatClosingLabel };
 });

@@ -14,7 +14,9 @@
       "lat": 1.37313477197799,
       "lon": 103.94802646457005,
       "precise": true,
-      "accessible": true
+      "accessible": true,
+      "closesAt": "22:00",
+      "photoUrl": null
     },
     {
       "id": "white-sands-mall",
@@ -25,7 +27,9 @@
       "lat": 1.3721,
       "lon": 103.9493,
       "precise": true,
-      "accessible": true
+      "accessible": true,
+      "closesAt": "22:00",
+      "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/White_Sands_Shopping_Centre%2C_Sep_06.JPG/250px-White_Sands_Shopping_Centre%2C_Sep_06.JPG"
     },
     {
       "id": "mrt-exit-a",
@@ -36,7 +40,9 @@
       "lat": 1.37276133738912,
       "lon": 103.95064755544978,
       "precise": true,
-      "accessible": true
+      "accessible": true,
+      "closesAt": "23:30",
+      "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/EW1_Pasir_Ris_MRT_Station_Exterior_202412.jpg/250px-EW1_Pasir_Ris_MRT_Station_Exterior_202412.jpg"
     },
     {
       "id": "mrt-exit-b",
@@ -47,7 +53,9 @@
       "lat": 1.37241,
       "lon": 103.948657,
       "precise": true,
-      "accessible": true
+      "accessible": true,
+      "closesAt": "23:30",
+      "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/EW1_Pasir_Ris_MRT_Station_Exterior_202412.jpg/250px-EW1_Pasir_Ris_MRT_Station_Exterior_202412.jpg"
     },
     {
       "id": "restroom",
@@ -58,7 +66,9 @@
       "lat": 1.373696,
       "lon": 103.94845,
       "precise": false,
-      "accessible": true
+      "accessible": true,
+      "closesAt": null,
+      "photoUrl": null
     },
     {
       "id": "nursing-room",
@@ -69,7 +79,9 @@
       "lat": 1.373696,
       "lon": 103.94845,
       "precise": false,
-      "accessible": true
+      "accessible": true,
+      "closesAt": null,
+      "photoUrl": null
     },
     {
       "id": "atm",
@@ -80,7 +92,9 @@
       "lat": 1.37313477197799,
       "lon": 103.94802646457005,
       "precise": false,
-      "accessible": true
+      "accessible": true,
+      "closesAt": "22:00",
+      "photoUrl": null
     },
     {
       "id": "bike-share",
@@ -91,7 +105,9 @@
       "lat": 1.37241,
       "lon": 103.948657,
       "precise": false,
-      "accessible": false
+      "accessible": false,
+      "closesAt": null,
+      "photoUrl": null
     },
     {
       "id": "pasir-ris-polyclinic",
@@ -102,7 +118,9 @@
       "lat": 1.37313477197799,
       "lon": 103.94802646457005,
       "precise": true,
-      "accessible": true
+      "accessible": true,
+      "closesAt": "16:30",
+      "photoUrl": null
     },
     {
       "id": "elias-cc",
@@ -113,7 +131,9 @@
       "lat": 1.3806,
       "lon": 103.9427,
       "precise": true,
-      "accessible": true
+      "accessible": true,
+      "closesAt": "22:00",
+      "photoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/PasirRisEliasCC.JPG/250px-PasirRisEliasCC.JPG"
     }
   ]
 }
