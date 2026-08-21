@@ -1,4 +1,5 @@
 import json
+import logging
 import math
 import requests
 import os
@@ -6,6 +7,7 @@ from datetime import datetime, timezone
 from collections import defaultdict
 
 LTA_API_BASE = "https://datamall2.mytransport.sg/ltaodataservice"
+logger = logging.getLogger(__name__)
 
 class BusSmartEngine:
     def __init__(self):
@@ -360,41 +362,37 @@ class BusSmartEngine:
 
     # ─── External API helpers ─────────────────────────────────────────────────
 
-    def get_traffic_incidents(self):
+    def _fetch_lta_feed(self, feed_name, path):
+        """Shared fetch for the LTA DataMall "Alerts" feeds. An empty ticker
+        and a missing/rejected credential looked identical before this: both
+        silently returned []. Logging here is what makes the difference
+        diagnosable instead of reading as "genuinely zero incidents."
+        """
         api_key = os.getenv('LTA_API_KEY')
         if not api_key:
+            logger.warning(
+                "%s: LTA_API_KEY is not set — returning no alerts instead of "
+                "calling LTA DataMall. Set LTA_API_KEY to enable this feed.",
+                feed_name,
+            )
             return []
         headers = {'AccountKey': api_key, 'Accept': 'application/json'}
         try:
-            r = requests.get(f'{LTA_API_BASE}/TrafficIncidents', headers=headers, timeout=5)
+            r = requests.get(f'{LTA_API_BASE}/{path}', headers=headers, timeout=5)
             r.raise_for_status()
             return r.json().get('value', [])
-        except Exception:
+        except Exception as exc:
+            logger.warning("%s: request to LTA DataMall failed: %s", feed_name, exc)
             return []
+
+    def get_traffic_incidents(self):
+        return self._fetch_lta_feed('TrafficIncidents', 'TrafficIncidents')
 
     def get_train_service_alerts(self):
-        api_key = os.getenv('LTA_API_KEY')
-        if not api_key:
-            return []
-        headers = {'AccountKey': api_key, 'Accept': 'application/json'}
-        try:
-            r = requests.get(f'{LTA_API_BASE}/TrainServiceAlerts', headers=headers, timeout=5)
-            r.raise_for_status()
-            return r.json().get('value', [])
-        except Exception:
-            return []
+        return self._fetch_lta_feed('TrainServiceAlerts', 'TrainServiceAlerts')
 
     def get_facilities_maintenance(self):
-        api_key = os.getenv('LTA_API_KEY')
-        if not api_key:
-            return []
-        headers = {'AccountKey': api_key, 'Accept': 'application/json'}
-        try:
-            r = requests.get(f'{LTA_API_BASE}/v2/FacilitiesMaintenance', headers=headers, timeout=5)
-            r.raise_for_status()
-            return r.json().get('value', [])
-        except Exception:
-            return []
+        return self._fetch_lta_feed('FacilitiesMaintenance', 'v2/FacilitiesMaintenance')
 
     def get_air_temperature(self, lat=None, lon=None):
         api_key = 'v2:c301d3e632007d24480125f32e20315e53467c6bca4707f4cc08a8dbe9353a74:uR417bu2gr6LnnYc14EzFWgRT9iHKsgb'

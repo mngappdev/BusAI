@@ -107,6 +107,8 @@
       berthLookupSubtitle: '点击车号查看泊位',
       berthOffsiteLabel: '上车站点',
       berthOffsiteNote: (stopName) => `此班车不在转换站内发车，请前往「${stopName}」乘车。`,
+      searchDestinationSubtitle: '搜索您要前往的地点',
+      destinationSetLabel: (label) => `目的地：${label}`,
     },
     en: {
       brand: 'Bus Concierge',
@@ -209,6 +211,8 @@
       berthLookupSubtitle: 'Tap your service number to see its berth',
       berthOffsiteLabel: 'Boards At',
       berthOffsiteNote: (stopName) => `This bus doesn't depart from inside the interchange — head to ${stopName} to board.`,
+      searchDestinationSubtitle: 'Search for where you want to go',
+      destinationSetLabel: (label) => `Destination: ${label}`,
     },
   };
 
