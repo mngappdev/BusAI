@@ -429,24 +429,6 @@
       <div class="tile-grid" id="tile-grid"></div>
     </section>
 
-    <section class="kiosk-view-full" data-view="lost-found" id="view-lost-found">
-      <div class="panel coming-soon-card">
-        <div class="coming-soon-icon">🎒</div>
-        <div id="coming-soon-lost-found-title" class="text-2xl font-extrabold mb-2"></div>
-        <p id="coming-soon-lost-found-body" class="text-slate-500 mb-6"></p>
-        <button class="rounded-full bg-blue-700 text-white px-6 py-3 text-lg font-extrabold back-home-btn" type="button"></button>
-      </div>
-    </section>
-
-    <section class="kiosk-view-full" data-view="feedback" id="view-feedback">
-      <div class="panel coming-soon-card">
-        <div class="coming-soon-icon">💬</div>
-        <div id="coming-soon-feedback-title" class="text-2xl font-extrabold mb-2"></div>
-        <p id="coming-soon-feedback-body" class="text-slate-500 mb-6"></p>
-        <button class="rounded-full bg-blue-700 text-white px-6 py-3 text-lg font-extrabold back-home-btn" type="button"></button>
-      </div>
-    </section>
-
     <section class="kiosk-view-full" data-view="nearby" id="view-nearby">
       <div class="nearby-view-inner">
         <div class="nearby-header">
@@ -530,6 +512,18 @@
       'nearby': { color: '#16a34a', soft: '#eafaf0' },
     };
 
+    // Feedback & Lost-and-Found are handled by Go-Ahead's existing case-management
+    // app, not built into this kiosk. Lost & Found reuses the same form with its
+    // Feedback Category pre-selected — that page has no built-in support for
+    // reading this from the URL (confirmed by reading its full source: no
+    // URLSearchParams/location.search handling anywhere), so this param does
+    // nothing until a few lines are added there. See the deploy notes.
+    const FEEDBACK_FORM_URL = 'https://pdis-grfnckf8bxcqe4fk.southeastasia-01.azurewebsites.net/pages/feedback.html';
+    const EXTERNAL_TILE_URLS = {
+      'feedback': FEEDBACK_FORM_URL,
+      'lost-found': `${FEEDBACK_FORM_URL}?category=${encodeURIComponent('Lost & Found')}`,
+    };
+
     let homeWayfindingPreview = null;
 
     function renderHomeTiles() {
@@ -550,7 +544,13 @@
           <div class="tile-title">${t(tile.titleKey)}</div>
           <div class="tile-subtitle">${t(tile.subtitleKey)}</div>
           ${previewHtml}`;
-        card.addEventListener('click', () => showView(tile.id));
+        card.addEventListener('click', () => {
+          if (EXTERNAL_TILE_URLS[tile.id]) {
+            window.location.href = EXTERNAL_TILE_URLS[tile.id];
+            return;
+          }
+          showView(tile.id);
+        });
         grid.appendChild(card);
       });
     }
@@ -854,10 +854,6 @@
       document.getElementById('home-subheading').textContent = t('homeSubheading');
       document.getElementById('home-btn').setAttribute('title', t('home'));
       renderHomeTiles();
-      document.getElementById('coming-soon-lost-found-title').textContent = t('comingSoonLostFoundTitle');
-      document.getElementById('coming-soon-lost-found-body').textContent = t('comingSoonBody');
-      document.getElementById('coming-soon-feedback-title').textContent = t('comingSoonFeedbackTitle');
-      document.getElementById('coming-soon-feedback-body').textContent = t('comingSoonBody');
       document.getElementById('nearby-heading').textContent = t('nearbyPlacesHeading');
       document.querySelectorAll('.back-home-btn').forEach((btn) => {
         btn.textContent = t('backToHome');
