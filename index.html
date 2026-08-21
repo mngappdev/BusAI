@@ -59,11 +59,7 @@
     }
     .you-are-here-label.leaflet-tooltip { background:#0f172a; color:#fff; border:none; border-radius:999px; padding:8px 18px; font-weight:800; font-size:15px; box-shadow:0 8px 20px rgba(15,23,42,.35); }
     .you-are-here-label.leaflet-tooltip::before { display:none; }
-    /* Recreated Go-Ahead Singapore wordmark — no source logo file was available
-       to embed directly; swap in a real asset here if one is supplied. */
-    .brand-wordmark { display:flex; flex-direction:column; line-height:1; flex-shrink:0; }
-    .brand-goahead { font-size:27px; font-weight:800; font-style:italic; color:#c8102e; letter-spacing:-.02em; }
-    .brand-singapore { font-size:14px; font-weight:800; color:#f0ad00; letter-spacing:.06em; text-transform:uppercase; margin-top:2px; }
+    .brand-logo { height:48px; width:auto; flex-shrink:0; display:block; }
     .left, .right { padding:22px 16px 16px; }
     .left { display: none; border-right:1px solid var(--border); }
     .right { border-left:1px solid var(--border); }
@@ -81,7 +77,8 @@
     .chat-pill { display:inline-flex; align-items:center; gap:10px; padding:14px 22px; border-radius:18px; font-size:19px; font-weight:700; min-height:52px; }
     .chat-pill.primary { background:#0c4fb2; color:white; }
     .chat-pill.secondary { background:#fff; color:#1f2937; border:1px solid #e2e8f0; }
-    .voice-btn { pointer-events:auto; width:56px; height:56px; border-radius:16px; background:#136f2c; color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(19,111,44,.3); font-size:22px; }
+    .voice-btn { pointer-events:auto; width:56px; height:56px; border-radius:16px; background:#d81e12; color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(216,30,18,.35); font-size:22px; overflow:hidden; padding:0; }
+    .voice-btn .mic-icon { width:100%; height:100%; object-fit:cover; display:block; }
     .main-wayfinding { grid-column: 1 / -1; }
     .berth-card { width:min(620px, 46vw); max-width:100%; padding:22px 24px; pointer-events:auto; display:none; flex-shrink:0; }
     .berth-card.visible { display:block; }
@@ -196,8 +193,7 @@
     @media (max-width: 1024px) {
       .app-shell { grid-template-columns: minmax(0, 1fr) 260px; }
       .topbar { padding:12px 14px; }
-      .brand-goahead { font-size:20px; }
-      .brand-singapore { font-size:11px; }
+      .brand-logo { height:34px; }
       .right { padding:16px 12px; }
       .right-card { padding:16px; }
       .map-card { min-height:calc(100vh - 80px - 24px); }
@@ -256,10 +252,7 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div id="brand" class="brand-wordmark">
-        <span class="brand-goahead">Go-Ahead</span>
-        <span class="brand-singapore">Singapore</span>
-      </div>
+      <img id="brand" class="brand-logo" src="/static/img/go-ahead-logo.png" alt="Go-Ahead Singapore" />
       <div class="news-ticker" id="news-ticker">
         <span class="news-label">Alerts</span>
         <div class="news-track"><div class="news-track-inner" id="news-track"></div></div>
@@ -327,7 +320,7 @@
                   alt="AI"
                   class="w-48 h-36 rounded-[44px] object-cover ring-2 ring-white shadow-lg"
                 />
-                <button id="mic-btn" class="voice-btn -mt-4">🎤</button>
+                <button id="mic-btn" class="voice-btn -mt-4"><img src="/static/img/lion-icon.jpg" alt="Voice search" class="mic-icon" /></button>
               </div>
               <div class="space-y-3">
                 <div class="flex gap-3 flex-wrap">
