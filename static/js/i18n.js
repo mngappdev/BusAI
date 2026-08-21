@@ -109,6 +109,12 @@
       berthOffsiteNote: (stopName) => `此班车不在转换站内发车，请前往「${stopName}」乘车。`,
       searchDestinationSubtitle: '搜索您要前往的地点',
       destinationSetLabel: (label) => `目的地：${label}`,
+      nearbyPlacesHeading: '附近兴趣点',
+      nearbyPlacesLoading: '正在加载附近设施…',
+      nearbyPlacesError: '暂时无法加载附近设施。',
+      nearbyPlacesFilterAll: '全部',
+      nearbyPlacesAccessible: '♿ 无障碍通道',
+      nearbyPlacesApprox: '大致位置',
     },
     en: {
       brand: 'Bus Concierge',
@@ -213,6 +219,12 @@
       berthOffsiteNote: (stopName) => `This bus doesn't depart from inside the interchange — head to ${stopName} to board.`,
       searchDestinationSubtitle: 'Search for where you want to go',
       destinationSetLabel: (label) => `Destination: ${label}`,
+      nearbyPlacesHeading: 'Nearby Places of Interest',
+      nearbyPlacesLoading: 'Loading nearby places…',
+      nearbyPlacesError: 'Could not load nearby places right now.',
+      nearbyPlacesFilterAll: 'All',
+      nearbyPlacesAccessible: '♿ Barrier-free access',
+      nearbyPlacesApprox: 'Approximate location',
     },
   };
 

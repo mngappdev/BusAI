@@ -25,6 +25,7 @@ class BusSmartEngine:
 
         self.berth_map = self._load_berth_map(base_path)
         self.berth_lookup = self._build_berth_lookup()
+        self.nearby_places_data = self._load_nearby_places(base_path)
 
         self._initialize_data()
 
@@ -52,6 +53,35 @@ class BusSmartEngine:
                 return json.load(f)
         except FileNotFoundError:
             return {}
+
+    def _load_nearby_places(self, base_path):
+        try:
+            with open(os.path.join(base_path, "nearby_places.json"), 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {"categories": [], "places": []}
+
+    def nearby_places(self, lat, lon):
+        """Curated points of interest around Pasir Ris Bus Interchange, with
+        distance and walk time computed live from the given location — the
+        data file only stores each place's own fixed coordinates.
+        """
+        WALK_MIN_PER_KM = 12  # same pace used for the trip planner's walk legs
+
+        places = []
+        for place in self.nearby_places_data.get('places', []):
+            distance_m = self.haversine(lat, lon, place['lat'], place['lon'])
+            places.append({
+                **place,
+                'distance_m': int(round(distance_m)),
+                'walk_minutes': int(round((distance_m / 1000) * WALK_MIN_PER_KM)),
+            })
+        places.sort(key=lambda p: (p['category'], p['distance_m']))
+
+        return {
+            'categories': self.nearby_places_data.get('categories', []),
+            'places': places,
+        }
 
     def _build_berth_lookup(self):
         """Map (stop, service) -> every berth that service boards from.

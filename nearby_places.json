@@ -1,0 +1,119 @@
+{
+  "categories": [
+    { "id": "food-mall", "icon": "🍽️", "nameEn": "Food & Mall", "nameZh": "美食与商场" },
+    { "id": "amenities", "icon": "🚻", "nameEn": "Public Amenities", "nameZh": "公共便民" },
+    { "id": "medical-community", "icon": "🏥", "nameEn": "Medical & Community", "nameZh": "医疗与社区" }
+  ],
+  "places": [
+    {
+      "id": "pasir-ris-mall",
+      "category": "food-mall",
+      "icon": "🛍️",
+      "nameEn": "Pasir Ris Mall",
+      "nameZh": "巴西立商场",
+      "lat": 1.37313477197799,
+      "lon": 103.94802646457005,
+      "precise": true,
+      "accessible": true
+    },
+    {
+      "id": "white-sands-mall",
+      "category": "food-mall",
+      "icon": "🛍️",
+      "nameEn": "White Sands Shopping Mall",
+      "nameZh": "白沙购物广场",
+      "lat": 1.3721,
+      "lon": 103.9493,
+      "precise": true,
+      "accessible": true
+    },
+    {
+      "id": "mrt-exit-a",
+      "category": "amenities",
+      "icon": "🚇",
+      "nameEn": "MRT Transfer · Exit A",
+      "nameZh": "地铁转乘 · A出口",
+      "lat": 1.37276133738912,
+      "lon": 103.95064755544978,
+      "precise": true,
+      "accessible": true
+    },
+    {
+      "id": "mrt-exit-b",
+      "category": "amenities",
+      "icon": "🚇",
+      "nameEn": "MRT Transfer · Exit B",
+      "nameZh": "地铁转乘 · B出口",
+      "lat": 1.37241,
+      "lon": 103.948657,
+      "precise": true,
+      "accessible": true
+    },
+    {
+      "id": "restroom",
+      "category": "amenities",
+      "icon": "🚻",
+      "nameEn": "Restroom",
+      "nameZh": "洗手间",
+      "lat": 1.373696,
+      "lon": 103.94845,
+      "precise": false,
+      "accessible": true
+    },
+    {
+      "id": "nursing-room",
+      "category": "amenities",
+      "icon": "👶",
+      "nameEn": "Nursing / Baby Care Room",
+      "nameZh": "母婴室",
+      "lat": 1.373696,
+      "lon": 103.94845,
+      "precise": false,
+      "accessible": true
+    },
+    {
+      "id": "atm",
+      "category": "amenities",
+      "icon": "🏧",
+      "nameEn": "ATM",
+      "nameZh": "自动提款机",
+      "lat": 1.37313477197799,
+      "lon": 103.94802646457005,
+      "precise": false,
+      "accessible": true
+    },
+    {
+      "id": "bike-share",
+      "category": "amenities",
+      "icon": "🚲",
+      "nameEn": "Bike-Share Docking",
+      "nameZh": "共享单车停车点",
+      "lat": 1.37241,
+      "lon": 103.948657,
+      "precise": false,
+      "accessible": false
+    },
+    {
+      "id": "pasir-ris-polyclinic",
+      "category": "medical-community",
+      "icon": "🏥",
+      "nameEn": "Pasir Ris Polyclinic",
+      "nameZh": "巴西立综合诊所",
+      "lat": 1.37313477197799,
+      "lon": 103.94802646457005,
+      "precise": true,
+      "accessible": true
+    },
+    {
+      "id": "elias-cc",
+      "category": "medical-community",
+      "icon": "🏛️",
+      "nameEn": "Elias Community Club",
+      "nameZh": "巴西立民众俱乐部",
+      "lat": 1.3806,
+      "lon": 103.9427,
+      "precise": true,
+      "accessible": true
+    }
+  ]
+}

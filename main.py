@@ -48,6 +48,14 @@ async def nearby_stops(
     }
 
 
+@app.get("/api/v1/nearby-places")
+async def nearby_places(
+    lat: float = Query(...),
+    lon: float = Query(...),
+):
+    return engine.nearby_places(lat, lon)
+
+
 @app.get("/api/v1/routes/{service_no}")
 async def route_summary(service_no: str):
     summary = engine.route_summary(service_no)

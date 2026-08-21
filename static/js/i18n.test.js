@@ -33,3 +33,13 @@ test('both dictionaries mention the stop name in the offsite-boarding note', () 
   assert.ok(translate('en', 'berthOffsiteNote', 'Exit B').includes('Exit B'));
   assert.ok(translate('zh', 'berthOffsiteNote', 'Exit B').includes('Exit B'));
 });
+
+test('both dictionaries define every "Nearby Places" key', () => {
+  [
+    'nearbyPlacesHeading', 'nearbyPlacesLoading', 'nearbyPlacesError',
+    'nearbyPlacesFilterAll', 'nearbyPlacesAccessible', 'nearbyPlacesApprox',
+  ].forEach((key) => {
+    assert.ok(DICTIONARIES.en[key], `en.${key} missing`);
+    assert.ok(DICTIONARIES.zh[key], `zh.${key} missing`);
+  });
+});

@@ -244,6 +244,25 @@
     .home-btn.visible { display:inline-flex; }
     .coming-soon-card { max-width:560px; margin:64px auto; text-align:center; padding:48px 32px; }
     .coming-soon-icon { font-size:56px; margin-bottom:16px; }
+
+    /* ── Nearby Places of Interest (附近兴趣点) ──────────────────────────── */
+    .nearby-view-inner { max-width:900px; margin:0 auto; padding:32px 8px 16px; }
+    .nearby-header { display:flex; align-items:center; gap:20px; margin-bottom:24px; }
+    .nearby-heading { font-size:32px; font-weight:800; color:var(--text); }
+    .nearby-tabs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+    .nearby-tab { padding:12px 22px; border-radius:999px; border:2px solid #dbe4f3; background:#fff; color:#334155; font-size:17px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:8px; min-height:52px; }
+    .nearby-tab.active { background:#0f4fd6; border-color:#0c3fa8; color:#fff; }
+    .nearby-category-group { margin-bottom:28px; }
+    .nearby-category-title { display:flex; align-items:center; gap:10px; font-size:22px; font-weight:800; color:var(--text); margin-bottom:14px; }
+    .nearby-place-list { display:flex; flex-direction:column; gap:14px; }
+    .nearby-place-card { display:flex; align-items:center; gap:18px; padding:20px 22px; border-radius:20px; background:#f8fafc; border:1px solid #eef2f7; }
+    .nearby-place-icon { font-size:30px; flex-shrink:0; width:52px; height:52px; display:grid; place-items:center; background:#fff; border-radius:14px; box-shadow:0 2px 8px rgba(20,30,58,.08); }
+    .nearby-place-info { flex:1; min-width:0; }
+    .nearby-place-name { font-size:18px; font-weight:800; color:var(--text); }
+    .nearby-place-meta { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .nearby-place-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:999px; background:#eaf2ff; color:#1d4ed8; font-size:13px; font-weight:700; }
+    .nearby-place-chip.accessible { background:#ecfdf5; color:#166534; }
+    .nearby-place-chip.approx { background:#fff7ed; color:#9a3412; }
     @media (max-width:768px) {
       .tile-grid { grid-template-columns:1fr; }
     }
@@ -427,11 +446,13 @@
     </section>
 
     <section class="kiosk-view-full" data-view="nearby" id="view-nearby">
-      <div class="panel coming-soon-card">
-        <div class="coming-soon-icon">📍</div>
-        <div id="coming-soon-nearby-title" class="text-2xl font-extrabold mb-2"></div>
-        <p id="coming-soon-nearby-body" class="text-slate-500 mb-6"></p>
-        <button class="rounded-full bg-blue-700 text-white px-6 py-3 text-lg font-extrabold back-home-btn" type="button"></button>
+      <div class="nearby-view-inner">
+        <div class="nearby-header">
+          <button class="rounded-full bg-blue-700 text-white px-6 py-3 text-lg font-extrabold back-home-btn" type="button"></button>
+          <div id="nearby-heading" class="nearby-heading"></div>
+        </div>
+        <div id="nearby-category-tabs" class="nearby-tabs"></div>
+        <div id="nearby-places-list" class="nearby-places-list"></div>
       </div>
     </section>
 
@@ -453,6 +474,7 @@
   <script src="/static/js/crowding.js"></script>
   <script src="/static/js/berth-schematic.js"></script>
   <script src="/static/js/trip-duration.js"></script>
+  <script src="/static/js/nearby-places.js"></script>
   <script src="/static/js/quick-destinations.js"></script>
   <script src="/static/js/qr-payload.js"></script>
   <script src="/static/js/home-preview.js"></script>
@@ -470,9 +492,11 @@
       routeOptions: [],
       trip: null,
       routePath: null,
+      nearbyPlaces: null,
     };
 
     let currentView = 'home';
+    let nearbyPlacesFilter = 'all';
 
     function getViewEls() {
       return document.querySelectorAll('[data-view]');
@@ -488,6 +512,9 @@
       document.getElementById('home-btn').classList.toggle('visible', nextViewId !== 'home');
       if (nextViewId === 'wayfinding' && !wasWayfinding) {
         setTimeout(() => map.invalidateSize(), 50);
+      }
+      if (nextViewId === 'nearby' && !state.nearbyPlaces) {
+        loadNearbyPlaces();
       }
       if (accessibilityState.readAloudEnabled) {
         speak(viewTitleFor(nextViewId));
@@ -829,8 +856,7 @@
       document.getElementById('coming-soon-lost-found-body').textContent = t('comingSoonBody');
       document.getElementById('coming-soon-feedback-title').textContent = t('comingSoonFeedbackTitle');
       document.getElementById('coming-soon-feedback-body').textContent = t('comingSoonBody');
-      document.getElementById('coming-soon-nearby-title').textContent = t('comingSoonNearbyTitle');
-      document.getElementById('coming-soon-nearby-body').textContent = t('comingSoonBody');
+      document.getElementById('nearby-heading').textContent = t('nearbyPlacesHeading');
       document.querySelectorAll('.back-home-btn').forEach((btn) => {
         btn.textContent = t('backToHome');
       });
@@ -857,6 +883,7 @@
       // otherwise keeps showing whatever language was active when it was
       // last fetched, since nothing else here touches #trip-summary.
       if (state.trip) renderTripSummary(state.trip, { announce: false });
+      if (state.nearbyPlaces) renderNearbyPlaces();
     }
 
     function showToast(message) {
@@ -1305,6 +1332,73 @@
         console.error(err);
         setAssistantStatus(stateLang.ui === 'zh' ? '附近站点加载失败。' : 'Failed to load nearby stops.');
       }
+    }
+
+    // ── Nearby Places of Interest (附近兴趣点) ──────────────────────────────
+    async function loadNearbyPlaces() {
+      const listEl = document.getElementById('nearby-places-list');
+      listEl.innerHTML = `<div class="small-label">${t('nearbyPlacesLoading')}</div>`;
+      try {
+        const res = await fetch(`${apiBase}/api/v1/nearby-places?lat=${state.current.lat}&lon=${state.current.lon}`);
+        const data = await res.json();
+        state.nearbyPlaces = data;
+        renderNearbyPlaces();
+      } catch (err) {
+        console.error(err);
+        listEl.innerHTML = `<div class="small-label">${t('nearbyPlacesError')}</div>`;
+      }
+    }
+
+    function renderNearbyPlaceCard(place) {
+      const lang = stateLang.ui;
+      const name = lang === 'zh' ? place.nameZh : place.nameEn;
+      const walkLabel = KioskNearbyPlaces.formatWalkLabel(place.distance_m, place.walk_minutes, lang);
+      const chips = [`<span class="nearby-place-chip">${walkLabel}</span>`];
+      if (place.accessible) {
+        chips.push(`<span class="nearby-place-chip accessible">${t('nearbyPlacesAccessible')}</span>`);
+      }
+      if (!place.precise) {
+        chips.push(`<span class="nearby-place-chip approx">${t('nearbyPlacesApprox')}</span>`);
+      }
+      return `
+        <div class="nearby-place-card">
+          <div class="nearby-place-icon">${place.icon}</div>
+          <div class="nearby-place-info">
+            <div class="nearby-place-name">${name}</div>
+            <div class="nearby-place-meta">${chips.join('')}</div>
+          </div>
+        </div>`;
+    }
+
+    function renderNearbyPlaces() {
+      const data = state.nearbyPlaces;
+      if (!data) return;
+      const lang = stateLang.ui;
+
+      const tabsEl = document.getElementById('nearby-category-tabs');
+      const allTab = `<button type="button" class="nearby-tab${nearbyPlacesFilter === 'all' ? ' active' : ''}" data-category="all">${t('nearbyPlacesFilterAll')}</button>`;
+      const categoryTabs = data.categories.map((cat) => `
+        <button type="button" class="nearby-tab${nearbyPlacesFilter === cat.id ? ' active' : ''}" data-category="${cat.id}">
+          ${cat.icon} ${lang === 'zh' ? cat.nameZh : cat.nameEn}
+        </button>`).join('');
+      tabsEl.innerHTML = allTab + categoryTabs;
+      tabsEl.querySelectorAll('.nearby-tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          nearbyPlacesFilter = btn.dataset.category;
+          renderNearbyPlaces();
+        });
+      });
+
+      const groups = KioskNearbyPlaces.groupByCategory(data.categories, data.places)
+        .filter((group) => nearbyPlacesFilter === 'all' || group.id === nearbyPlacesFilter)
+        .filter((group) => group.places.length > 0);
+
+      const listEl = document.getElementById('nearby-places-list');
+      listEl.innerHTML = groups.map((group) => `
+        <div class="nearby-category-group">
+          <div class="nearby-category-title">${group.icon} ${lang === 'zh' ? group.nameZh : group.nameEn}</div>
+          <div class="nearby-place-list">${group.places.map(renderNearbyPlaceCard).join('')}</div>
+        </div>`).join('');
     }
 
     async function loadRouteDetails(serviceNo) {
