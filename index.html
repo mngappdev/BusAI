@@ -462,6 +462,7 @@
   <script src="/static/js/accessibility.js"></script>
   <script src="/static/js/crowding.js"></script>
   <script src="/static/js/berth-schematic.js"></script>
+  <script src="/static/js/trip-duration.js"></script>
   <script src="/static/js/quick-destinations.js"></script>
   <script src="/static/js/qr-payload.js"></script>
   <script src="/static/js/home-preview.js"></script>
@@ -1382,12 +1383,12 @@
     function buildDirectTimeline(best, isZh) {
       const now = new Date();
       const waitMins  = best?.live?.minutes ?? 5;
+      const totalMins = KioskTripDuration.computeDirectTripMinutes(best);
       const travelMins = Math.max(4, (best?.stops ?? 5) * 2);
-      const walkMins  = Math.round((best?.dist_km ?? 0.5) * 12);
+      const walkMins  = totalMins - travelMins;
       const departT   = new Date(now.getTime() + waitMins  * 60000);
       const alightT   = new Date(departT.getTime()  + travelMins * 60000);
       const arriveT   = new Date(alightT.getTime()  + walkMins   * 60000);
-      const totalMins = travelMins + walkMins;
       const stopsLabel = isZh
         ? `${best.stops} 站 · ${travelMins} 分钟`
         : `${best.stops} stops · ${travelMins} min`;
@@ -1677,7 +1678,7 @@
         renderRouteCards(data.options || []);
         if (best) {
           if (shouldAnnounce()) {
-            const etaText = best.live ? best.live.minutes : (isZh ? '未知' : 'unknown');
+            const etaText = KioskTripDuration.computeDirectTripMinutes(best);
             speak(t('welcomeSpeak', best.service, etaText));
             showToast(t('bestOption', best.service));
           }
