@@ -80,7 +80,14 @@
     .chat-pill.primary { background:#0c4fb2; color:white; }
     .chat-pill.secondary { background:#fff; color:#1f2937; border:1px solid #e2e8f0; }
     .voice-btn { pointer-events:auto; width:40px; height:40px; border-radius:12px; background:#136f2c; color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(19,111,44,.3); }
-    .route-cards-dock { padding:12px 16px 8px; background:var(--bg); border-top:1px solid var(--border); }
+    .main-wayfinding { grid-column: 1 / -1; }
+    .search-toggle-btn { position:absolute; top:24px; right:24px; z-index:5; pointer-events:auto; background:#fff; border:none; border-radius:999px; padding:16px 26px; font-size:18px; font-weight:800; color:var(--text); box-shadow:0 12px 32px rgba(15,23,42,.18); display:flex; align-items:center; gap:10px; cursor:pointer; }
+    .search-toggle-btn:hover { box-shadow:0 16px 40px rgba(15,79,214,.25); }
+    .search-panel { position:absolute; top:0; right:0; height:100%; width:min(440px, 92vw); background:rgba(255,255,255,.97); backdrop-filter:blur(16px); box-shadow:-16px 0 40px rgba(15,23,42,.18); z-index:6; padding:32px 28px; overflow-y:auto; transform:translateX(100%); transition:transform .25s ease; }
+    .search-panel.open { transform:translateX(0); }
+    .search-panel-close { position:absolute; top:24px; right:24px; width:52px; height:52px; border-radius:50%; background:#f1f5f9; border:none; font-size:22px; font-weight:800; cursor:pointer; color:var(--text); }
+    .route-cards-dock { position:absolute; left:0; right:0; bottom:0; z-index:5; padding:16px 20px 24px; background:linear-gradient(180deg, rgba(15,23,42,0) 0%, rgba(15,23,42,.16) 45%, rgba(15,23,42,.28) 100%); pointer-events:none; }
+    .route-cards-dock .route-cards { pointer-events:auto; }
     .route-cards { display:flex; gap:12px; overflow-x:auto; overflow-y:visible; padding-bottom:6px; scroll-snap-type:x mandatory; }
     .route-cards::-webkit-scrollbar { height:4px; }
     .route-cards::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:999px; }
@@ -276,7 +283,7 @@
       </div>
     </aside>
 
-    <main class="main" data-view="wayfinding">
+    <main class="main main-wayfinding" data-view="wayfinding">
       <section class="map-card panel">
         <div id="map"></div>
 
@@ -313,38 +320,40 @@
           </div>
 
         </div>
-      </section>
 
-      <!-- Route cards live below the map, never overlapping it -->
-      <div class="route-cards-dock">
-        <div class="route-cards" id="route-cards"></div>
-      </div>
-    </main>
+        <button id="search-panel-toggle" class="search-toggle-btn" type="button">
+          <span>🔎</span><span id="search-toggle-label">Search</span>
+        </button>
 
-    <aside class="right" data-view="wayfinding">
-      <div class="panel right-card mb-8">
-        <div class="flex items-start gap-3">
-          <div class="mt-1 text-blue-700 text-2xl">⌖</div>
-          <div class="flex-1">
-            <div id="current-location-title" class="text-2xl font-extrabold">Current Location</div>
-            <div id="current-location-subtitle" class="small-label">当前位置</div>
-            <div class="mt-5 search-box">
-              <span>🔎</span>
-              <input id="postcode-input" class="bg-transparent outline-none flex-1 text-lg" placeholder="Enter Postcode | 输入邮编" />
+        <aside id="search-panel" class="search-panel">
+          <button id="search-panel-close" class="search-panel-close" type="button">✕</button>
+          <div class="flex items-start gap-3">
+            <div class="mt-1 text-blue-700 text-2xl">⌖</div>
+            <div class="flex-1">
+              <div id="current-location-title" class="text-2xl font-extrabold">Current Location</div>
+              <div id="current-location-subtitle" class="small-label">当前位置</div>
+              <div class="mt-5 search-box">
+                <span>🔎</span>
+                <input id="postcode-input" class="bg-transparent outline-none flex-1 text-lg" placeholder="Enter Postcode | 输入邮编" />
+              </div>
+              <div class="mt-4 font-bold text-blue-700" id="location-label">Near: Baker Street, London</div>
             </div>
-            <div class="mt-4 font-bold text-blue-700" id="location-label">Near: Baker Street, London</div>
           </div>
+
+          <div id="nearby-stops-title" class="mt-8 mb-4 text-2xl font-extrabold">Nearby Stops | 附近站点</div>
+          <div class="stop-list" id="stop-list"></div>
+
+          <div class="mt-8 panel p-6 flex items-center justify-between text-slate-500 font-bold tracking-[.14em] uppercase">
+            <span><span class="status-dot mr-2 align-middle"></span>Concierge Active</span>
+            <span>v2.4.0-kinetic</span>
+          </div>
+        </aside>
+
+        <div class="route-cards-dock">
+          <div class="route-cards" id="route-cards"></div>
         </div>
-      </div>
-
-      <div id="nearby-stops-title" class="mb-4 text-2xl font-extrabold">Nearby Stops | 附近站点</div>
-      <div class="stop-list" id="stop-list"></div>
-
-      <div class="mt-8 panel p-6 flex items-center justify-between text-slate-500 font-bold tracking-[.14em] uppercase">
-        <span><span class="status-dot mr-2 align-middle"></span>Concierge Active</span>
-        <span>v2.4.0-kinetic</span>
-      </div>
-    </aside>
+      </section>
+    </main>
 
     <section class="kiosk-view-full" data-view="home" id="view-home">
       <div class="home-hero">
@@ -555,6 +564,14 @@
       btn.addEventListener('click', () => showView('home'));
     });
 
+    const searchPanelEl = document.getElementById('search-panel');
+    document.getElementById('search-panel-toggle').addEventListener('click', () => {
+      searchPanelEl.classList.toggle('open');
+    });
+    document.getElementById('search-panel-close').addEventListener('click', () => {
+      searchPanelEl.classList.remove('open');
+    });
+
     // 2. 初始化图标 (放在最前面，防止 ReferenceError)
     const userIcon = L.divIcon({
         className: 'you-are-here-marker',
@@ -754,6 +771,7 @@
       document.getElementById('font-decrease-btn').setAttribute('aria-label', t('a11yFontDecrease'));
       document.getElementById('read-aloud-btn').setAttribute('aria-label', t('a11yReadAloud'));
       document.getElementById('fullscreen-btn').setAttribute('aria-label', t('a11yFullscreen'));
+      document.getElementById('search-toggle-label').textContent = t('searchToggleLabel');
       renderNearbyStops(state.nearby);
       renderRouteCards(state.routeOptions);
       renderQuickDestinations();

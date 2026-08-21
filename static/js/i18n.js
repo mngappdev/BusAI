@@ -93,6 +93,7 @@
       qrStopsLabel: '站',
       homeTilePreview: (service, mins) => `${service} 路 · ${mins} 分钟`,
       youAreHere: '您在这里',
+      searchToggleLabel: '搜索',
     },
     en: {
       brand: 'Bus Concierge',
@@ -181,6 +182,7 @@
       qrStopsLabel: 'stops',
       homeTilePreview: (service, mins) => `Bus ${service} · ${mins} min`,
       youAreHere: 'You Are Here',
+      searchToggleLabel: 'Search',
     },
   };
 
