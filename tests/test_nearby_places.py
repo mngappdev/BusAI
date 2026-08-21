@@ -86,11 +86,23 @@ def test_every_place_has_closes_at_and_photo_url_fields(engine):
             assert len(place["closesAt"]) == 5 and place["closesAt"][2] == ":", place["closesAt"]
 
 
-def test_places_with_a_photo_url_use_a_real_wikimedia_source(engine):
-    # Every photoUrl in the curated data was fetched and confirmed to return
-    # 200 before being added — this guards against a future edit adding an
-    # unverified or broken link.
+def test_places_with_a_photo_url_use_a_verified_source(engine):
+    # Every photoUrl is either a Wikimedia Commons URL (fetched and confirmed
+    # 200 before being added) or a local /static/img/ asset the user supplied
+    # directly — never an unverified or fabricated link.
     result = engine.nearby_places(*PASIR_RIS_INT)
     for place in result["places"]:
-        if place["photoUrl"]:
-            assert place["photoUrl"].startswith("https://upload.wikimedia.org/"), place["id"]
+        url = place["photoUrl"]
+        if url:
+            assert url.startswith("https://upload.wikimedia.org/") or url.startswith("/static/img/"), place["id"]
+
+
+def test_local_photo_assets_exist_on_disk(engine):
+    import os
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    result = engine.nearby_places(*PASIR_RIS_INT)
+    for place in result["places"]:
+        url = place["photoUrl"]
+        if url and url.startswith("/static/img/"):
+            asset_path = os.path.join(base_path, "..", url.lstrip("/"))
+            assert os.path.isfile(asset_path), f"{place['id']}: {url} not found on disk"

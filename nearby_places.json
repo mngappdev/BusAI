@@ -16,7 +16,7 @@
       "precise": true,
       "accessible": true,
       "closesAt": "22:00",
-      "photoUrl": null
+      "photoUrl": "/static/img/pasir-ris-mall.jpg"
     },
     {
       "id": "white-sands-mall",
@@ -120,7 +120,7 @@
       "precise": true,
       "accessible": true,
       "closesAt": "16:30",
-      "photoUrl": null
+      "photoUrl": "/static/img/pasir-ris-polyclinic.jpg"
     },
     {
       "id": "elias-cc",
