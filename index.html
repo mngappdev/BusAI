@@ -113,6 +113,8 @@
     .badge.blue { background:#d9e6ff; color:#2451c2; }
     .right-card { padding:24px; }
     .search-box { display:flex; align-items:center; gap:12px; background:#f3f5f9; border-radius:999px; padding:18px 22px; color:#64748b; min-height:56px; }
+    .search-hint-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .search-hint-chip { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:999px; background:#eef4ff; color:#2451c2; font-size:13px; font-weight:700; }
     .stop-list { display:flex; flex-direction:column; gap:18px; }
     .stop-card { padding:22px; border-radius:24px; background:#f8fafc; border:1px solid #eef2f7; cursor:pointer; transition:.15s transform ease; min-height:64px; }
     .stop-card:hover { transform: translateY(-1px); }
@@ -332,13 +334,17 @@
             <div class="flex-1">
               <div id="current-location-title" class="text-2xl font-extrabold">Current Location</div>
               <div id="current-location-subtitle" class="small-label">当前位置</div>
-              <div class="mt-5 search-box">
+              <div id="search-hint-row" class="search-hint-row"></div>
+              <div class="mt-3 search-box">
                 <span>🔎</span>
                 <input id="postcode-input" class="bg-transparent outline-none flex-1 text-lg" placeholder="Enter Postcode | 输入邮编" />
               </div>
               <div class="mt-4 font-bold text-blue-700" id="location-label">Near: Baker Street, London</div>
             </div>
           </div>
+
+          <div id="quick-dest-heading" class="mt-8 mb-4 text-2xl font-extrabold"></div>
+          <div id="quick-dest-row-panel" class="flex gap-2 flex-wrap"></div>
 
           <div id="nearby-stops-title" class="mt-8 mb-4 text-2xl font-extrabold">Nearby Stops | 附近站点</div>
           <div class="stop-list" id="stop-list"></div>
@@ -772,6 +778,13 @@
       document.getElementById('read-aloud-btn').setAttribute('aria-label', t('a11yReadAloud'));
       document.getElementById('fullscreen-btn').setAttribute('aria-label', t('a11yFullscreen'));
       document.getElementById('search-toggle-label').textContent = t('searchToggleLabel');
+      document.getElementById('quick-dest-heading').textContent = t('quickDestHeading');
+      document.getElementById('search-hint-row').innerHTML = [
+        'searchHintPostcode',
+        'searchHintLandmark',
+        'searchHintMrt',
+        'searchHintStopCode',
+      ].map((key) => `<span class="search-hint-chip">${t(key)}</span>`).join('');
       renderNearbyStops(state.nearby);
       renderRouteCards(state.routeOptions);
       renderQuickDestinations();
@@ -1066,19 +1079,26 @@
       });
     }
 
+    function buildQuickDestButton(dest) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chat-pill secondary';
+      btn.textContent = `${dest.icon} ${t(dest.labelKey)}`;
+      btn.addEventListener('click', async () => {
+        await setDestinationLocation({ lat: dest.lat, lon: dest.lon, label: t(dest.labelKey) });
+        await planJourney();
+      });
+      return btn;
+    }
+
     function renderQuickDestinations() {
-      const row = document.getElementById('quick-dest-row');
-      row.innerHTML = '';
-      KioskQuickDestinations.QUICK_DESTINATIONS.forEach((dest) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'chat-pill secondary';
-        btn.textContent = `${dest.icon} ${t(dest.labelKey)}`;
-        btn.addEventListener('click', async () => {
-          await setDestinationLocation({ lat: dest.lat, lon: dest.lon, label: t(dest.labelKey) });
-          await planJourney();
+      ['quick-dest-row', 'quick-dest-row-panel'].forEach((containerId) => {
+        const row = document.getElementById(containerId);
+        if (!row) return;
+        row.innerHTML = '';
+        KioskQuickDestinations.QUICK_DESTINATIONS.forEach((dest) => {
+          row.appendChild(buildQuickDestButton(dest));
         });
-        row.appendChild(btn);
       });
     }
 
