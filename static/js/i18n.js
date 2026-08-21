@@ -98,6 +98,7 @@
       searchHintLandmark: '🏢 地标',
       searchHintMrt: '🚇 地铁站',
       searchHintStopCode: '🚌 巴士站编码',
+      floorPlanCaption: '示意图，非实际比例',
     },
     en: {
       brand: 'Bus Concierge',
@@ -191,6 +192,7 @@
       searchHintLandmark: '🏢 Landmark',
       searchHintMrt: '🚇 MRT',
       searchHintStopCode: '🚌 Stop Code',
+      floorPlanCaption: 'Schematic — not to scale',
     },
   };
 

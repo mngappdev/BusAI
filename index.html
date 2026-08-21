@@ -81,7 +81,7 @@
     .chat-pill.secondary { background:#fff; color:#1f2937; border:1px solid #e2e8f0; }
     .voice-btn { pointer-events:auto; width:56px; height:56px; border-radius:16px; background:#136f2c; color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(19,111,44,.3); font-size:22px; }
     .main-wayfinding { grid-column: 1 / -1; }
-    .berth-card { position:absolute; top:24px; left:24px; z-index:4; width:min(320px, 40vw); padding:22px 24px; pointer-events:auto; display:none; }
+    .berth-card { position:absolute; top:24px; left:24px; z-index:4; width:min(420px, 44vw); padding:22px 24px; pointer-events:auto; display:none; }
     .berth-card.visible { display:block; }
     .berth-card-label { font-size:14px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
     .berth-card-value { font-size:40px; font-weight:800; color:#0f4fd6; margin:6px 0 14px; }
@@ -109,6 +109,18 @@
     .berth-schematic { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; max-width:360px; margin:10px 0 0; }
     .berth-cell { padding:10px 0; text-align:center; border-radius:10px; background:#f1f5f9; color:#334155; font-weight:800; font-size:13px; border:2px solid transparent; }
     .berth-cell.active { background:#0f4fd6; color:#fff; border-color:#0c3fa8; box-shadow:0 4px 12px rgba(15,79,214,.3); }
+    .floor-plan-svg { width:100%; height:auto; margin-top:10px; }
+    .fp-boundary { fill:#f8fafc; stroke:#e2e8f0; stroke-width:2; }
+    .fp-mrt-link rect { fill:#0f172a; }
+    .fp-mrt-link text { fill:#fff; font-size:11px; font-weight:800; }
+    .fp-alighting rect { fill:#fef3c7; stroke:#f59e0b; stroke-width:1.5; }
+    .fp-alighting text { fill:#92400e; font-size:11px; font-weight:800; }
+    .fp-berth rect { fill:#f1f5f9; stroke:#cbd5e1; stroke-width:1.5; }
+    .fp-berth text { fill:#334155; font-size:12px; font-weight:800; }
+    .fp-berth-active rect { fill:#0f4fd6; stroke:#0c3fa8; }
+    .fp-berth-active text { fill:#fff; }
+    .fp-route { stroke:#0f4fd6; stroke-width:3; stroke-dasharray:8,6; animation: dash 1s linear infinite; }
+    .floor-plan-caption { font-size:11px; color:var(--muted); text-align:center; margin-top:6px; }
     .trip-qr-block { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); display:flex; align-items:center; gap:12px; }
     .trip-qr-block svg { width:72px; height:72px; flex-shrink:0; }
     .trip-qr-label { font-size:13px; font-weight:700; color:var(--muted); }
@@ -1135,7 +1147,8 @@
       card.innerHTML = `
         <div class="berth-card-label">${t('berthLabel')}</div>
         <div class="berth-card-value">${berth}</div>
-        ${KioskBerthSchematic.buildSchematicHtml(berth)}`;
+        ${KioskBerthSchematic.buildFloorPlanSvg(berth)}
+        <div class="floor-plan-caption">${t('floorPlanCaption')}</div>`;
       card.classList.add('visible');
     }
 
