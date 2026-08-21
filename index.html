@@ -74,18 +74,19 @@
     .map-card { position:relative; z-index: 10;height:100%; min-height: calc(100dvh - 88px - 32px); border-radius:0; overflow:hidden; background:linear-gradient(180deg,#e65b55 0%, #d84f47 100%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
     #map { position:absolute; inset:0; height:100%; width:100%; z-index:0; filter:saturate(.85) contrast(1.05); }
     /* ── Map overlay: stack items from top, no hollow middle gap ── */
-    .map-overlay { position:absolute; inset:0; z-index:2; pointer-events:none; padding:20px 20px 16px; display:flex; flex-direction:column; gap:10px; }
+    .map-overlay { position:absolute; inset:0; z-index:2; pointer-events:none; padding:20px 20px 16px; display:flex; flex-direction:column; align-items:flex-start; gap:14px; overflow-y:auto; max-height:100%; }
+    .map-overlay-right { position:absolute; inset:0; z-index:3; pointer-events:none; padding:24px 24px 16px; display:flex; flex-direction:column; align-items:flex-end; gap:14px; overflow-y:auto; max-height:100%; }
     .hero-chat { width:min(100%, 720px); background:rgba(255,247,247,.92); border-radius:24px; padding:16px; box-shadow:0 8px 24px rgba(27,31,59,.18); border:1px solid rgba(255,255,255,.35); backdrop-filter:blur(14px); pointer-events:auto; align-self:flex-start; }
     .chat-pill { display:inline-flex; align-items:center; gap:10px; padding:14px 22px; border-radius:18px; font-size:19px; font-weight:700; min-height:52px; }
     .chat-pill.primary { background:#0c4fb2; color:white; }
     .chat-pill.secondary { background:#fff; color:#1f2937; border:1px solid #e2e8f0; }
     .voice-btn { pointer-events:auto; width:56px; height:56px; border-radius:16px; background:#136f2c; color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(19,111,44,.3); font-size:22px; }
     .main-wayfinding { grid-column: 1 / -1; }
-    .berth-card { position:absolute; top:24px; left:24px; z-index:4; width:min(420px, 44vw); padding:22px 24px; pointer-events:auto; display:none; }
+    .berth-card { width:min(420px, 44vw); max-width:100%; padding:22px 24px; pointer-events:auto; display:none; flex-shrink:0; }
     .berth-card.visible { display:block; }
     .berth-card-label { font-size:14px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
     .berth-card-value { font-size:40px; font-weight:800; color:#0f4fd6; margin:6px 0 14px; }
-    .search-toggle-btn { position:absolute; top:24px; right:24px; z-index:5; pointer-events:auto; background:#fff; border:none; border-radius:999px; padding:16px 26px; font-size:18px; font-weight:800; color:var(--text); box-shadow:0 12px 32px rgba(15,23,42,.18); display:flex; align-items:center; gap:10px; cursor:pointer; }
+    .search-toggle-btn { pointer-events:auto; flex-shrink:0; background:#fff; border:none; border-radius:999px; padding:16px 26px; font-size:18px; font-weight:800; color:var(--text); box-shadow:0 12px 32px rgba(15,23,42,.18); display:flex; align-items:center; gap:10px; cursor:pointer; }
     .search-toggle-btn:hover { box-shadow:0 16px 40px rgba(15,79,214,.25); }
     .search-panel { position:absolute; top:0; right:0; height:100%; width:min(440px, 92vw); background:rgba(255,255,255,.97); backdrop-filter:blur(16px); box-shadow:-16px 0 40px rgba(15,23,42,.18); z-index:6; padding:32px 28px; overflow-y:auto; transform:translateX(100%); transition:transform .25s ease; }
     .search-panel.open { transform:translateX(0); }
@@ -142,7 +143,7 @@
     .small-label { color:#64748b; font-size:14px; }
     .status-dot { width:10px; height:10px; border-radius:999px; background:#17a34a; display:inline-block; }
     /* ── Timeline trip summary (Google Maps style) ── */
-    .trip-summary { position:absolute; top:24px; right:24px; width:min(440px, calc(50% - 28px)); padding:20px 24px; pointer-events:auto; z-index:4; }
+    .trip-summary { width:min(440px, 42vw); max-width:100%; padding:20px 24px; pointer-events:auto; flex-shrink:0; }
     .tl-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; gap:8px; flex-wrap:wrap; }
     .tl-timerange { font-size:20px; font-weight:800; color:#0f172a; }
     .tl-duration { display:inline-block; font-size:15px; font-weight:700; color:#64748b; background:#f1f5f9; padding:4px 12px; border-radius:999px; margin-top:6px; }
@@ -187,12 +188,12 @@
       .right { padding:16px 12px; }
       .right-card { padding:16px; }
       .map-card { min-height:calc(100vh - 80px - 24px); }
-      .map-overlay { padding:14px 14px 12px; gap:8px; }
+      .map-overlay, .map-overlay-right { padding:14px 14px 12px; gap:8px; }
       .route-card { min-width:240px; max-width:240px; }
       .route-cards-dock { padding:10px 12px 6px; }
       .hero-chat { padding:12px; width:min(100%, 580px); }
       .chat-pill { font-size:13px; padding:8px 12px; }
-      .trip-summary { top:14px; right:14px; width:min(300px, calc(55% - 20px)); }
+      .trip-summary, .berth-card { width:min(300px, calc(55vw - 20px)); }
       .tl-timerange { font-size:15px; }
     }
     /* Mobile (≤768px): single-column stack */
@@ -201,11 +202,11 @@
       .left, .right { border:none; }
       .main { padding:0 8px 8px; }
       .map-card { min-height:75vh; border-radius:20px; }
-      .map-overlay { padding:12px 12px 10px; gap:8px; }
+      .map-overlay, .map-overlay-right { padding:12px 12px 10px; gap:8px; }
       .route-card { min-width:calc(80vw); max-width:calc(80vw); }
       .route-cards-dock { padding:8px 10px 4px; }
       .hero-chat { width:100%; border-radius:18px; padding:10px; }
-      .trip-summary { top:auto; bottom:10px; right:10px; left:10px; width:auto; }
+      .trip-summary, .berth-card { width:100%; }
       .chat-pill { font-size:12px; padding:7px 10px; gap:6px; }
       .tl-row { grid-template-columns:46px 14px 1fr; gap:7px; }
       .tl-leg { grid-template-columns:46px 14px 1fr; gap:7px; }
@@ -337,13 +338,14 @@
             </div>
           </div>
 
+          <aside id="berth-card" class="panel berth-card"></aside>
         </div>
 
-        <aside id="berth-card" class="panel berth-card"></aside>
-
-        <button id="search-panel-toggle" class="search-toggle-btn" type="button">
-          <span>🔎</span><span id="search-toggle-label">Search</span>
-        </button>
+        <div id="map-overlay-right" class="map-overlay-right">
+          <button id="search-panel-toggle" class="search-toggle-btn" type="button">
+            <span>🔎</span><span id="search-toggle-label">Search</span>
+          </button>
+        </div>
 
         <aside id="search-panel" class="search-panel">
           <button id="search-panel-close" class="search-panel-close" type="button">✕</button>
@@ -1491,7 +1493,7 @@
           const el = document.createElement('div');
           el.id = 'trip-summary';
           el.className = 'panel trip-summary';
-          document.querySelector('.map-overlay').appendChild(el);
+          document.getElementById('map-overlay-right').appendChild(el);
           return el;
         })();
 
