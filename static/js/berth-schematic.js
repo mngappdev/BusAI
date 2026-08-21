@@ -71,6 +71,22 @@
   const CHIP_H = 30;
   const CHIP_GAP = 6;
 
+  // Some best-route stops (e.g. Pasir Ris Stn Exit B) are curbside stops
+  // near the interchange but outside it — real bus stops with no berth
+  // number, not a data gap. The route walks out of the hall to a labelled
+  // pin instead of pointing at a berth that doesn't exist.
+  // Threads the gap between B2 (right edge x=378) and B1 (left edge x=422)
+  // before dropping below the alighting strip, so the line clears every
+  // berth pill and the alighting box rather than cutting through them.
+  const OFFSITE_WAYPOINTS = [[430, 320], [400, 320], [400, 480], [620, 480]];
+  const OFFSITE_POSITION = { x: 620, y: 480 };
+
+  function escapeXml(str) {
+    return String(str).replace(/[&<>"']/g, (ch) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;',
+    }[ch]));
+  }
+
   function chipWidth(label) {
     return Math.max(34, 13 + 9 * label.length);
   }
@@ -136,6 +152,33 @@
       + `</g>`;
   }
 
+  function renderAlighting() {
+    return `<g class="fp-alighting">`
+      + `<rect x="560" y="416" width="270" height="30" rx="7"></rect>`
+      + `<text x="695" y="436" text-anchor="middle">`
+      + `ALIGHTING ${ALIGHTING_IDS[0]}-${ALIGHTING_IDS[ALIGHTING_IDS.length - 1]}</text>`
+      + `</g>`;
+  }
+
+  function renderKiosk() {
+    return `<g class="fp-kiosk">`
+      + `<circle class="fp-kiosk-pulse" cx="${KIOSK_POSITION.x}" cy="${KIOSK_POSITION.y}" r="20"></circle>`
+      + `<circle class="fp-kiosk-dot" cx="${KIOSK_POSITION.x}" cy="${KIOSK_POSITION.y}" r="10"></circle>`
+      + `<text x="${KIOSK_POSITION.x}" y="${KIOSK_POSITION.y + 40}" text-anchor="middle">YOU ARE HERE</text>`
+      + `</g>`;
+  }
+
+  // Shared chrome every floor-plan variant draws: the hall, its two known
+  // amenity exits, the alighting strip, and every berth (unhighlighted).
+  function renderHallChrome(berths) {
+    return `<path class="fp-boundary" d="${HALL_OUTLINE}"></path>`
+      + `<text class="fp-title" x="546" y="222" text-anchor="middle">PASIR RIS BUS INTERCHANGE</text>`
+      + renderExit(8, 148, 'Pasir Ris Mall')
+      + renderExit(8, 372, 'Polyclinic')
+      + renderAlighting()
+      + berths;
+  }
+
   function buildFloorPlanSvg(active) {
     const activeBerths = normaliseActive(active);
     const isActive = (id) => activeBerths.indexOf(id) !== -1;
@@ -143,27 +186,31 @@
     const berths = BOARDING_BERTHS.map((id) => renderBerth(id, isActive(id))).join('');
     const routes = activeBerths.map(renderRoute).join('');
 
-    const alighting = `<g class="fp-alighting">`
-      + `<rect x="560" y="416" width="270" height="30" rx="7"></rect>`
-      + `<text x="695" y="436" text-anchor="middle">`
-      + `ALIGHTING ${ALIGHTING_IDS[0]}-${ALIGHTING_IDS[ALIGHTING_IDS.length - 1]}</text>`
-      + `</g>`;
+    return `<svg viewBox="0 0 880 520" class="floor-plan-svg" xmlns="http://www.w3.org/2000/svg" role="img">`
+      + renderHallChrome(berths)
+      + routes
+      + renderKiosk()
+      + `</svg>`;
+  }
 
-    const kiosk = `<g class="fp-kiosk">`
-      + `<circle class="fp-kiosk-pulse" cx="${KIOSK_POSITION.x}" cy="${KIOSK_POSITION.y}" r="20"></circle>`
-      + `<circle class="fp-kiosk-dot" cx="${KIOSK_POSITION.x}" cy="${KIOSK_POSITION.y}" r="10"></circle>`
-      + `<text x="${KIOSK_POSITION.x}" y="${KIOSK_POSITION.y + 40}" text-anchor="middle">YOU ARE HERE</text>`
+  function buildOffsiteFloorPlanSvg(stopName) {
+    const berths = BOARDING_BERTHS.map((id) => renderBerth(id, false)).join('');
+    const [d, [endX, endY]] = [
+      OFFSITE_WAYPOINTS.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x} ${y}`).join(' '),
+      OFFSITE_WAYPOINTS[OFFSITE_WAYPOINTS.length - 1],
+    ];
+    const safeName = escapeXml(stopName);
+
+    const offsiteRoute = `<path class="fp-route fp-route-offsite" fill="none" d="${d}"></path>`
+      + `<g class="fp-offsite-pin">`
+      + `<circle cx="${endX}" cy="${endY}" r="10"></circle>`
+      + `<text x="${endX}" y="${endY + 34}" text-anchor="middle">🚶 ${safeName}</text>`
       + `</g>`;
 
     return `<svg viewBox="0 0 880 520" class="floor-plan-svg" xmlns="http://www.w3.org/2000/svg" role="img">`
-      + `<path class="fp-boundary" d="${HALL_OUTLINE}"></path>`
-      + `<text class="fp-title" x="546" y="222" text-anchor="middle">PASIR RIS BUS INTERCHANGE</text>`
-      + renderExit(8, 148, 'Pasir Ris Mall')
-      + renderExit(8, 372, 'Polyclinic')
-      + alighting
-      + berths
-      + routes
-      + kiosk
+      + renderHallChrome(berths)
+      + offsiteRoute
+      + renderKiosk()
       + `</svg>`;
   }
 
@@ -177,5 +224,8 @@
     ALL_SERVICES,
     findBerthForService,
     buildFloorPlanSvg,
+    OFFSITE_WAYPOINTS,
+    OFFSITE_POSITION,
+    buildOffsiteFloorPlanSvg,
   };
 });

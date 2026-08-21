@@ -96,8 +96,8 @@
     .route-cards { display:flex; gap:12px; overflow-x:auto; overflow-y:visible; padding-bottom:6px; scroll-snap-type:x mandatory; }
     .route-cards::-webkit-scrollbar { height:4px; }
     .route-cards::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:999px; }
-    .route-card { min-width:360px; max-width:360px; background:#fff; border-radius:24px; padding:22px; box-shadow:0 4px 16px rgba(20,30,58,.10); scroll-snap-align:start; flex-shrink:0; }
-    .route-card.best { border:2px solid #0f4fd6; box-shadow:0 16px 34px rgba(15,79,214,.18); }
+    .route-card { display:none; min-width:360px; max-width:360px; background:#fff; border-radius:24px; padding:22px; box-shadow:0 4px 16px rgba(20,30,58,.10); scroll-snap-align:start; flex-shrink:0; }
+    .route-card.best { display:none; border:2px solid #0f4fd6; box-shadow:0 16px 34px rgba(15,79,214,.18); }
     .route-meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
     .route-chip { display:inline-flex; align-items:center; gap:6px; padding:9px 15px; border-radius:999px; background:#f1f5f9; color:#334155; font-size:15px; font-weight:700; }
     .route-chip.good { background:#e9f8ef; color:#166534; }
@@ -125,6 +125,9 @@
     .fp-berth-active .fp-chip rect { fill:#2563eb; }
     .fp-route { stroke:#0f4fd6; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:14,10; animation: dash 1s linear infinite; }
     .fp-route-end { fill:#0f4fd6; }
+    .fp-route-offsite { stroke:#0f766e; }
+    .fp-offsite-pin circle { fill:#0f766e; }
+    .fp-offsite-pin text { fill:#0f766e; font-size:15px; font-weight:800; }
     .fp-kiosk .fp-kiosk-dot { fill:#dc2626; }
     .fp-kiosk .fp-kiosk-pulse { fill:none; stroke:#dc2626; stroke-width:3; transform-origin:center; transform-box:fill-box; animation:yah-pulse 2s ease-out infinite; }
     .fp-kiosk text { fill:#7f1d1d; font-size:16px; font-weight:800; }
@@ -1190,7 +1193,12 @@
       container.innerHTML = qr.createSvgTag(3);
     }
 
-    function renderBerthCard(berth, options, service) {
+    // The only stop we have curated berth data for. A leg from any other
+    // stop code is a real roadside stop outside the interchange, not a gap
+    // in our data — it has no berth number to show.
+    const CURATED_INTERCHANGE_STOP = '77009';
+
+    function renderBerthCard(berth, options, service, fromCode, fromName) {
       const card = document.getElementById('berth-card');
       if (!card) return;
 
@@ -1198,6 +1206,18 @@
       // backend reports no single berth. Show every candidate rather than
       // guessing one — the plan's 359W/359E labels tell them which is theirs.
       const candidates = berth ? [berth] : (options || []);
+
+      if (!candidates.length && fromCode && fromCode !== CURATED_INTERCHANGE_STOP && fromName) {
+        card.innerHTML = `
+          <div class="berth-card-label">${t('berthOffsiteLabel')}</div>
+          <div class="berth-card-value">${fromName}</div>
+          <div class="berth-ambiguous">${t('berthOffsiteNote', fromName)}</div>
+          ${KioskBerthSchematic.buildOffsiteFloorPlanSvg(fromName)}
+          <div class="floor-plan-caption">${t('floorPlanCaption')}</div>`;
+        card.classList.add('visible');
+        return;
+      }
+
       if (!candidates.length) {
         card.classList.remove('visible');
         card.innerHTML = '';
@@ -1600,7 +1620,7 @@
           const leg2 = firstOpt?.leg2;
           summary.innerHTML = buildTransferTimeline(leg1, leg2, isZh);
           if (leg1) {
-            renderBerthCard(leg1.berth, leg1.berth_options, leg1.service);
+            renderBerthCard(leg1.berth, leg1.berth_options, leg1.service, leg1.from_code, leg1.from_name);
           }
           if (leg1 && leg2) {
             renderTripQr(KioskQrPayload.buildDirectTripPayload({
@@ -1639,7 +1659,7 @@
         const best = data.best || data.options?.[0];
         summary.innerHTML = buildDirectTimeline(best, isZh);
         if (best) {
-          renderBerthCard(best.berth, best.berth_options, best.service);
+          renderBerthCard(best.berth, best.berth_options, best.service, best.from_code, best.from_name);
           renderTripQr(KioskQrPayload.buildDirectTripPayload({
             service: best.service,
             fromName: best.from_name,

@@ -28,3 +28,8 @@ test('both dictionaries define every "Find My Berth" key', () => {
     assert.ok(DICTIONARIES.zh[key], `zh.${key} missing`);
   });
 });
+
+test('both dictionaries mention the stop name in the offsite-boarding note', () => {
+  assert.ok(translate('en', 'berthOffsiteNote', 'Exit B').includes('Exit B'));
+  assert.ok(translate('zh', 'berthOffsiteNote', 'Exit B').includes('Exit B'));
+});

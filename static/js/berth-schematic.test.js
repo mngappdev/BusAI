@@ -10,6 +10,8 @@ const {
   ALL_SERVICES,
   findBerthForService,
   buildFloorPlanSvg,
+  OFFSITE_WAYPOINTS,
+  buildOffsiteFloorPlanSvg,
 } = require('./berth-schematic.js');
 
 test('BOARDING_BERTHS lists exactly B1 through B10', () => {
@@ -143,6 +145,43 @@ test('findBerthForService resolves a directional label to its exact berth', () =
 
 test('findBerthForService returns null for an unknown label', () => {
   assert.equal(findBerthForService('999'), null);
+});
+
+// ── Offsite boarding (best route leaves from a stop outside the interchange) ─
+
+test('OFFSITE_WAYPOINTS starts at the kiosk and stays outside the hall', () => {
+  const [firstX, firstY] = OFFSITE_WAYPOINTS[0];
+  assert.equal(firstX, KIOSK_POSITION.x);
+  assert.equal(firstY, KIOSK_POSITION.y);
+  assert.ok(OFFSITE_WAYPOINTS.length >= 2);
+});
+
+test('buildOffsiteFloorPlanSvg names the boarding stop and shows a walking route', () => {
+  const svg = buildOffsiteFloorPlanSvg('Pasir Ris Stn Exit B');
+  assert.ok(svg.includes('Pasir Ris Stn Exit B'), 'expected the stop name in the markup');
+  assert.ok(svg.includes('class="fp-route fp-route-offsite"'), 'expected an offsite route path');
+});
+
+test('buildOffsiteFloorPlanSvg still shows every berth for context, none highlighted', () => {
+  const svg = buildOffsiteFloorPlanSvg('Pasir Ris Stn Exit B');
+  BOARDING_BERTHS.forEach((berth) => {
+    assert.ok(svg.includes(`>${berth}<`), `expected a ${berth} label`);
+  });
+  assert.ok(!svg.includes('fp-berth-active'), 'no berth should be highlighted — none applies here');
+});
+
+test('buildOffsiteFloorPlanSvg escapes a stop name containing markup characters', () => {
+  const svg = buildOffsiteFloorPlanSvg('Stop <script>alert(1)</script> & Co');
+  assert.ok(!svg.includes('<script>'), 'must not inject raw markup from the stop name');
+});
+
+test('buildOffsiteFloorPlanSvg is well-formed', () => {
+  const svg = buildOffsiteFloorPlanSvg('Pasir Ris Stn Exit B');
+  assert.equal((svg.match(/<svg/g) || []).length, 1);
+  assert.equal((svg.match(/<\/svg>/g) || []).length, 1);
+  assert.equal((svg.match(/<g/g) || []).length, (svg.match(/<\/g>/g) || []).length, 'unbalanced <g>');
+  assert.ok(!svg.includes('undefined'));
+  assert.ok(!svg.includes('NaN'));
 });
 
 test('buildFloorPlanSvg emits well-formed, complete markup', () => {
