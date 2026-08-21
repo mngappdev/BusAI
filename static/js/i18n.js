@@ -91,6 +91,8 @@
       qrHint: '用手机扫描保存路线信息',
       qrBusLabel: '巴士',
       qrStopsLabel: '站',
+      homeTilePreview: (service, mins) => `${service} 路 · ${mins} 分钟`,
+      youAreHere: '您在这里',
     },
     en: {
       brand: 'Bus Concierge',
@@ -177,6 +179,8 @@
       qrHint: 'Scan with your phone to save this trip',
       qrBusLabel: 'Bus',
       qrStopsLabel: 'stops',
+      homeTilePreview: (service, mins) => `Bus ${service} · ${mins} min`,
+      youAreHere: 'You Are Here',
     },
   };
 

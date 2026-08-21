@@ -180,15 +180,18 @@
       .tl-leg-detail { font-size:11px; }
     }
     .kiosk-view-full { grid-column: 1 / -1; grid-row: 2; padding: 0 16px 16px; overflow-y:auto; }
-    .home-hero { padding: 40px 8px 24px; text-align:center; }
-    .home-hero h1 { font-size:36px; font-weight:800; color:var(--text); margin:0 0 8px; }
-    .home-hero p { font-size:18px; color:var(--muted); margin:0; }
-    .tile-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:24px; max-width:960px; margin:32px auto 0; padding:0 8px; }
-    .tile-card { background:var(--panel); border:2px solid var(--border); border-radius:28px; padding:32px 24px; display:flex; flex-direction:column; align-items:flex-start; gap:12px; cursor:pointer; box-shadow:0 12px 32px rgba(15,23,42,.06); transition:.15s transform ease, .15s box-shadow ease; min-height:220px; text-align:left; font-family:inherit; }
-    .tile-card:hover, .tile-card:focus-visible { transform:translateY(-2px); box-shadow:0 18px 40px rgba(15,79,214,.14); border-color:var(--blue); outline:none; }
-    .tile-icon { font-size:48px; }
-    .tile-title { font-size:24px; font-weight:800; color:var(--text); }
-    .tile-subtitle { font-size:15px; color:var(--muted); }
+    .home-hero { padding: 48px 8px 32px; text-align:center; }
+    .home-hero h1 { font-size:44px; font-weight:800; color:var(--text); margin:0 0 10px; }
+    .home-hero p { font-size:20px; color:var(--muted); margin:0; }
+    .tile-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:28px; max-width:1080px; margin:32px auto 0; padding:0 8px; }
+    .tile-card { position:relative; background:var(--panel); border:2px solid var(--border); border-top:6px solid var(--tile-accent, var(--blue)); border-radius:28px; padding:36px 28px; display:flex; flex-direction:column; align-items:flex-start; gap:14px; cursor:pointer; box-shadow:0 12px 32px rgba(15,23,42,.06); transition:.15s transform ease, .15s box-shadow ease; min-height:280px; text-align:left; font-family:inherit; }
+    .tile-card:hover, .tile-card:focus-visible { transform:translateY(-2px); box-shadow:0 18px 40px rgba(15,79,214,.14); outline:none; }
+    .tile-icon-badge { width:72px; height:72px; border-radius:22px; background:var(--tile-accent-soft, #eaf0ff); display:grid; place-items:center; }
+    .tile-icon { font-size:40px; }
+    .tile-title { font-size:28px; font-weight:800; color:var(--text); }
+    .tile-subtitle { font-size:16px; color:var(--muted); }
+    .tile-preview { margin-top:auto; padding-top:14px; display:inline-flex; align-items:center; gap:8px; font-size:15px; font-weight:800; color:var(--tile-accent, var(--blue)); }
+    .tile-preview .tile-preview-badge { background:var(--tile-accent-soft, #eaf0ff); border-radius:999px; padding:6px 14px; }
     .a11y-toolbar { display:flex; gap:8px; align-items:center; }
     .a11y-btn { width:40px; height:40px; border-radius:12px; border:1px solid var(--border); background:#fff; font-weight:800; font-size:16px; color:#334155; display:grid; place-items:center; cursor:pointer; }
     .a11y-btn.active { background:#0f4fd6; color:#fff; border-color:#0f4fd6; }
@@ -388,6 +391,7 @@
   <script src="/static/js/berth-schematic.js"></script>
   <script src="/static/js/quick-destinations.js"></script>
   <script src="/static/js/qr-payload.js"></script>
+  <script src="/static/js/home-preview.js"></script>
   <script>
     const apiBase = '';
     const defaultLocation = { lat: 1.373696, lon: 103.94845, label: 'Pasir Ris Bus Interchange'};
@@ -426,20 +430,47 @@
       }
     }
 
+    const TILE_ACCENTS = {
+      'wayfinding': { color: '#0f4fd6', soft: '#eaf0ff' },
+      'lost-found': { color: '#d97706', soft: '#fff7e6' },
+      'feedback': { color: '#7c3aed', soft: '#f3ecff' },
+      'nearby': { color: '#16a34a', soft: '#eafaf0' },
+    };
+
+    let homeWayfindingPreview = null;
+
     function renderHomeTiles() {
       const grid = document.getElementById('tile-grid');
       grid.innerHTML = '';
       KioskViewRouter.TILES.forEach((tile) => {
+        const accent = TILE_ACCENTS[tile.id] || TILE_ACCENTS['wayfinding'];
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'tile-card';
+        card.style.setProperty('--tile-accent', accent.color);
+        card.style.setProperty('--tile-accent-soft', accent.soft);
+        const previewHtml = (tile.id === 'wayfinding' && homeWayfindingPreview)
+          ? `<div class="tile-preview"><span class="tile-preview-badge">🚌 ${t('homeTilePreview', homeWayfindingPreview.service, homeWayfindingPreview.minutes)}</span></div>`
+          : '';
         card.innerHTML = `
-          <div class="tile-icon">${tile.icon}</div>
+          <div class="tile-icon-badge"><div class="tile-icon">${tile.icon}</div></div>
           <div class="tile-title">${t(tile.titleKey)}</div>
-          <div class="tile-subtitle">${t(tile.subtitleKey)}</div>`;
+          <div class="tile-subtitle">${t(tile.subtitleKey)}</div>
+          ${previewHtml}`;
         card.addEventListener('click', () => showView(tile.id));
         grid.appendChild(card);
       });
+    }
+
+    async function loadHomeWayfindingPreview() {
+      try {
+        const res = await fetch(`${apiBase}/api/v1/nearby-stops?lat=${defaultLocation.lat}&lon=${defaultLocation.lon}&radius_m=900&limit=6`);
+        const data = await res.json();
+        homeWayfindingPreview = KioskHomePreview.pickBestPreview(data.stops || []);
+      } catch (_) {
+        homeWayfindingPreview = null;
+      }
+      if (currentView === 'home') renderHomeTiles();
     }
 
     const accessibilityState = {
@@ -1555,6 +1586,7 @@
     initVoice();
     setLanguage('zh');
     showView('home');
+    loadHomeWayfindingPreview();
     startNewsTicker();
     loadNearby(defaultLocation.lat, defaultLocation.lon);
     planJourney();
