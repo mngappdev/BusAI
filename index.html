@@ -853,6 +853,10 @@
       renderRouteCards(state.routeOptions);
       renderQuickDestinations();
       updateYouAreHereLabel();
+      // Re-render any already-planned trip in the new language — the panel
+      // otherwise keeps showing whatever language was active when it was
+      // last fetched, since nothing else here touches #trip-summary.
+      if (state.trip) renderTripSummary(state.trip, { announce: false });
     }
 
     function showToast(message) {
@@ -1541,25 +1545,19 @@
         }
     }
 
-    async function planJourney() {
-      const shouldAnnounce = () => currentView === 'wayfinding';
-      try {
-        setAssistantStatus(t('planning'));
-        const res = await fetch(`${apiBase}/api/v1/plan`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            s_lat: state.current.lat,
-            s_lon: state.current.lon,
-            e_lat: state.destination.lat,
-            e_lon: state.destination.lon,
-          })
-        });
-        const data = await res.json();
-        state.trip = data;
+    // Renders a /api/v1/plan response into the summary/berth/QR panels.
+    // Split out of planJourney so a language switch can re-render the
+    // already-fetched trip in the new language (setLanguage calls this with
+    // announce:false) instead of leaving stale-language HTML on screen until
+    // the next fetch — buildDirectTimeline/buildTransferTimeline branch on
+    // stateLang.ui at render time, so re-running them is enough; no need to
+    // hit the API again.
+    function renderTripSummary(data, { announce = true } = {}) {
+      const shouldAnnounce = () => announce && currentView === 'wayfinding';
+      state.trip = data;
 
-         // 绘图
-        drawRoute(data);
+       // 绘图
+      drawRoute(data);
 
         const summary = document.getElementById('trip-summary') || (() => {
           const el = document.createElement('div');
@@ -1671,10 +1669,27 @@
         } else if (shouldAnnounce()) {
           showToast(t('noRoute'));
         }
+    }
+
+    async function planJourney() {
+      try {
+        setAssistantStatus(t('planning'));
+        const res = await fetch(`${apiBase}/api/v1/plan`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            s_lat: state.current.lat,
+            s_lon: state.current.lon,
+            e_lat: state.destination.lat,
+            e_lon: state.destination.lon,
+          })
+        });
+        const data = await res.json();
+        renderTripSummary(data, { announce: currentView === 'wayfinding' });
       } catch (err) {
         console.error(err);
         setAssistantStatus(stateLang.ui === 'zh' ? '路线规划失败。' : 'Route planning failed.');
-        if (shouldAnnounce()) showToast(stateLang.ui === 'zh' ? '规划失败' : 'Plan failed');
+        if (currentView === 'wayfinding') showToast(stateLang.ui === 'zh' ? '规划失败' : 'Plan failed');
       }
     }
 
