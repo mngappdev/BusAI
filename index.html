@@ -82,7 +82,7 @@
     .chat-pill.secondary { background:#fff; color:#1f2937; border:1px solid #e2e8f0; }
     .voice-btn { pointer-events:auto; width:56px; height:56px; border-radius:16px; background:#136f2c; color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(19,111,44,.3); font-size:22px; }
     .main-wayfinding { grid-column: 1 / -1; }
-    .berth-card { width:min(420px, 44vw); max-width:100%; padding:22px 24px; pointer-events:auto; display:none; flex-shrink:0; }
+    .berth-card { width:min(620px, 46vw); max-width:100%; padding:22px 24px; pointer-events:auto; display:none; flex-shrink:0; }
     .berth-card.visible { display:block; }
     .berth-card-label { font-size:14px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
     .berth-card-value { font-size:40px; font-weight:800; color:#0f4fd6; margin:6px 0 14px; }
@@ -107,21 +107,29 @@
     .crowd-dot.amber { background:#d97706; }
     .crowd-dot.red { background:#dc2626; }
     .crowd-dot.gray { background:#94a3b8; }
-    .berth-schematic { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; max-width:360px; margin:10px 0 0; }
-    .berth-cell { padding:10px 0; text-align:center; border-radius:10px; background:#f1f5f9; color:#334155; font-weight:800; font-size:13px; border:2px solid transparent; }
-    .berth-cell.active { background:#0f4fd6; color:#fff; border-color:#0c3fa8; box-shadow:0 4px 12px rgba(15,79,214,.3); }
-    .floor-plan-svg { width:100%; height:auto; margin-top:10px; }
-    .fp-boundary { fill:#f8fafc; stroke:#e2e8f0; stroke-width:2; }
-    .fp-mrt-link rect { fill:#0f172a; }
-    .fp-mrt-link text { fill:#fff; font-size:11px; font-weight:800; }
-    .fp-alighting rect { fill:#fef3c7; stroke:#f59e0b; stroke-width:1.5; }
-    .fp-alighting text { fill:#92400e; font-size:11px; font-weight:800; }
-    .fp-berth rect { fill:#f1f5f9; stroke:#cbd5e1; stroke-width:1.5; }
-    .fp-berth text { fill:#334155; font-size:12px; font-weight:800; }
-    .fp-berth-active rect { fill:#0f4fd6; stroke:#0c3fa8; }
-    .fp-berth-active text { fill:#fff; }
-    .fp-route { stroke:#0f4fd6; stroke-width:3; stroke-dasharray:8,6; animation: dash 1s linear infinite; }
-    .floor-plan-caption { font-size:11px; color:var(--muted); text-align:center; margin-top:6px; }
+    /* ── Station floor plan (站内平面图高亮动线) ───────────────────────── */
+    .floor-plan-svg { width:100%; height:auto; margin-top:10px; display:block; }
+    .fp-boundary { fill:#fff; stroke:#0f172a; stroke-width:3; stroke-linejoin:round; }
+    .fp-title { fill:#0f172a; font-size:30px; font-weight:800; letter-spacing:.5px; }
+    .fp-exit rect { fill:#15803d; }
+    .fp-exit text { fill:#fff; font-size:14px; font-weight:800; }
+    .fp-exit .fp-exit-sub { font-size:12px; font-weight:600; }
+    .fp-alighting rect { fill:#fbbf24; stroke:#d97706; stroke-width:2; }
+    .fp-alighting text { fill:#451a03; font-size:16px; font-weight:800; }
+    .fp-berth .fp-pill { fill:#fde047; stroke:#ca8a04; stroke-width:2; }
+    .fp-berth .fp-pill-text { fill:#451a03; font-size:18px; font-weight:800; }
+    .fp-berth .fp-chip rect { fill:#6b7280; }
+    .fp-berth .fp-chip text { fill:#fff; font-size:16px; font-weight:800; }
+    .fp-berth-active .fp-pill { fill:#0f4fd6; stroke:#0c3fa8; }
+    .fp-berth-active .fp-pill-text { fill:#fff; }
+    .fp-berth-active .fp-chip rect { fill:#2563eb; }
+    .fp-route { stroke:#0f4fd6; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:14,10; animation: dash 1s linear infinite; }
+    .fp-route-end { fill:#0f4fd6; }
+    .fp-kiosk .fp-kiosk-dot { fill:#dc2626; }
+    .fp-kiosk .fp-kiosk-pulse { fill:none; stroke:#dc2626; stroke-width:3; transform-origin:center; transform-box:fill-box; animation:yah-pulse 2s ease-out infinite; }
+    .fp-kiosk text { fill:#7f1d1d; font-size:16px; font-weight:800; }
+    .floor-plan-caption { font-size:13px; color:var(--muted); text-align:center; margin-top:8px; }
+    .berth-ambiguous { margin-top:10px; padding:10px 14px; border-radius:12px; background:#fff7ed; border:1px solid #fdba74; color:#9a3412; font-size:15px; font-weight:700; line-height:1.4; }
     .trip-qr-block { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); display:flex; align-items:center; gap:12px; }
     .trip-qr-block svg { width:72px; height:72px; flex-shrink:0; }
     .trip-qr-label { font-size:13px; font-weight:700; color:var(--muted); }
@@ -193,7 +201,8 @@
       .route-cards-dock { padding:10px 12px 6px; }
       .hero-chat { padding:12px; width:min(100%, 580px); }
       .chat-pill { font-size:13px; padding:8px 12px; }
-      .trip-summary, .berth-card { width:min(300px, calc(55vw - 20px)); }
+      .trip-summary { width:min(300px, calc(55vw - 20px)); }
+      .berth-card { width:min(460px, calc(72vw - 20px)); }
       .tl-timerange { font-size:15px; }
     }
     /* Mobile (≤768px): single-column stack */
@@ -1138,18 +1147,31 @@
       container.innerHTML = qr.createSvgTag(3);
     }
 
-    function renderBerthCard(berth) {
+    function renderBerthCard(berth, options, service) {
       const card = document.getElementById('berth-card');
       if (!card) return;
-      if (!berth) {
+
+      // A loop service boards from a different berth per direction, so the
+      // backend reports no single berth. Show every candidate rather than
+      // guessing one — the plan's 359W/359E labels tell them which is theirs.
+      const candidates = berth ? [berth] : (options || []);
+      if (!candidates.length) {
         card.classList.remove('visible');
         card.innerHTML = '';
         return;
       }
+
+      const heading = berth
+        ? `<div class="berth-card-value">${berth}</div>`
+        : `<div class="berth-card-value">${candidates.join(' / ')}</div>`;
+      const note = berth ? '' :
+        `<div class="berth-ambiguous">${t('berthCheckDirection', service, candidates.join(' / '))}</div>`;
+
       card.innerHTML = `
         <div class="berth-card-label">${t('berthLabel')}</div>
-        <div class="berth-card-value">${berth}</div>
-        ${KioskBerthSchematic.buildFloorPlanSvg(berth)}
+        ${heading}
+        ${note}
+        ${KioskBerthSchematic.buildFloorPlanSvg(candidates)}
         <div class="floor-plan-caption">${t('floorPlanCaption')}</div>`;
       card.classList.add('visible');
     }
@@ -1535,7 +1557,7 @@
           const leg2 = firstOpt?.leg2;
           summary.innerHTML = buildTransferTimeline(leg1, leg2, isZh);
           if (leg1) {
-            renderBerthCard(leg1.berth);
+            renderBerthCard(leg1.berth, leg1.berth_options, leg1.service);
           }
           if (leg1 && leg2) {
             renderTripQr(KioskQrPayload.buildDirectTripPayload({
@@ -1574,7 +1596,7 @@
         const best = data.best || data.options?.[0];
         summary.innerHTML = buildDirectTimeline(best, isZh);
         if (best) {
-          renderBerthCard(best.berth);
+          renderBerthCard(best.berth, best.berth_options, best.service);
           renderTripQr(KioskQrPayload.buildDirectTripPayload({
             service: best.service,
             fromName: best.from_name,

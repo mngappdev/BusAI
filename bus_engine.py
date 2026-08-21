@@ -52,15 +52,30 @@ class BusSmartEngine:
             return {}
 
     def _build_berth_lookup(self):
+        """Map (stop, service) -> every berth that service boards from.
+
+        A looping service uses a different berth per direction (359 boards at
+        B4 westbound and B6 eastbound), so this is deliberately a list.
+        """
         lookup = {}
         for stop_code, info in self.berth_map.items():
             for entry in info.get('boarding', []):
                 for svc in entry.get('services', []):
-                    lookup[(stop_code, svc)] = entry['berth']
+                    lookup.setdefault((stop_code, svc), []).append(entry['berth'])
         return lookup
 
+    def get_berth_options(self, stop_code, service_no):
+        return list(self.berth_lookup.get((stop_code, str(service_no)), []))
+
     def get_berth(self, stop_code, service_no):
-        return self.berth_lookup.get((stop_code, str(service_no)))
+        """The berth, but only when there is exactly one.
+
+        Our route data carries no loop-direction field, so for a service with
+        two berths we cannot tell which one applies. Naming one would be wrong
+        half the time; callers should fall back to get_berth_options.
+        """
+        berths = self.berth_lookup.get((stop_code, str(service_no)), [])
+        return berths[0] if len(berths) == 1 else None
 
     # ─── Utilities ────────────────────────────────────────────────────────────
 
@@ -201,6 +216,7 @@ class BusSmartEngine:
             'polyline': polyline,
             'live': live,
             'berth': self.get_berth(s_code, svc),
+            'berth_options': self.get_berth_options(s_code, svc),
         }
 
     def _find_direct_routes(self, start_cluster, end_cluster):

@@ -99,6 +99,9 @@
       searchHintMrt: '🚇 地铁站',
       searchHintStopCode: '🚌 巴士站编码',
       floorPlanCaption: '示意图，非实际比例',
+      berthCheckDirection: (service, berths) =>
+        `${service} 路为环线，两个方向泊位不同（${berths}）。请查看车头方向指示牌确认。`,
+      berthPlanHeading: '站内平面图',
     },
     en: {
       brand: 'Bus Concierge',
@@ -193,6 +196,9 @@
       searchHintMrt: '🚇 MRT',
       searchHintStopCode: '🚌 Stop Code',
       floorPlanCaption: 'Schematic — not to scale',
+      berthCheckDirection: (service, berths) =>
+        `Bus ${service} is a loop service and boards at ${berths} depending on direction. Check the destination sign on the bus.`,
+      berthPlanHeading: 'Station Floor Plan',
     },
   };
 

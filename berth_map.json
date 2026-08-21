@@ -3,16 +3,16 @@
     "nameEn": "Pasir Ris Bus Interchange",
     "nameZh": "巴西立巴士转换站",
     "boarding": [
-      { "berth": "B1", "services": ["58", "58B", "88"] },
-      { "berth": "B2", "services": ["12", "12e", "21"] },
-      { "berth": "B3", "services": ["17", "68"] },
-      { "berth": "B4", "services": ["359", "403"] },
-      { "berth": "B5", "services": ["358", "46"] },
-      { "berth": "B6", "services": ["354"] },
-      { "berth": "B7", "services": ["3"] },
-      { "berth": "B8", "services": ["5", "6"] },
-      { "berth": "B9", "services": ["15", "15A", "518", "518A"] },
-      { "berth": "B10", "services": [] }
+      { "berth": "B1", "services": ["58", "58B", "88"], "displayServices": ["58", "88"] },
+      { "berth": "B2", "services": ["12", "12e", "21"], "displayServices": ["12", "12e", "21"] },
+      { "berth": "B3", "services": ["17", "68"], "displayServices": ["17", "68"] },
+      { "berth": "B4", "services": ["359", "403"], "displayServices": ["359W", "403"] },
+      { "berth": "B5", "services": ["358", "46"], "displayServices": ["358W", "46"] },
+      { "berth": "B6", "services": ["359", "354"], "displayServices": ["359E", "354"] },
+      { "berth": "B7", "services": ["358", "3"], "displayServices": ["358E", "3"] },
+      { "berth": "B8", "services": ["5", "6"], "displayServices": ["5", "6"] },
+      { "berth": "B9", "services": ["15", "15A", "518", "518A"], "displayServices": ["15", "518", "518A"] },
+      { "berth": "B10", "services": [], "displayServices": [] }
     ],
     "alighting": ["A1", "A2", "A3", "A4", "A5"]
   }
