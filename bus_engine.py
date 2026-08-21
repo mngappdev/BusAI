@@ -5,6 +5,9 @@ import requests
 import os
 from datetime import datetime, timezone
 from collections import defaultdict
+from dotenv import load_dotenv
+
+load_dotenv()  # picks up LTA_API_KEY (and anything else) from a .env file, if present
 
 LTA_API_BASE = "https://datamall2.mytransport.sg/ltaodataservice"
 logger = logging.getLogger(__name__)
