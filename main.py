@@ -19,7 +19,23 @@ app.add_middleware(
 
 engine = BusSmartEngine()
 BASE_DIR = Path(__file__).resolve().parent
-app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+
+# A kiosk browser stays open for days. Without this the browser falls back to
+# heuristic caching and can keep running an old bundle long after a deploy —
+# that is how a shipped fix for the walk-leg duration never reached the screen.
+# "no-cache" means "revalidate before reusing", not "never store": the ETag
+# turns each check into a cheap 304.
+REVALIDATE = "no-cache, must-revalidate"
+
+
+class RevalidatedStaticFiles(StaticFiles):
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = REVALIDATE
+        return response
+
+
+app.mount("/static", RevalidatedStaticFiles(directory=BASE_DIR / "static"), name="static")
 
 class TripRequest(BaseModel):
     s_lat: float
@@ -30,7 +46,7 @@ class TripRequest(BaseModel):
 
 @app.get("/")
 async def index():
-    return FileResponse(BASE_DIR / "index.html")
+    return FileResponse(BASE_DIR / "index.html", headers={"Cache-Control": REVALIDATE})
 
 
 @app.get("/api/v1/nearby-stops")
