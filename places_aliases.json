@@ -1,0 +1,2615 @@
+{
+  "places": [
+    {
+      "id": "changi-airport",
+      "name_en": "Changi Airport",
+      "name_zh": "樟宜机场",
+      "category": "airport",
+      "lat": 1.355299,
+      "lon": 103.989142,
+      "aliases": [
+        "airport",
+        "changi",
+        "changi airport",
+        "changi apt",
+        "机场",
+        "樟宜机场"
+      ]
+    },
+    {
+      "id": "changi-airport-t1",
+      "name_en": "Changi Airport Terminal 1",
+      "name_zh": "樟宜机场 1 号航站楼",
+      "category": "airport",
+      "lat": 1.361709,
+      "lon": 103.990349,
+      "aliases": [
+        "airport t1",
+        "changi airport t1",
+        "t1",
+        "terminal 1",
+        "一号航站楼",
+        "机场 t1",
+        "樟宜机场 t1"
+      ]
+    },
+    {
+      "id": "changi-airport-t2",
+      "name_en": "Changi Airport Terminal 2",
+      "name_zh": "樟宜机场 2 号航站楼",
+      "category": "airport",
+      "lat": 1.355299,
+      "lon": 103.989142,
+      "aliases": [
+        "airport t2",
+        "changi airport t2",
+        "t2",
+        "terminal 2",
+        "二号航站楼",
+        "机场 t2",
+        "樟宜机场 t2"
+      ]
+    },
+    {
+      "id": "changi-airport-t3",
+      "name_en": "Changi Airport Terminal 3",
+      "name_zh": "樟宜机场 3 号航站楼",
+      "category": "airport",
+      "lat": 1.356626,
+      "lon": 103.986562,
+      "aliases": [
+        "airport t3",
+        "changi airport t3",
+        "t3",
+        "terminal 3",
+        "三号航站楼",
+        "机场 t3",
+        "樟宜机场 t3"
+      ]
+    },
+    {
+      "id": "changi-airport-t4",
+      "name_en": "Changi Airport Terminal 4",
+      "name_zh": "樟宜机场 4 号航站楼",
+      "category": "airport",
+      "lat": 1.338145,
+      "lon": 103.983636,
+      "aliases": [
+        "airport t4",
+        "changi airport t4",
+        "t4",
+        "terminal 4",
+        "四号航站楼",
+        "机场 t4",
+        "樟宜机场 t4"
+      ]
+    },
+    {
+      "id": "jewel-changi",
+      "name_en": "Jewel Changi Airport",
+      "name_zh": "星耀樟宜",
+      "category": "mall",
+      "lat": 1.360341,
+      "lon": 103.989078,
+      "aliases": [
+        "jewel",
+        "jewel changi",
+        "星耀",
+        "星耀樟宜"
+      ]
+    },
+    {
+      "id": "changi-airport-mrt",
+      "name_en": "Changi Airport MRT Station",
+      "name_zh": "樟宜机场地铁站",
+      "category": "mrt",
+      "lat": 1.357479,
+      "lon": 103.987884,
+      "aliases": [
+        "changi airport mrt",
+        "changi airport station",
+        "樟宜机场地铁站"
+      ]
+    },
+    {
+      "id": "changi-general-hospital",
+      "name_en": "Changi General Hospital",
+      "name_zh": "樟宜综合医院",
+      "category": "hospital",
+      "lat": 1.297316,
+      "lon": 103.838541,
+      "aliases": [
+        "cgh",
+        "changi general hospital",
+        "changi hospital",
+        "樟宜医院",
+        "樟宜综合医院"
+      ]
+    },
+    {
+      "id": "singapore-general-hospital",
+      "name_en": "Singapore General Hospital",
+      "name_zh": "新加坡中央医院",
+      "category": "hospital",
+      "lat": 1.279335,
+      "lon": 103.835249,
+      "aliases": [
+        "sgh",
+        "singapore general hospital",
+        "中央医院",
+        "新加坡中央医院"
+      ]
+    },
+    {
+      "id": "tan-tock-seng-hospital",
+      "name_en": "Tan Tock Seng Hospital",
+      "name_zh": "陈笃生医院",
+      "category": "hospital",
+      "lat": 1.319673,
+      "lon": 103.84794,
+      "aliases": [
+        "tan tock seng",
+        "tan tock seng hospital",
+        "ttsh",
+        "陈笃生",
+        "陈笃生医院"
+      ]
+    },
+    {
+      "id": "national-university-hospital",
+      "name_en": "National University Hospital",
+      "name_zh": "国立大学医院",
+      "category": "hospital",
+      "lat": 1.294836,
+      "lon": 103.783726,
+      "aliases": [
+        "national university hospital",
+        "nuh",
+        "国立大学医院"
+      ]
+    },
+    {
+      "id": "kk-womens-and-childrens-hospital",
+      "name_en": "KK Women's and Children's Hospital",
+      "name_zh": "竹脚妇幼医院",
+      "category": "hospital",
+      "lat": 1.31049,
+      "lon": 103.846813,
+      "aliases": [
+        "kk hospital",
+        "kk women's and children's hospital",
+        "kkh",
+        "竹脚医院",
+        "竹脚妇幼医院"
+      ]
+    },
+    {
+      "id": "khoo-teck-puat-hospital",
+      "name_en": "Khoo Teck Puat Hospital",
+      "name_zh": "邱德拔医院",
+      "category": "hospital",
+      "lat": 1.424081,
+      "lon": 103.838579,
+      "aliases": [
+        "khoo teck puat",
+        "khoo teck puat hospital",
+        "ktph",
+        "邱德拔医院"
+      ]
+    },
+    {
+      "id": "ng-teng-fong-general-hospital",
+      "name_en": "Ng Teng Fong General Hospital",
+      "name_zh": "黄廷方综合医院",
+      "category": "hospital",
+      "lat": 1.333606,
+      "lon": 103.745448,
+      "aliases": [
+        "ng teng fong",
+        "ng teng fong general hospital",
+        "ntfgh",
+        "黄廷方综合医院"
+      ]
+    },
+    {
+      "id": "sengkang-general-hospital",
+      "name_en": "Sengkang General Hospital",
+      "name_zh": "盛港综合医院",
+      "category": "hospital",
+      "lat": 1.394393,
+      "lon": 103.893164,
+      "aliases": [
+        "sengkang general hospital",
+        "sengkang hospital",
+        "skh",
+        "盛港医院",
+        "盛港综合医院"
+      ]
+    },
+    {
+      "id": "institute-of-mental-health",
+      "name_en": "Institute of Mental Health",
+      "name_zh": "心理卫生学院",
+      "category": "hospital",
+      "lat": 1.381598,
+      "lon": 103.884592,
+      "aliases": [
+        "imh",
+        "institute of mental health",
+        "心理卫生学院"
+      ]
+    },
+    {
+      "id": "national-heart-centre",
+      "name_en": "National Heart Centre Singapore",
+      "name_zh": "国家心脏中心",
+      "category": "hospital",
+      "lat": 1.278581,
+      "lon": 103.836119,
+      "aliases": [
+        "national heart centre",
+        "nhcs",
+        "国家心脏中心"
+      ]
+    },
+    {
+      "id": "national-cancer-centre",
+      "name_en": "National Cancer Centre Singapore",
+      "name_zh": "国家癌症中心",
+      "category": "hospital",
+      "lat": 1.281168,
+      "lon": 103.837825,
+      "aliases": [
+        "national cancer centre",
+        "nccs",
+        "国家癌症中心"
+      ]
+    },
+    {
+      "id": "mount-elizabeth-hospital",
+      "name_en": "Mount Elizabeth Hospital",
+      "name_zh": "伊丽莎白医院",
+      "category": "hospital",
+      "lat": 1.305408,
+      "lon": 103.835473,
+      "aliases": [
+        "mount elizabeth",
+        "mt elizabeth",
+        "伊丽莎白医院"
+      ]
+    },
+    {
+      "id": "gleneagles-hospital",
+      "name_en": "Gleneagles Hospital",
+      "name_zh": "鹰阁医院",
+      "category": "hospital",
+      "lat": 1.307428,
+      "lon": 103.819605,
+      "aliases": [
+        "gleneagles",
+        "鹰阁医院"
+      ]
+    },
+    {
+      "id": "raffles-hospital",
+      "name_en": "Raffles Hospital",
+      "name_zh": "莱佛士医院",
+      "category": "hospital",
+      "lat": 1.301182,
+      "lon": 103.857466,
+      "aliases": [
+        "raffles hospital",
+        "莱佛士医院"
+      ]
+    },
+    {
+      "id": "mount-alvernia-hospital",
+      "name_en": "Mount Alvernia Hospital",
+      "name_zh": "安微尼亚山医院",
+      "category": "hospital",
+      "lat": 1.341499,
+      "lon": 103.837774,
+      "aliases": [
+        "mount alvernia",
+        "mt alvernia",
+        "安微尼亚山医院"
+      ]
+    },
+    {
+      "id": "parkway-east-hospital",
+      "name_en": "Parkway East Hospital",
+      "name_zh": "百汇东岸医院",
+      "category": "hospital",
+      "lat": 1.315088,
+      "lon": 103.908757,
+      "aliases": [
+        "parkway east",
+        "parkway east hospital",
+        "百汇东岸医院"
+      ]
+    },
+    {
+      "id": "woodlands-health-campus",
+      "name_en": "Woodlands Health Campus",
+      "name_zh": "兀兰健康园区",
+      "category": "hospital",
+      "lat": 1.424681,
+      "lon": 103.794744,
+      "aliases": [
+        "woodlands health",
+        "woodlands health campus",
+        "兀兰健康园区"
+      ]
+    },
+    {
+      "id": "alexandra-hospital",
+      "name_en": "Alexandra Hospital",
+      "name_zh": "亚历山大医院",
+      "category": "hospital",
+      "lat": 1.285481,
+      "lon": 103.800181,
+      "aliases": [
+        "alexandra hospital",
+        "亚历山大医院"
+      ]
+    },
+    {
+      "id": "pasir-ris-polyclinic",
+      "name_en": "Pasir Ris Polyclinic",
+      "name_zh": "巴西立综合诊疗所",
+      "category": "clinic",
+      "lat": 1.373503,
+      "lon": 103.948185,
+      "aliases": [
+        "pasir ris poly",
+        "pasir ris polyclinic",
+        "巴西立综合诊疗所",
+        "巴西立诊所"
+      ]
+    },
+    {
+      "id": "tampines-polyclinic",
+      "name_en": "Tampines Polyclinic",
+      "name_zh": "淡滨尼综合诊疗所",
+      "category": "clinic",
+      "lat": 1.35731,
+      "lon": 103.945849,
+      "aliases": [
+        "tampines poly",
+        "tampines polyclinic",
+        "淡滨尼综合诊疗所"
+      ]
+    },
+    {
+      "id": "bedok-polyclinic",
+      "name_en": "Bedok Polyclinic",
+      "name_zh": "勿洛综合诊疗所",
+      "category": "clinic",
+      "lat": 1.326712,
+      "lon": 103.93203,
+      "aliases": [
+        "bedok poly",
+        "bedok polyclinic",
+        "勿洛综合诊疗所"
+      ]
+    },
+    {
+      "id": "geylang-polyclinic",
+      "name_en": "Geylang Polyclinic",
+      "name_zh": "芽笼综合诊疗所",
+      "category": "clinic",
+      "lat": 1.319494,
+      "lon": 103.887166,
+      "aliases": [
+        "geylang poly",
+        "geylang polyclinic",
+        "芽笼综合诊疗所"
+      ]
+    },
+    {
+      "id": "toa-payoh-polyclinic",
+      "name_en": "Toa Payoh Polyclinic",
+      "name_zh": "大巴窑综合诊疗所",
+      "category": "clinic",
+      "lat": 1.33448,
+      "lon": 103.858956,
+      "aliases": [
+        "toa payoh poly",
+        "toa payoh polyclinic",
+        "大巴窑综合诊疗所"
+      ]
+    },
+    {
+      "id": "ang-mo-kio-polyclinic",
+      "name_en": "Ang Mo Kio Polyclinic",
+      "name_zh": "宏茂桥综合诊疗所",
+      "category": "clinic",
+      "lat": 1.374325,
+      "lon": 103.845678,
+      "aliases": [
+        "amk poly",
+        "amk polyclinic",
+        "ang mo kio polyclinic",
+        "宏茂桥综合诊疗所"
+      ]
+    },
+    {
+      "id": "sengkang-polyclinic",
+      "name_en": "Sengkang Polyclinic",
+      "name_zh": "盛港综合诊疗所",
+      "category": "clinic",
+      "lat": 1.392692,
+      "lon": 103.894328,
+      "aliases": [
+        "sengkang poly",
+        "sengkang polyclinic",
+        "盛港综合诊疗所"
+      ]
+    },
+    {
+      "id": "punggol-polyclinic",
+      "name_en": "Punggol Polyclinic",
+      "name_zh": "榜鹅综合诊疗所",
+      "category": "clinic",
+      "lat": 1.402878,
+      "lon": 103.913196,
+      "aliases": [
+        "punggol poly",
+        "punggol polyclinic",
+        "榜鹅综合诊疗所"
+      ]
+    },
+    {
+      "id": "white-sands",
+      "name_en": "White Sands",
+      "name_zh": "白沙购物中心",
+      "category": "mall",
+      "lat": 1.365636,
+      "lon": 103.960862,
+      "aliases": [
+        "white sands",
+        "whitesands",
+        "白沙",
+        "白沙购物中心",
+        "白沙购物广场"
+      ]
+    },
+    {
+      "id": "downtown-east",
+      "name_en": "Downtown East",
+      "name_zh": "东部市中心",
+      "category": "mall",
+      "lat": 1.379127,
+      "lon": 103.955445,
+      "aliases": [
+        "d'resort",
+        "downtown east",
+        "东部市中心"
+      ]
+    },
+    {
+      "id": "tampines-mall",
+      "name_en": "Tampines Mall",
+      "name_zh": "淡滨尼购物中心",
+      "category": "mall",
+      "lat": 1.352527,
+      "lon": 103.944699,
+      "aliases": [
+        "tampines mall",
+        "淡滨尼购物中心"
+      ]
+    },
+    {
+      "id": "tampines-one",
+      "name_en": "Tampines 1",
+      "name_zh": "淡滨尼一号",
+      "category": "mall",
+      "lat": 1.352228,
+      "lon": 103.952437,
+      "aliases": [
+        "tampines 1",
+        "tampines one",
+        "淡滨尼一号"
+      ]
+    },
+    {
+      "id": "century-square",
+      "name_en": "Century Square",
+      "name_zh": "世纪广场",
+      "category": "mall",
+      "lat": 1.352368,
+      "lon": 103.943812,
+      "aliases": [
+        "century square",
+        "世纪广场"
+      ]
+    },
+    {
+      "id": "our-tampines-hub",
+      "name_en": "Our Tampines Hub",
+      "name_zh": "我们的淡滨尼",
+      "category": "government",
+      "lat": 1.353547,
+      "lon": 103.940381,
+      "aliases": [
+        "oth",
+        "our tampines hub",
+        "tampines hub",
+        "我们的淡滨尼"
+      ]
+    },
+    {
+      "id": "bedok-mall",
+      "name_en": "Bedok Mall",
+      "name_zh": "勿洛坊",
+      "category": "mall",
+      "lat": 1.324736,
+      "lon": 103.929256,
+      "aliases": [
+        "bedok mall",
+        "勿洛坊"
+      ]
+    },
+    {
+      "id": "changi-city-point",
+      "name_en": "Changi City Point",
+      "name_zh": "樟宜城市坊",
+      "category": "mall",
+      "lat": 1.334036,
+      "lon": 103.962918,
+      "aliases": [
+        "changi city point",
+        "樟宜城市坊"
+      ]
+    },
+    {
+      "id": "parkway-parade",
+      "name_en": "Parkway Parade",
+      "name_zh": "百汇广场",
+      "category": "mall",
+      "lat": 1.30107,
+      "lon": 103.905279,
+      "aliases": [
+        "parkway parade",
+        "百汇广场"
+      ]
+    },
+    {
+      "id": "katong-square",
+      "name_en": "Katong Square",
+      "name_zh": "加东广场",
+      "category": "mall",
+      "lat": 1.305135,
+      "lon": 103.904307,
+      "aliases": [
+        "katong square",
+        "加东广场"
+      ]
+    },
+    {
+      "id": "eastpoint-mall",
+      "name_en": "Eastpoint Mall",
+      "name_zh": "东点城",
+      "category": "mall",
+      "lat": 1.342706,
+      "lon": 103.953025,
+      "aliases": [
+        "eastpoint",
+        "eastpoint mall",
+        "东点城"
+      ]
+    },
+    {
+      "id": "loyang-point",
+      "name_en": "Loyang Point",
+      "name_zh": "罗央坊",
+      "category": "mall",
+      "lat": 1.367001,
+      "lon": 103.964618,
+      "aliases": [
+        "loyang point",
+        "罗央坊"
+      ]
+    },
+    {
+      "id": "vivocity",
+      "name_en": "VivoCity",
+      "name_zh": "怡丰城",
+      "category": "mall",
+      "lat": 1.264293,
+      "lon": 103.822305,
+      "aliases": [
+        "vivo city",
+        "vivocity",
+        "怡丰城"
+      ]
+    },
+    {
+      "id": "ion-orchard",
+      "name_en": "ION Orchard",
+      "name_zh": "爱雍乌节",
+      "category": "mall",
+      "lat": 1.30398,
+      "lon": 103.832032,
+      "aliases": [
+        "ion",
+        "ion orchard",
+        "爱雍乌节"
+      ]
+    },
+    {
+      "id": "ngee-ann-city",
+      "name_en": "Ngee Ann City",
+      "name_zh": "义安城",
+      "category": "mall",
+      "lat": 1.302242,
+      "lon": 103.835182,
+      "aliases": [
+        "ngee ann city",
+        "taka",
+        "takashimaya",
+        "义安城",
+        "高岛屋"
+      ]
+    },
+    {
+      "id": "plaza-singapura",
+      "name_en": "Plaza Singapura",
+      "name_zh": "狮城大厦",
+      "category": "mall",
+      "lat": 1.300748,
+      "lon": 103.845048,
+      "aliases": [
+        "plaza singapura",
+        "狮城大厦"
+      ]
+    },
+    {
+      "id": "bugis-junction",
+      "name_en": "Bugis Junction",
+      "name_zh": "白沙浮广场",
+      "category": "mall",
+      "lat": 1.299113,
+      "lon": 103.855411,
+      "aliases": [
+        "bugis junction",
+        "白沙浮广场"
+      ]
+    },
+    {
+      "id": "bugis-plus",
+      "name_en": "Bugis+",
+      "name_zh": "白沙浮商业城",
+      "category": "mall",
+      "lat": 1.299604,
+      "lon": 103.854242,
+      "aliases": [
+        "bugis plus",
+        "bugis+",
+        "白沙浮商业城"
+      ]
+    },
+    {
+      "id": "suntec-city",
+      "name_en": "Suntec City",
+      "name_zh": "新达城",
+      "category": "mall",
+      "lat": 1.29486,
+      "lon": 103.860334,
+      "aliases": [
+        "suntec",
+        "suntec city",
+        "新达城"
+      ]
+    },
+    {
+      "id": "marina-bay-sands",
+      "name_en": "Marina Bay Sands",
+      "name_zh": "滨海湾金沙",
+      "category": "landmark",
+      "lat": 1.283994,
+      "lon": 103.859451,
+      "aliases": [
+        "marina bay sands",
+        "mbs",
+        "滨海湾金沙",
+        "金沙"
+      ]
+    },
+    {
+      "id": "northpoint-city",
+      "name_en": "Northpoint City",
+      "name_zh": "纳福城",
+      "category": "mall",
+      "lat": 1.429698,
+      "lon": 103.835776,
+      "aliases": [
+        "northpoint",
+        "northpoint city",
+        "纳福城"
+      ]
+    },
+    {
+      "id": "causeway-point",
+      "name_en": "Causeway Point",
+      "name_zh": "长堤坊",
+      "category": "mall",
+      "lat": 1.43607,
+      "lon": 103.785982,
+      "aliases": [
+        "causeway point",
+        "长堤坊"
+      ]
+    },
+    {
+      "id": "jurong-point",
+      "name_en": "Jurong Point",
+      "name_zh": "裕廊坊",
+      "category": "mall",
+      "lat": 1.334845,
+      "lon": 103.720462,
+      "aliases": [
+        "jurong point",
+        "裕廊坊"
+      ]
+    },
+    {
+      "id": "westgate",
+      "name_en": "Westgate",
+      "name_zh": "西城",
+      "category": "mall",
+      "lat": 1.334158,
+      "lon": 103.742766,
+      "aliases": [
+        "westgate",
+        "西城"
+      ]
+    },
+    {
+      "id": "jem",
+      "name_en": "JEM",
+      "name_zh": "裕廊 JEM",
+      "category": "mall",
+      "lat": 1.333293,
+      "lon": 103.743279,
+      "aliases": [
+        "jem"
+      ]
+    },
+    {
+      "id": "nex",
+      "name_en": "NEX",
+      "name_zh": "纳福",
+      "category": "mall",
+      "lat": 1.350769,
+      "lon": 103.872296,
+      "aliases": [
+        "nex",
+        "nex mall"
+      ]
+    },
+    {
+      "id": "amk-hub",
+      "name_en": "AMK Hub",
+      "name_zh": "宏茂桥中心",
+      "category": "mall",
+      "lat": 1.369389,
+      "lon": 103.848478,
+      "aliases": [
+        "amk hub",
+        "ang mo kio hub",
+        "宏茂桥中心"
+      ]
+    },
+    {
+      "id": "compass-one",
+      "name_en": "Compass One",
+      "name_zh": "康埔桦一号",
+      "category": "mall",
+      "lat": 1.392053,
+      "lon": 103.895071,
+      "aliases": [
+        "compass one",
+        "compass point",
+        "康埔桦一号"
+      ]
+    },
+    {
+      "id": "waterway-point",
+      "name_en": "Waterway Point",
+      "name_zh": "水滨坊",
+      "category": "mall",
+      "lat": 1.406536,
+      "lon": 103.901988,
+      "aliases": [
+        "waterway point",
+        "水滨坊"
+      ]
+    },
+    {
+      "id": "junction-8",
+      "name_en": "Junction 8",
+      "name_zh": "碧山第八站",
+      "category": "mall",
+      "lat": 1.350481,
+      "lon": 103.84876,
+      "aliases": [
+        "j8",
+        "junction 8",
+        "碧山第八站"
+      ]
+    },
+    {
+      "id": "paya-lebar-quarter",
+      "name_en": "Paya Lebar Quarter",
+      "name_zh": "巴耶利峇广场",
+      "category": "mall",
+      "lat": 1.317709,
+      "lon": 103.893415,
+      "aliases": [
+        "paya lebar quarter",
+        "plq",
+        "巴耶利峇广场"
+      ]
+    },
+    {
+      "id": "city-square-mall",
+      "name_en": "City Square Mall",
+      "name_zh": "城市广场",
+      "category": "mall",
+      "lat": 1.311421,
+      "lon": 103.856624,
+      "aliases": [
+        "city square mall",
+        "城市广场"
+      ]
+    },
+    {
+      "id": "funan",
+      "name_en": "Funan",
+      "name_zh": "福南",
+      "category": "mall",
+      "lat": 1.291348,
+      "lon": 103.84999,
+      "aliases": [
+        "funan",
+        "funan mall",
+        "福南"
+      ]
+    },
+    {
+      "id": "raffles-city",
+      "name_en": "Raffles City",
+      "name_zh": "莱佛士城",
+      "category": "mall",
+      "lat": 1.293894,
+      "lon": 103.85312,
+      "aliases": [
+        "raffles city",
+        "莱佛士城"
+      ]
+    },
+    {
+      "id": "great-world",
+      "name_en": "Great World",
+      "name_zh": "大世界",
+      "category": "mall",
+      "lat": 1.293423,
+      "lon": 103.832022,
+      "aliases": [
+        "great world",
+        "great world city",
+        "大世界"
+      ]
+    },
+    {
+      "id": "313-somerset",
+      "name_en": "313@Somerset",
+      "name_zh": "索美塞 313",
+      "category": "mall",
+      "lat": 1.301014,
+      "lon": 103.838361,
+      "aliases": [
+        "313",
+        "313 somerset",
+        "313@somerset",
+        "索美塞313"
+      ]
+    },
+    {
+      "id": "mustafa-centre",
+      "name_en": "Mustafa Centre",
+      "name_zh": "慕斯达法中心",
+      "category": "mall",
+      "lat": 1.310112,
+      "lon": 103.855291,
+      "aliases": [
+        "mustafa",
+        "mustafa centre",
+        "慕斯达法中心"
+      ]
+    },
+    {
+      "id": "lucky-plaza",
+      "name_en": "Lucky Plaza",
+      "name_zh": "幸运商业中心",
+      "category": "mall",
+      "lat": 1.304506,
+      "lon": 103.833962,
+      "aliases": [
+        "lucky plaza",
+        "幸运商业中心"
+      ]
+    },
+    {
+      "id": "tiong-bahru-plaza",
+      "name_en": "Tiong Bahru Plaza",
+      "name_zh": "中峇鲁广场",
+      "category": "mall",
+      "lat": 1.286459,
+      "lon": 103.827015,
+      "aliases": [
+        "tiong bahru plaza",
+        "中峇鲁广场"
+      ]
+    },
+    {
+      "id": "hougang-mall",
+      "name_en": "Hougang Mall",
+      "name_zh": "后港坊",
+      "category": "mall",
+      "lat": 1.372491,
+      "lon": 103.893774,
+      "aliases": [
+        "hougang mall",
+        "后港坊"
+      ]
+    },
+    {
+      "id": "clementi-mall",
+      "name_en": "The Clementi Mall",
+      "name_zh": "金文泰坊",
+      "category": "mall",
+      "lat": 1.314896,
+      "lon": 103.764423,
+      "aliases": [
+        "clementi mall",
+        "金文泰坊"
+      ]
+    },
+    {
+      "id": "imm",
+      "name_en": "IMM",
+      "name_zh": "怡满",
+      "category": "mall",
+      "lat": 1.334875,
+      "lon": 103.746895,
+      "aliases": [
+        "imm",
+        "imm building"
+      ]
+    },
+    {
+      "id": "bukit-panjang-plaza",
+      "name_en": "Bukit Panjang Plaza",
+      "name_zh": "武吉班让广场",
+      "category": "mall",
+      "lat": 1.37992,
+      "lon": 103.764357,
+      "aliases": [
+        "bp plaza",
+        "bukit panjang plaza",
+        "武吉班让广场"
+      ]
+    },
+    {
+      "id": "lot-one",
+      "name_en": "Lot One",
+      "name_zh": "第一乐广场",
+      "category": "mall",
+      "lat": 1.38507,
+      "lon": 103.745239,
+      "aliases": [
+        "lot 1",
+        "lot one",
+        "第一乐广场"
+      ]
+    },
+    {
+      "id": "west-mall",
+      "name_en": "West Mall",
+      "name_zh": "西坊",
+      "category": "mall",
+      "lat": 1.350021,
+      "lon": 103.749216,
+      "aliases": [
+        "west mall",
+        "西坊"
+      ]
+    },
+    {
+      "id": "seletar-mall",
+      "name_en": "The Seletar Mall",
+      "name_zh": "实里达坊",
+      "category": "mall",
+      "lat": 1.39147,
+      "lon": 103.876126,
+      "aliases": [
+        "seletar mall",
+        "实里达坊"
+      ]
+    },
+    {
+      "id": "heartland-mall",
+      "name_en": "Heartland Mall",
+      "name_zh": "心乐坊",
+      "category": "mall",
+      "lat": 1.359542,
+      "lon": 103.885167,
+      "aliases": [
+        "heartland mall",
+        "kovan mall",
+        "心乐坊"
+      ]
+    },
+    {
+      "id": "pasir-ris-mrt",
+      "name_en": "Pasir Ris MRT Station",
+      "name_zh": "巴西立地铁站",
+      "category": "mrt",
+      "lat": 1.367129,
+      "lon": 103.960557,
+      "aliases": [
+        "pasir ris mrt",
+        "pasir ris station",
+        "巴西立地铁站",
+        "巴西立站"
+      ]
+    },
+    {
+      "id": "tampines-mrt",
+      "name_en": "Tampines MRT Station",
+      "name_zh": "淡滨尼地铁站",
+      "category": "mrt",
+      "lat": 1.356191,
+      "lon": 103.954634,
+      "aliases": [
+        "tampines mrt",
+        "tampines station",
+        "淡滨尼地铁站"
+      ]
+    },
+    {
+      "id": "simei-mrt",
+      "name_en": "Simei MRT Station",
+      "name_zh": "四美地铁站",
+      "category": "mrt",
+      "lat": 1.343197,
+      "lon": 103.953377,
+      "aliases": [
+        "simei mrt",
+        "simei station",
+        "四美地铁站"
+      ]
+    },
+    {
+      "id": "tanah-merah-mrt",
+      "name_en": "Tanah Merah MRT Station",
+      "name_zh": "丹那美拉地铁站",
+      "category": "mrt",
+      "lat": 1.327187,
+      "lon": 103.946349,
+      "aliases": [
+        "tanah merah",
+        "tanah merah mrt",
+        "丹那美拉地铁站"
+      ]
+    },
+    {
+      "id": "bedok-mrt",
+      "name_en": "Bedok MRT Station",
+      "name_zh": "勿洛地铁站",
+      "category": "mrt",
+      "lat": 1.32398,
+      "lon": 103.929984,
+      "aliases": [
+        "bedok mrt",
+        "bedok station",
+        "勿洛地铁站"
+      ]
+    },
+    {
+      "id": "expo-mrt",
+      "name_en": "Expo MRT Station",
+      "name_zh": "博览地铁站",
+      "category": "mrt",
+      "lat": 1.33455,
+      "lon": 103.961548,
+      "aliases": [
+        "expo mrt",
+        "expo station",
+        "博览地铁站"
+      ]
+    },
+    {
+      "id": "eunos-mrt",
+      "name_en": "Eunos MRT Station",
+      "name_zh": "友诺士地铁站",
+      "category": "mrt",
+      "lat": 1.319784,
+      "lon": 103.903226,
+      "aliases": [
+        "eunos",
+        "eunos mrt",
+        "友诺士地铁站"
+      ]
+    },
+    {
+      "id": "kembangan-mrt",
+      "name_en": "Kembangan MRT Station",
+      "name_zh": "景万岸地铁站",
+      "category": "mrt",
+      "lat": 1.321038,
+      "lon": 103.912948,
+      "aliases": [
+        "kembangan",
+        "kembangan mrt",
+        "景万岸地铁站"
+      ]
+    },
+    {
+      "id": "paya-lebar-mrt",
+      "name_en": "Paya Lebar MRT Station",
+      "name_zh": "巴耶利峇地铁站",
+      "category": "mrt",
+      "lat": 1.317247,
+      "lon": 103.892261,
+      "aliases": [
+        "paya lebar mrt",
+        "paya lebar station",
+        "巴耶利峇地铁站"
+      ]
+    },
+    {
+      "id": "aljunied-mrt",
+      "name_en": "Aljunied MRT Station",
+      "name_zh": "阿裕尼地铁站",
+      "category": "mrt",
+      "lat": 1.316433,
+      "lon": 103.882906,
+      "aliases": [
+        "aljunied",
+        "aljunied mrt",
+        "阿裕尼地铁站"
+      ]
+    },
+    {
+      "id": "city-hall-mrt",
+      "name_en": "City Hall MRT Station",
+      "name_zh": "政府大厦地铁站",
+      "category": "mrt",
+      "lat": 1.29299,
+      "lon": 103.852543,
+      "aliases": [
+        "city hall mrt",
+        "city hall station",
+        "政府大厦地铁站"
+      ]
+    },
+    {
+      "id": "raffles-place-mrt",
+      "name_en": "Raffles Place MRT Station",
+      "name_zh": "莱佛士坊地铁站",
+      "category": "mrt",
+      "lat": 1.283933,
+      "lon": 103.851463,
+      "aliases": [
+        "raffles place mrt",
+        "raffles place station",
+        "莱佛士坊地铁站"
+      ]
+    },
+    {
+      "id": "dhoby-ghaut-mrt",
+      "name_en": "Dhoby Ghaut MRT Station",
+      "name_zh": "多美歌地铁站",
+      "category": "mrt",
+      "lat": 1.298912,
+      "lon": 103.846293,
+      "aliases": [
+        "dhoby ghaut",
+        "dhoby ghaut mrt",
+        "多美歌地铁站"
+      ]
+    },
+    {
+      "id": "orchard-mrt",
+      "name_en": "Orchard MRT Station",
+      "name_zh": "乌节地铁站",
+      "category": "mrt",
+      "lat": 1.302422,
+      "lon": 103.823869,
+      "aliases": [
+        "orchard mrt",
+        "orchard station",
+        "乌节地铁站"
+      ]
+    },
+    {
+      "id": "somerset-mrt",
+      "name_en": "Somerset MRT Station",
+      "name_zh": "索美塞地铁站",
+      "category": "mrt",
+      "lat": 1.300253,
+      "lon": 103.839158,
+      "aliases": [
+        "somerset",
+        "somerset mrt",
+        "索美塞地铁站"
+      ]
+    },
+    {
+      "id": "newton-mrt",
+      "name_en": "Newton MRT Station",
+      "name_zh": "纽顿地铁站",
+      "category": "mrt",
+      "lat": 1.31257,
+      "lon": 103.838032,
+      "aliases": [
+        "newton mrt",
+        "newton station",
+        "纽顿地铁站"
+      ]
+    },
+    {
+      "id": "bugis-mrt",
+      "name_en": "Bugis MRT Station",
+      "name_zh": "武吉士地铁站",
+      "category": "mrt",
+      "lat": 1.300465,
+      "lon": 103.855707,
+      "aliases": [
+        "bugis mrt",
+        "bugis station",
+        "武吉士地铁站"
+      ]
+    },
+    {
+      "id": "outram-park-mrt",
+      "name_en": "Outram Park MRT Station",
+      "name_zh": "欧南园地铁站",
+      "category": "mrt",
+      "lat": 1.280242,
+      "lon": 103.840052,
+      "aliases": [
+        "outram park",
+        "outram park mrt",
+        "欧南园地铁站"
+      ]
+    },
+    {
+      "id": "tanjong-pagar-mrt",
+      "name_en": "Tanjong Pagar MRT Station",
+      "name_zh": "丹戎巴葛地铁站",
+      "category": "mrt",
+      "lat": 1.276561,
+      "lon": 103.845725,
+      "aliases": [
+        "tanjong pagar",
+        "tanjong pagar mrt",
+        "丹戎巴葛地铁站"
+      ]
+    },
+    {
+      "id": "marina-bay-mrt",
+      "name_en": "Marina Bay MRT Station",
+      "name_zh": "滨海湾地铁站",
+      "category": "mrt",
+      "lat": 1.276311,
+      "lon": 103.854605,
+      "aliases": [
+        "marina bay mrt",
+        "marina bay station",
+        "滨海湾地铁站"
+      ]
+    },
+    {
+      "id": "harbourfront-mrt",
+      "name_en": "HarbourFront MRT Station",
+      "name_zh": "港湾地铁站",
+      "category": "mrt",
+      "lat": 1.265311,
+      "lon": 103.820557,
+      "aliases": [
+        "harbourfront",
+        "harbourfront mrt",
+        "港湾地铁站"
+      ]
+    },
+    {
+      "id": "jurong-east-mrt",
+      "name_en": "Jurong East MRT Station",
+      "name_zh": "裕廊东地铁站",
+      "category": "mrt",
+      "lat": 1.333028,
+      "lon": 103.74237,
+      "aliases": [
+        "jurong east mrt",
+        "jurong east station",
+        "裕廊东地铁站"
+      ]
+    },
+    {
+      "id": "woodlands-mrt",
+      "name_en": "Woodlands MRT Station",
+      "name_zh": "兀兰地铁站",
+      "category": "mrt",
+      "lat": 1.43682,
+      "lon": 103.786067,
+      "aliases": [
+        "woodlands mrt",
+        "woodlands station",
+        "兀兰地铁站"
+      ]
+    },
+    {
+      "id": "yishun-mrt",
+      "name_en": "Yishun MRT Station",
+      "name_zh": "义顺地铁站",
+      "category": "mrt",
+      "lat": 1.429443,
+      "lon": 103.835005,
+      "aliases": [
+        "yishun mrt",
+        "yishun station",
+        "义顺地铁站"
+      ]
+    },
+    {
+      "id": "ang-mo-kio-mrt",
+      "name_en": "Ang Mo Kio MRT Station",
+      "name_zh": "宏茂桥地铁站",
+      "category": "mrt",
+      "lat": 1.369933,
+      "lon": 103.849558,
+      "aliases": [
+        "amk mrt",
+        "amk station",
+        "ang mo kio mrt",
+        "宏茂桥地铁站"
+      ]
+    },
+    {
+      "id": "bishan-mrt",
+      "name_en": "Bishan MRT Station",
+      "name_zh": "碧山地铁站",
+      "category": "mrt",
+      "lat": 1.351019,
+      "lon": 103.850057,
+      "aliases": [
+        "bishan mrt",
+        "bishan station",
+        "碧山地铁站"
+      ]
+    },
+    {
+      "id": "serangoon-mrt",
+      "name_en": "Serangoon MRT Station",
+      "name_zh": "实龙岗地铁站",
+      "category": "mrt",
+      "lat": 1.351048,
+      "lon": 103.87107,
+      "aliases": [
+        "serangoon mrt",
+        "serangoon station",
+        "实龙岗地铁站"
+      ]
+    },
+    {
+      "id": "hougang-mrt",
+      "name_en": "Hougang MRT Station",
+      "name_zh": "后港地铁站",
+      "category": "mrt",
+      "lat": 1.370335,
+      "lon": 103.892262,
+      "aliases": [
+        "hougang mrt",
+        "hougang station",
+        "后港地铁站"
+      ]
+    },
+    {
+      "id": "sengkang-mrt",
+      "name_en": "Sengkang MRT Station",
+      "name_zh": "盛港地铁站",
+      "category": "mrt",
+      "lat": 1.391695,
+      "lon": 103.895485,
+      "aliases": [
+        "sengkang mrt",
+        "sengkang station",
+        "盛港地铁站"
+      ]
+    },
+    {
+      "id": "punggol-mrt",
+      "name_en": "Punggol MRT Station",
+      "name_zh": "榜鹅地铁站",
+      "category": "mrt",
+      "lat": 1.414927,
+      "lon": 103.910166,
+      "aliases": [
+        "punggol mrt",
+        "punggol station",
+        "榜鹅地铁站"
+      ]
+    },
+    {
+      "id": "toa-payoh-mrt",
+      "name_en": "Toa Payoh MRT Station",
+      "name_zh": "大巴窑地铁站",
+      "category": "mrt",
+      "lat": 1.332629,
+      "lon": 103.847502,
+      "aliases": [
+        "toa payoh mrt",
+        "toa payoh station",
+        "大巴窑地铁站"
+      ]
+    },
+    {
+      "id": "novena-mrt",
+      "name_en": "Novena MRT Station",
+      "name_zh": "诺维娜地铁站",
+      "category": "mrt",
+      "lat": 1.320441,
+      "lon": 103.843826,
+      "aliases": [
+        "novena",
+        "novena mrt",
+        "诺维娜地铁站"
+      ]
+    },
+    {
+      "id": "little-india-mrt",
+      "name_en": "Little India MRT Station",
+      "name_zh": "小印度地铁站",
+      "category": "mrt",
+      "lat": 1.307244,
+      "lon": 103.849842,
+      "aliases": [
+        "little india mrt",
+        "little india station",
+        "小印度地铁站"
+      ]
+    },
+    {
+      "id": "clementi-mrt",
+      "name_en": "Clementi MRT Station",
+      "name_zh": "金文泰地铁站",
+      "category": "mrt",
+      "lat": 1.315116,
+      "lon": 103.765191,
+      "aliases": [
+        "clementi mrt",
+        "clementi station",
+        "金文泰地铁站"
+      ]
+    },
+    {
+      "id": "buona-vista-mrt",
+      "name_en": "Buona Vista MRT Station",
+      "name_zh": "波那维斯达地铁站",
+      "category": "mrt",
+      "lat": 1.306275,
+      "lon": 103.790363,
+      "aliases": [
+        "buona vista",
+        "buona vista mrt",
+        "波那维斯达地铁站"
+      ]
+    },
+    {
+      "id": "boon-lay-mrt",
+      "name_en": "Boon Lay MRT Station",
+      "name_zh": "文礼地铁站",
+      "category": "mrt",
+      "lat": 1.338604,
+      "lon": 103.706065,
+      "aliases": [
+        "boon lay mrt",
+        "boon lay station",
+        "文礼地铁站"
+      ]
+    },
+    {
+      "id": "choa-chu-kang-mrt",
+      "name_en": "Choa Chu Kang MRT Station",
+      "name_zh": "蔡厝港地铁站",
+      "category": "mrt",
+      "lat": 1.385368,
+      "lon": 103.744085,
+      "aliases": [
+        "cck mrt",
+        "cck station",
+        "choa chu kang mrt",
+        "蔡厝港地铁站"
+      ]
+    },
+    {
+      "id": "bukit-batok-mrt",
+      "name_en": "Bukit Batok MRT Station",
+      "name_zh": "武吉巴督地铁站",
+      "category": "mrt",
+      "lat": 1.349033,
+      "lon": 103.749566,
+      "aliases": [
+        "bukit batok mrt",
+        "bukit batok station",
+        "武吉巴督地铁站"
+      ]
+    },
+    {
+      "id": "canberra-mrt",
+      "name_en": "Canberra MRT Station",
+      "name_zh": "坎贝拉地铁站",
+      "category": "mrt",
+      "lat": 1.443077,
+      "lon": 103.829703,
+      "aliases": [
+        "canberra",
+        "canberra mrt",
+        "canberra station",
+        "坎贝拉地铁站"
+      ]
+    },
+    {
+      "id": "kallang-mrt",
+      "name_en": "Kallang MRT Station",
+      "name_zh": "加冷地铁站",
+      "category": "mrt",
+      "lat": 1.311489,
+      "lon": 103.871387,
+      "aliases": [
+        "kallang mrt",
+        "kallang station",
+        "加冷地铁站"
+      ]
+    },
+    {
+      "id": "lavender-mrt",
+      "name_en": "Lavender MRT Station",
+      "name_zh": "劳明达地铁站",
+      "category": "mrt",
+      "lat": 1.307392,
+      "lon": 103.862785,
+      "aliases": [
+        "lavender",
+        "lavender mrt",
+        "劳明达地铁站"
+      ]
+    },
+    {
+      "id": "tai-seng-mrt",
+      "name_en": "Tai Seng MRT Station",
+      "name_zh": "大成地铁站",
+      "category": "mrt",
+      "lat": 1.335142,
+      "lon": 103.888389,
+      "aliases": [
+        "tai seng",
+        "tai seng mrt",
+        "大成地铁站"
+      ]
+    },
+    {
+      "id": "kovan-mrt",
+      "name_en": "Kovan MRT Station",
+      "name_zh": "高文地铁站",
+      "category": "mrt",
+      "lat": 1.359902,
+      "lon": 103.884495,
+      "aliases": [
+        "kovan mrt",
+        "kovan station",
+        "高文地铁站"
+      ]
+    },
+    {
+      "id": "botanic-gardens-mrt",
+      "name_en": "Botanic Gardens MRT Station",
+      "name_zh": "植物园地铁站",
+      "category": "mrt",
+      "lat": 1.322387,
+      "lon": 103.815385,
+      "aliases": [
+        "botanic gardens mrt",
+        "botanic gardens station",
+        "植物园地铁站"
+      ]
+    },
+    {
+      "id": "caldecott-mrt",
+      "name_en": "Caldecott MRT Station",
+      "name_zh": "加利谷地铁站",
+      "category": "mrt",
+      "lat": 1.337347,
+      "lon": 103.839544,
+      "aliases": [
+        "caldecott",
+        "caldecott mrt",
+        "加利谷地铁站"
+      ]
+    },
+    {
+      "id": "marymount-mrt",
+      "name_en": "Marymount MRT Station",
+      "name_zh": "玛丽蒙地铁站",
+      "category": "mrt",
+      "lat": 1.348707,
+      "lon": 103.839423,
+      "aliases": [
+        "marymount",
+        "marymount mrt",
+        "玛丽蒙地铁站"
+      ]
+    },
+    {
+      "id": "braddell-mrt",
+      "name_en": "Braddell MRT Station",
+      "name_zh": "布莱德地铁站",
+      "category": "mrt",
+      "lat": 1.340105,
+      "lon": 103.846756,
+      "aliases": [
+        "braddell",
+        "braddell mrt",
+        "布莱德地铁站"
+      ]
+    },
+    {
+      "id": "queenstown-mrt",
+      "name_en": "Queenstown MRT Station",
+      "name_zh": "女皇镇地铁站",
+      "category": "mrt",
+      "lat": 1.294551,
+      "lon": 103.806077,
+      "aliases": [
+        "queenstown",
+        "queenstown mrt",
+        "女皇镇地铁站"
+      ]
+    },
+    {
+      "id": "redhill-mrt",
+      "name_en": "Redhill MRT Station",
+      "name_zh": "红山地铁站",
+      "category": "mrt",
+      "lat": 1.289635,
+      "lon": 103.816741,
+      "aliases": [
+        "redhill",
+        "redhill mrt",
+        "红山地铁站"
+      ]
+    },
+    {
+      "id": "commonwealth-mrt",
+      "name_en": "Commonwealth MRT Station",
+      "name_zh": "联邦地铁站",
+      "category": "mrt",
+      "lat": 1.302502,
+      "lon": 103.798229,
+      "aliases": [
+        "commonwealth",
+        "commonwealth mrt",
+        "联邦地铁站"
+      ]
+    },
+    {
+      "id": "farrer-park-mrt",
+      "name_en": "Farrer Park MRT Station",
+      "name_zh": "花拉公园地铁站",
+      "category": "mrt",
+      "lat": 1.31314,
+      "lon": 103.854755,
+      "aliases": [
+        "farrer park",
+        "farrer park mrt",
+        "花拉公园地铁站"
+      ]
+    },
+    {
+      "id": "boon-keng-mrt",
+      "name_en": "Boon Keng MRT Station",
+      "name_zh": "文庆地铁站",
+      "category": "mrt",
+      "lat": 1.31994,
+      "lon": 103.862053,
+      "aliases": [
+        "boon keng",
+        "boon keng mrt",
+        "文庆地铁站"
+      ]
+    },
+    {
+      "id": "potong-pasir-mrt",
+      "name_en": "Potong Pasir MRT Station",
+      "name_zh": "波东巴西地铁站",
+      "category": "mrt",
+      "lat": 1.331378,
+      "lon": 103.869364,
+      "aliases": [
+        "potong pasir",
+        "potong pasir mrt",
+        "波东巴西地铁站"
+      ]
+    },
+    {
+      "id": "buangkok-mrt",
+      "name_en": "Buangkok MRT Station",
+      "name_zh": "万国地铁站",
+      "category": "mrt",
+      "lat": 1.383694,
+      "lon": 103.89305,
+      "aliases": [
+        "buangkok",
+        "buangkok mrt",
+        "万国地铁站"
+      ]
+    },
+    {
+      "id": "pasir-ris-bus-interchange",
+      "name_en": "Pasir Ris Bus Interchange",
+      "name_zh": "巴西立巴士转换站",
+      "category": "interchange",
+      "lat": 1.373811,
+      "lon": 103.94873,
+      "aliases": [
+        "pasir ris bus interchange",
+        "pasir ris interchange",
+        "巴西立巴士转换站",
+        "巴西立车站"
+      ]
+    },
+    {
+      "id": "tampines-bus-interchange",
+      "name_en": "Tampines Bus Interchange",
+      "name_zh": "淡滨尼巴士转换站",
+      "category": "interchange",
+      "lat": 1.354367,
+      "lon": 103.943675,
+      "aliases": [
+        "tampines bus interchange",
+        "tampines interchange",
+        "淡滨尼巴士转换站"
+      ]
+    },
+    {
+      "id": "bedok-bus-interchange",
+      "name_en": "Bedok Bus Interchange",
+      "name_zh": "勿洛巴士转换站",
+      "category": "interchange",
+      "lat": 1.324736,
+      "lon": 103.929256,
+      "aliases": [
+        "bedok bus interchange",
+        "bedok interchange",
+        "勿洛巴士转换站"
+      ]
+    },
+    {
+      "id": "sengkang-bus-interchange",
+      "name_en": "Sengkang Bus Interchange",
+      "name_zh": "盛港巴士转换站",
+      "category": "interchange",
+      "lat": 1.391688,
+      "lon": 103.89613,
+      "aliases": [
+        "sengkang bus interchange",
+        "sengkang interchange",
+        "盛港巴士转换站"
+      ]
+    },
+    {
+      "id": "punggol-bus-interchange",
+      "name_en": "Punggol Bus Interchange",
+      "name_zh": "榜鹅巴士转换站",
+      "category": "interchange",
+      "lat": 1.404278,
+      "lon": 103.902304,
+      "aliases": [
+        "punggol bus interchange",
+        "punggol interchange",
+        "榜鹅巴士转换站"
+      ]
+    },
+    {
+      "id": "hougang-bus-interchange",
+      "name_en": "Hougang Central Bus Interchange",
+      "name_zh": "后港巴士转换站",
+      "category": "interchange",
+      "lat": 1.370895,
+      "lon": 103.893157,
+      "aliases": [
+        "hougang bus interchange",
+        "hougang interchange",
+        "后港巴士转换站"
+      ]
+    },
+    {
+      "id": "serangoon-bus-interchange",
+      "name_en": "Serangoon Bus Interchange",
+      "name_zh": "实龙岗巴士转换站",
+      "category": "interchange",
+      "lat": 1.350769,
+      "lon": 103.872296,
+      "aliases": [
+        "serangoon bus interchange",
+        "serangoon interchange",
+        "实龙岗巴士转换站"
+      ]
+    },
+    {
+      "id": "ang-mo-kio-bus-interchange",
+      "name_en": "Ang Mo Kio Bus Interchange",
+      "name_zh": "宏茂桥巴士转换站",
+      "category": "interchange",
+      "lat": 1.369519,
+      "lon": 103.848462,
+      "aliases": [
+        "amk bus interchange",
+        "amk interchange",
+        "ang mo kio bus interchange",
+        "宏茂桥巴士转换站"
+      ]
+    },
+    {
+      "id": "toa-payoh-bus-interchange",
+      "name_en": "Toa Payoh Bus Interchange",
+      "name_zh": "大巴窑巴士转换站",
+      "category": "interchange",
+      "lat": 1.332069,
+      "lon": 103.847134,
+      "aliases": [
+        "toa payoh bus interchange",
+        "toa payoh interchange",
+        "大巴窑巴士转换站"
+      ]
+    },
+    {
+      "id": "jurong-east-bus-interchange",
+      "name_en": "Jurong East Bus Interchange",
+      "name_zh": "裕廊东巴士转换站",
+      "category": "interchange",
+      "lat": 1.331864,
+      "lon": 103.740927,
+      "aliases": [
+        "jurong east bus interchange",
+        "jurong east interchange",
+        "裕廊东巴士转换站"
+      ]
+    },
+    {
+      "id": "woodlands-bus-interchange",
+      "name_en": "Woodlands Bus Interchange",
+      "name_zh": "兀兰巴士转换站",
+      "category": "interchange",
+      "lat": 1.437588,
+      "lon": 103.786575,
+      "aliases": [
+        "woodlands bus interchange",
+        "woodlands interchange",
+        "兀兰巴士转换站"
+      ]
+    },
+    {
+      "id": "yishun-bus-interchange",
+      "name_en": "Yishun Bus Interchange",
+      "name_zh": "义顺巴士转换站",
+      "category": "interchange",
+      "lat": 1.427866,
+      "lon": 103.836144,
+      "aliases": [
+        "yishun bus interchange",
+        "yishun interchange",
+        "义顺巴士转换站"
+      ]
+    },
+    {
+      "id": "boon-lay-bus-interchange",
+      "name_en": "Boon Lay Bus Interchange",
+      "name_zh": "文礼巴士转换站",
+      "category": "interchange",
+      "lat": 1.339315,
+      "lon": 103.705351,
+      "aliases": [
+        "boon lay bus interchange",
+        "boon lay interchange",
+        "文礼巴士转换站"
+      ]
+    },
+    {
+      "id": "choa-chu-kang-bus-interchange",
+      "name_en": "Choa Chu Kang Bus Interchange",
+      "name_zh": "蔡厝港巴士转换站",
+      "category": "interchange",
+      "lat": 1.385555,
+      "lon": 103.745262,
+      "aliases": [
+        "cck bus interchange",
+        "cck interchange",
+        "choa chu kang bus interchange",
+        "蔡厝港巴士转换站"
+      ]
+    },
+    {
+      "id": "clementi-bus-interchange",
+      "name_en": "Clementi Bus Interchange",
+      "name_zh": "金文泰巴士转换站",
+      "category": "interchange",
+      "lat": 1.314967,
+      "lon": 103.76427,
+      "aliases": [
+        "clementi bus interchange",
+        "clementi interchange",
+        "金文泰巴士转换站"
+      ]
+    },
+    {
+      "id": "bishan-bus-interchange",
+      "name_en": "Bishan Bus Interchange",
+      "name_zh": "碧山巴士转换站",
+      "category": "interchange",
+      "lat": 1.350117,
+      "lon": 103.849763,
+      "aliases": [
+        "bishan bus interchange",
+        "bishan interchange",
+        "碧山巴士转换站"
+      ]
+    },
+    {
+      "id": "ica-building",
+      "name_en": "ICA Building",
+      "name_zh": "移民与关卡局大厦",
+      "category": "government",
+      "lat": 1.306538,
+      "lon": 103.862571,
+      "aliases": [
+        "ica",
+        "ica building",
+        "immigration",
+        "移民与关卡局",
+        "移民厅"
+      ]
+    },
+    {
+      "id": "hdb-hub",
+      "name_en": "HDB Hub",
+      "name_zh": "建屋局中心",
+      "category": "government",
+      "lat": 1.332055,
+      "lon": 103.848508,
+      "aliases": [
+        "hdb",
+        "hdb hub",
+        "建屋局",
+        "建屋局中心"
+      ]
+    },
+    {
+      "id": "cpf-board",
+      "name_en": "CPF Building",
+      "name_zh": "公积金局大厦",
+      "category": "government",
+      "lat": 1.34966,
+      "lon": 103.84919,
+      "aliases": [
+        "cpf",
+        "cpf board",
+        "cpf building",
+        "公积金局"
+      ]
+    },
+    {
+      "id": "revenue-house",
+      "name_en": "Revenue House",
+      "name_zh": "税务大厦",
+      "category": "government",
+      "lat": 1.319518,
+      "lon": 103.842155,
+      "aliases": [
+        "iras",
+        "revenue house",
+        "税务大厦",
+        "税务局"
+      ]
+    },
+    {
+      "id": "supreme-court",
+      "name_en": "Supreme Court",
+      "name_zh": "最高法院",
+      "category": "government",
+      "lat": 1.289871,
+      "lon": 103.851257,
+      "aliases": [
+        "supreme court",
+        "最高法院"
+      ]
+    },
+    {
+      "id": "parliament-house",
+      "name_en": "Parliament House",
+      "name_zh": "国会大厦",
+      "category": "government",
+      "lat": 1.288688,
+      "lon": 103.851118,
+      "aliases": [
+        "parliament",
+        "parliament house",
+        "国会大厦"
+      ]
+    },
+    {
+      "id": "national-library",
+      "name_en": "National Library",
+      "name_zh": "国家图书馆",
+      "category": "government",
+      "lat": 1.348342,
+      "lon": 103.677442,
+      "aliases": [
+        "national library",
+        "国家图书馆"
+      ]
+    },
+    {
+      "id": "tampines-regional-library",
+      "name_en": "Tampines Regional Library",
+      "name_zh": "淡滨尼区域图书馆",
+      "category": "government",
+      "lat": 1.353387,
+      "lon": 103.940269,
+      "aliases": [
+        "tampines library",
+        "tampines regional library",
+        "淡滨尼图书馆"
+      ]
+    },
+    {
+      "id": "pasir-ris-elias-cc",
+      "name_en": "Pasir Ris Elias Community Club",
+      "name_zh": "巴西立伊莱雅斯民众俱乐部",
+      "category": "government",
+      "lat": 1.378439,
+      "lon": 103.942549,
+      "aliases": [
+        "elias cc",
+        "pasir ris elias community club",
+        "巴西立民众俱乐部",
+        "民众俱乐部"
+      ]
+    },
+    {
+      "id": "mom-services-centre",
+      "name_en": "Ministry of Manpower Services Centre",
+      "name_zh": "人力部服务中心",
+      "category": "government",
+      "lat": 1.326303,
+      "lon": 103.869036,
+      "aliases": [
+        "ministry of manpower",
+        "mom",
+        "人力部"
+      ]
+    },
+    {
+      "id": "singapore-land-authority",
+      "name_en": "Singapore Land Authority",
+      "name_zh": "新加坡土地管理局",
+      "category": "government",
+      "lat": 1.319741,
+      "lon": 103.842018,
+      "aliases": [
+        "singapore land authority",
+        "sla",
+        "土地管理局"
+      ]
+    },
+    {
+      "id": "gardens-by-the-bay",
+      "name_en": "Gardens by the Bay",
+      "name_zh": "滨海湾花园",
+      "category": "landmark",
+      "lat": 1.284589,
+      "lon": 103.864657,
+      "aliases": [
+        "gardens by the bay",
+        "滨海湾花园"
+      ]
+    },
+    {
+      "id": "merlion-park",
+      "name_en": "Merlion Park",
+      "name_zh": "鱼尾狮公园",
+      "category": "landmark",
+      "lat": 1.286811,
+      "lon": 103.854535,
+      "aliases": [
+        "merlion",
+        "merlion park",
+        "鱼尾狮",
+        "鱼尾狮公园"
+      ]
+    },
+    {
+      "id": "sentosa",
+      "name_en": "Sentosa",
+      "name_zh": "圣淘沙",
+      "category": "landmark",
+      "lat": 1.249812,
+      "lon": 103.829491,
+      "aliases": [
+        "sentosa",
+        "圣淘沙"
+      ]
+    },
+    {
+      "id": "universal-studios",
+      "name_en": "Universal Studios Singapore",
+      "name_zh": "环球影城",
+      "category": "landmark",
+      "lat": 1.256121,
+      "lon": 103.822537,
+      "aliases": [
+        "universal studios",
+        "uss",
+        "环球影城"
+      ]
+    },
+    {
+      "id": "singapore-zoo",
+      "name_en": "Singapore Zoo",
+      "name_zh": "新加坡动物园",
+      "category": "landmark",
+      "lat": 1.405594,
+      "lon": 103.789598,
+      "aliases": [
+        "singapore zoo",
+        "zoo",
+        "动物园",
+        "新加坡动物园"
+      ]
+    },
+    {
+      "id": "night-safari",
+      "name_en": "Night Safari",
+      "name_zh": "夜间野生动物园",
+      "category": "landmark",
+      "lat": 1.401633,
+      "lon": 103.784335,
+      "aliases": [
+        "night safari",
+        "夜间野生动物园"
+      ]
+    },
+    {
+      "id": "bird-paradise",
+      "name_en": "Bird Paradise",
+      "name_zh": "飞禽公园",
+      "category": "landmark",
+      "lat": 1.404712,
+      "lon": 103.779811,
+      "aliases": [
+        "bird paradise",
+        "bird park",
+        "jurong bird park",
+        "飞禽公园"
+      ]
+    },
+    {
+      "id": "science-centre",
+      "name_en": "Science Centre Singapore",
+      "name_zh": "新加坡科学馆",
+      "category": "landmark",
+      "lat": 1.332839,
+      "lon": 103.735821,
+      "aliases": [
+        "science center",
+        "science centre",
+        "新加坡科学馆",
+        "科学馆"
+      ]
+    },
+    {
+      "id": "esplanade",
+      "name_en": "Esplanade",
+      "name_zh": "滨海艺术中心",
+      "category": "landmark",
+      "lat": 1.290205,
+      "lon": 103.855567,
+      "aliases": [
+        "esplanade",
+        "榴莲壳",
+        "滨海艺术中心"
+      ]
+    },
+    {
+      "id": "singapore-flyer",
+      "name_en": "Singapore Flyer",
+      "name_zh": "新加坡摩天观景轮",
+      "category": "landmark",
+      "lat": 1.289073,
+      "lon": 103.862922,
+      "aliases": [
+        "flyer",
+        "singapore flyer",
+        "摩天观景轮"
+      ]
+    },
+    {
+      "id": "national-stadium",
+      "name_en": "National Stadium",
+      "name_zh": "国家体育场",
+      "category": "landmark",
+      "lat": 1.304698,
+      "lon": 103.873563,
+      "aliases": [
+        "national stadium",
+        "sports hub",
+        "国家体育场"
+      ]
+    },
+    {
+      "id": "botanic-gardens",
+      "name_en": "Singapore Botanic Gardens",
+      "name_zh": "新加坡植物园",
+      "category": "landmark",
+      "lat": 1.310387,
+      "lon": 103.81632,
+      "aliases": [
+        "botanic gardens",
+        "植物园"
+      ]
+    },
+    {
+      "id": "east-coast-park",
+      "name_en": "East Coast Park",
+      "name_zh": "东海岸公园",
+      "category": "landmark",
+      "lat": 1.313266,
+      "lon": 103.924569,
+      "aliases": [
+        "east coast park",
+        "ecp",
+        "东海岸公园"
+      ]
+    },
+    {
+      "id": "pasir-ris-park",
+      "name_en": "Pasir Ris Park",
+      "name_zh": "巴西立公园",
+      "category": "landmark",
+      "lat": 1.367703,
+      "lon": 103.961961,
+      "aliases": [
+        "pasir ris park",
+        "巴西立公园"
+      ]
+    },
+    {
+      "id": "changi-beach-park",
+      "name_en": "Changi Beach Park",
+      "name_zh": "樟宜海滩公园",
+      "category": "landmark",
+      "lat": 1.382729,
+      "lon": 104.001982,
+      "aliases": [
+        "changi beach",
+        "changi beach park",
+        "樟宜海滩"
+      ]
+    },
+    {
+      "id": "singapore-expo",
+      "name_en": "Singapore Expo",
+      "name_zh": "新加坡博览中心",
+      "category": "landmark",
+      "lat": 1.334402,
+      "lon": 103.96036,
+      "aliases": [
+        "expo",
+        "singapore expo",
+        "博览中心",
+        "新加坡博览中心"
+      ]
+    },
+    {
+      "id": "suntec-convention",
+      "name_en": "Suntec Singapore Convention Centre",
+      "name_zh": "新达城会展中心",
+      "category": "landmark",
+      "lat": 1.293504,
+      "lon": 103.857195,
+      "aliases": [
+        "suntec convention",
+        "suntec convention centre",
+        "新达城会展中心"
+      ]
+    },
+    {
+      "id": "chinatown",
+      "name_en": "Chinatown",
+      "name_zh": "牛车水",
+      "category": "landmark",
+      "lat": 1.282275,
+      "lon": 103.843239,
+      "aliases": [
+        "chinatown",
+        "牛车水"
+      ]
+    },
+    {
+      "id": "little-india",
+      "name_en": "Little India",
+      "name_zh": "小印度",
+      "category": "landmark",
+      "lat": 1.309712,
+      "lon": 103.853435,
+      "aliases": [
+        "little india",
+        "小印度"
+      ]
+    },
+    {
+      "id": "kampong-glam",
+      "name_en": "Kampong Glam",
+      "name_zh": "甘榜格南",
+      "category": "landmark",
+      "lat": 1.302795,
+      "lon": 103.863598,
+      "aliases": [
+        "arab street",
+        "kampong glam",
+        "甘榜格南",
+        "阿拉伯街"
+      ]
+    },
+    {
+      "id": "clarke-quay",
+      "name_en": "Clarke Quay",
+      "name_zh": "克拉码头",
+      "category": "landmark",
+      "lat": 1.291878,
+      "lon": 103.844228,
+      "aliases": [
+        "clarke quay",
+        "克拉码头"
+      ]
+    },
+    {
+      "id": "boat-quay",
+      "name_en": "Boat Quay",
+      "name_zh": "驳船码头",
+      "category": "landmark",
+      "lat": 1.287736,
+      "lon": 103.849343,
+      "aliases": [
+        "boat quay",
+        "驳船码头"
+      ]
+    },
+    {
+      "id": "orchard-road",
+      "name_en": "Orchard Road",
+      "name_zh": "乌节路",
+      "category": "landmark",
+      "lat": 1.303228,
+      "lon": 103.83668,
+      "aliases": [
+        "orchard",
+        "orchard road",
+        "乌节路"
+      ]
+    },
+    {
+      "id": "one-raffles-place",
+      "name_en": "One Raffles Place",
+      "name_zh": "莱佛士坊一号",
+      "category": "landmark",
+      "lat": 1.28435,
+      "lon": 103.851073,
+      "aliases": [
+        "one raffles place",
+        "莱佛士坊一号"
+      ]
+    },
+    {
+      "id": "marina-barrage",
+      "name_en": "Marina Barrage",
+      "name_zh": "滨海堤坝",
+      "category": "landmark",
+      "lat": 1.279906,
+      "lon": 103.87047,
+      "aliases": [
+        "marina barrage",
+        "滨海堤坝"
+      ]
+    },
+    {
+      "id": "fort-canning-park",
+      "name_en": "Fort Canning Park",
+      "name_zh": "福康宁公园",
+      "category": "landmark",
+      "lat": 1.292516,
+      "lon": 103.847682,
+      "aliases": [
+        "fort canning",
+        "fort canning park",
+        "福康宁公园"
+      ]
+    },
+    {
+      "id": "bukit-timah-nature-reserve",
+      "name_en": "Bukit Timah Nature Reserve",
+      "name_zh": "武吉知马自然保护区",
+      "category": "landmark",
+      "lat": 1.354431,
+      "lon": 103.778073,
+      "aliases": [
+        "bukit timah nature reserve",
+        "武吉知马自然保护区"
+      ]
+    },
+    {
+      "id": "mandai-wildlife-reserve",
+      "name_en": "Mandai Wildlife Reserve",
+      "name_zh": "万礼野生动物保护区",
+      "category": "landmark",
+      "lat": 1.406421,
+      "lon": 103.789653,
+      "aliases": [
+        "mandai",
+        "mandai wildlife reserve",
+        "万礼"
+      ]
+    },
+    {
+      "id": "river-wonders",
+      "name_en": "River Wonders",
+      "name_zh": "河川生态园",
+      "category": "landmark",
+      "lat": 1.403662,
+      "lon": 103.792461,
+      "aliases": [
+        "river safari",
+        "river wonders",
+        "河川生态园"
+      ]
+    },
+    {
+      "id": "nus",
+      "name_en": "National University of Singapore",
+      "name_zh": "新加坡国立大学",
+      "category": "education",
+      "lat": 1.294201,
+      "lon": 103.771072,
+      "aliases": [
+        "national university of singapore",
+        "nus",
+        "国大",
+        "新加坡国立大学"
+      ]
+    },
+    {
+      "id": "ntu",
+      "name_en": "Nanyang Technological University",
+      "name_zh": "南洋理工大学",
+      "category": "education",
+      "lat": 1.352949,
+      "lon": 103.689224,
+      "aliases": [
+        "nanyang technological university",
+        "ntu",
+        "南大",
+        "南洋理工大学"
+      ]
+    },
+    {
+      "id": "smu",
+      "name_en": "Singapore Management University",
+      "name_zh": "新加坡管理大学",
+      "category": "education",
+      "lat": 1.296847,
+      "lon": 103.852208,
+      "aliases": [
+        "singapore management university",
+        "smu",
+        "新加坡管理大学"
+      ]
+    },
+    {
+      "id": "sutd",
+      "name_en": "Singapore University of Technology and Design",
+      "name_zh": "新加坡科技设计大学",
+      "category": "education",
+      "lat": 1.340172,
+      "lon": 103.96286,
+      "aliases": [
+        "singapore university of technology and design",
+        "sutd",
+        "新加坡科技设计大学"
+      ]
+    },
+    {
+      "id": "temasek-polytechnic",
+      "name_en": "Temasek Polytechnic",
+      "name_zh": "淡马锡理工学院",
+      "category": "education",
+      "lat": 1.346634,
+      "lon": 103.931221,
+      "aliases": [
+        "temasek poly",
+        "temasek polytechnic",
+        "tp",
+        "淡马锡理工学院"
+      ]
+    },
+    {
+      "id": "ngee-ann-polytechnic",
+      "name_en": "Ngee Ann Polytechnic",
+      "name_zh": "义安理工学院",
+      "category": "education",
+      "lat": 1.332481,
+      "lon": 103.773306,
+      "aliases": [
+        "ngee ann poly",
+        "ngee ann polytechnic",
+        "np",
+        "义安理工学院"
+      ]
+    },
+    {
+      "id": "singapore-polytechnic",
+      "name_en": "Singapore Polytechnic",
+      "name_zh": "新加坡理工学院",
+      "category": "education",
+      "lat": 1.293921,
+      "lon": 103.7631,
+      "aliases": [
+        "singapore poly",
+        "singapore polytechnic",
+        "sp",
+        "新加坡理工学院"
+      ]
+    },
+    {
+      "id": "republic-polytechnic",
+      "name_en": "Republic Polytechnic",
+      "name_zh": "共和理工学院",
+      "category": "education",
+      "lat": 1.444968,
+      "lon": 103.785362,
+      "aliases": [
+        "republic poly",
+        "republic polytechnic",
+        "rp",
+        "共和理工学院"
+      ]
+    },
+    {
+      "id": "nanyang-polytechnic",
+      "name_en": "Nanyang Polytechnic",
+      "name_zh": "南洋理工学院",
+      "category": "education",
+      "lat": 1.377819,
+      "lon": 103.848423,
+      "aliases": [
+        "nanyang poly",
+        "nanyang polytechnic",
+        "nyp",
+        "南洋理工学院"
+      ]
+    }
+  ]
+}
