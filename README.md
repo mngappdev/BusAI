@@ -76,10 +76,15 @@ docker run -p 8000:8000 -e LTA_API_KEY=你的LTA_API_KEY kinetic-concierge
 set LTA_API_KEY=你的LTA_API_KEY
 set DATAGOVSG=你的DATA_GOV_SG_API_KEY
 set LTA_REFRESH_INTERVAL=900
+set ONEMAP_EMAIL=你的OneMap账号邮箱
+set ONEMAP_PASSWORD=你的OneMap账号密码
 ```
 
 - `LTA_API_KEY`：LTA DataMall API Key
 - `LTA_REFRESH_INTERVAL`：Bus Routes 缓存刷新间隔，单位秒，默认 900
+- `ONEMAP_EMAIL` / `ONEMAP_PASSWORD`：OneMap 账号（免费注册），用于查询下车站到目的地的**真实路网步行距离**。
+  密码变量也接受 `ONEMAP_EMAIL_PASSWORD` 这个名字，两者等价。
+  未配置、或账号无 API 权限时自动回退为直线距离 × 1.3 的估算，功能不受影响。
 
 ### Azure Web App 配置建议
 

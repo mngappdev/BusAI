@@ -10,6 +10,11 @@ from dotenv import load_dotenv
 load_dotenv()  # picks up LTA_API_KEY (and anything else) from a .env file, if present
 
 LTA_API_BASE = "https://datamall2.mytransport.sg/ltaodataservice"
+ONEMAP_API_BASE = "https://www.onemap.gov.sg/api"
+
+WALK_SPEED_M_PER_MIN = 80   # project-wide walking pace, also used by nearby-stop cards
+WALK_DETOUR_FACTOR = 1.3    # straight line -> street network, when OneMap is unavailable
+
 logger = logging.getLogger(__name__)
 
 class BusSmartEngine:
@@ -25,6 +30,8 @@ class BusSmartEngine:
         for r in self.routes:
             self.stop_to_routes[r['BusStopCode']].append(r)
         self._arrival_cache = {}
+        self._walk_cache = {}
+        self._onemap_auth = None
 
         self.berth_map = self._load_berth_map(base_path)
         self.berth_lookup = self._build_berth_lookup()
@@ -335,6 +342,25 @@ class BusSmartEngine:
         ))
         return final
 
+    def _attach_walk_to_dest(self, legs, e_lat, e_lon, network_lookups=3):
+        """Walk from the alighting stop to the real destination (not the on-bus distance).
+
+        Only the options the kiosk actually displays get a live OneMap lookup, so a
+        long option list can never stall the journey plan.
+        """
+        for index, leg in enumerate(legs):
+            stop = self.stop_map.get(leg['to_code'])
+            if not stop:
+                continue
+            walk = self.walking_route(
+                stop['Latitude'], stop['Longitude'], e_lat, e_lon,
+                allow_network=index < network_lookups,
+            )
+            leg['walk_to_dest_m'] = walk['distance_m']
+            leg['walk_to_dest_min'] = walk['minutes']
+            leg['walk_source'] = walk['source']
+        return legs
+
     def best_route_candidates(self, s_lat, s_lon, e_lat, e_lon):
         dist = self.haversine(s_lat, s_lon, e_lat, e_lon)
         if dist < 800:
@@ -352,7 +378,7 @@ class BusSmartEngine:
 
         direct = self._find_direct_routes(start_cluster, end_cluster)
         if direct:
-            processed = self._process_options(direct)
+            processed = self._attach_walk_to_dest(self._process_options(direct), e_lat, e_lon)
             return {
                 'type': 'bus',
                 'mode': 'direct',
@@ -363,6 +389,7 @@ class BusSmartEngine:
 
         transfer = self._find_transfer_routes(start_cluster, end_cluster)
         if transfer:
+            self._attach_walk_to_dest([opt['leg2'] for opt in transfer], e_lat, e_lon)
             return {
                 'type': 'bus',
                 'mode': 'transfer',
@@ -392,6 +419,83 @@ class BusSmartEngine:
                 'distance_km': float(r.get('Distance', 0)),
             })
         return {'service': service_no, 'directions': grouped}
+
+    # ─── Walking distance ─────────────────────────────────────────────────────
+
+    def _get_onemap_token(self):
+        """Cached OneMap auth token. Returns None when credentials are absent or auth fails."""
+        email = os.getenv('ONEMAP_EMAIL')
+        # Both spellings are accepted: Azure and the local setup scripts differ.
+        password = os.getenv('ONEMAP_PASSWORD') or os.getenv('ONEMAP_EMAIL_PASSWORD')
+        if not email or not password:
+            return None
+
+        now = datetime.now(timezone.utc).timestamp()
+        if self._onemap_auth and self._onemap_auth[1] - 60 > now:
+            return self._onemap_auth[0]
+
+        try:
+            r = requests.post(
+                f'{ONEMAP_API_BASE}/auth/post/getToken',
+                json={'email': email, 'password': password},
+                timeout=5,
+            )
+            r.raise_for_status()
+            payload = r.json()
+            token = payload.get('access_token')
+            if not token:
+                return None
+            self._onemap_auth = (token, float(payload.get('expiry_timestamp', now + 3600)))
+            return token
+        except Exception:
+            return None
+
+    def _estimated_walk(self, straight_m):
+        """Straight-line distance padded for real street detours."""
+        padded = straight_m * WALK_DETOUR_FACTOR
+        return {
+            'distance_m': round(padded),
+            'minutes': max(1, round(padded / WALK_SPEED_M_PER_MIN)),
+            'source': 'estimate',
+        }
+
+    def walking_route(self, s_lat, s_lon, e_lat, e_lon, allow_network=True):
+        """Street-network walking distance from OneMap, falling back to a padded straight line."""
+        key = (round(s_lat, 5), round(s_lon, 5), round(e_lat, 5), round(e_lon, 5))
+        if key in self._walk_cache:
+            return self._walk_cache[key]
+
+        straight_m = self.haversine(s_lat, s_lon, e_lat, e_lon)
+        token = self._get_onemap_token() if allow_network else None
+        if not token:
+            return self._estimated_walk(straight_m)
+
+        try:
+            r = requests.get(
+                f'{ONEMAP_API_BASE}/public/routingsvc/route',
+                headers={'Authorization': token},
+                params={
+                    'start': f'{s_lat},{s_lon}',
+                    'end': f'{e_lat},{e_lon}',
+                    'routeType': 'walk',
+                },
+                timeout=5,
+            )
+            r.raise_for_status()
+            metres = (r.json().get('route_summary') or {}).get('total_distance')
+            if metres is None:
+                return self._estimated_walk(straight_m)
+            walk = {
+                'distance_m': round(float(metres)),
+                'minutes': max(1, round(float(metres) / WALK_SPEED_M_PER_MIN)),
+                'source': 'onemap',
+            }
+        except Exception:
+            return self._estimated_walk(straight_m)
+
+        # Only real routing answers are worth caching; estimates are cheap to redo.
+        self._walk_cache[key] = walk
+        return walk
 
     # ─── External API helpers ─────────────────────────────────────────────────
 
