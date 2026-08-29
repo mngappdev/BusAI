@@ -1,6 +1,7 @@
 import json
 import logging
 import math
+import re
 import requests
 import os
 from datetime import datetime, timezone
@@ -14,6 +15,53 @@ ONEMAP_API_BASE = "https://www.onemap.gov.sg/api"
 
 WALK_SPEED_M_PER_MIN = 80   # project-wide walking pace, also used by nearby-stop cards
 WALK_DETOUR_FACTOR = 1.3    # straight line -> street network, when OneMap is unavailable
+
+# What a Singapore passenger says vs what the alias table stores.
+SHORT_FORMS = {
+    'hosp': 'hospital',
+    'stn': 'station',
+    'mrt': 'station',
+    'int': 'interchange',
+    'poly': 'polyclinic',
+    'polyclinics': 'polyclinic',
+    'ctr': 'centre',
+    'center': 'centre',
+    'sq': 'square',
+    'st': 'street',
+    'rd': 'road',
+    'ave': 'avenue',
+    'pk': 'park',
+    'jln': 'jalan',
+    'bt': 'bukit',
+    'apt': 'airport',
+}
+
+# Singlish particles and fillers. Stripped only as a second pass — see
+# _strip_filler for why the order matters.
+FILLER_WORDS = {
+    'lah', 'leh', 'lor', 'hor', 'ah', 'sia', 'meh', 'liao', 'eh', 'uh', 'um',
+    'one', 'can', 'please', 'pls', 'the', 'a', 'to', 'go', 'going', 'want',
+    'wanna', 'i', 'me', 'my', 'now', 'there', 'here', 'ok', 'okay', 'hey',
+    '啊', '啦', '咯', '喽', '呢', '吧', '嘛', '我', '要', '去', '到', '想',
+}
+
+LEAD_IN_PHRASES = [
+    'how to go to', 'how do i go to', 'how to go', 'how to get to',
+    'i want to go to', 'i want to go', 'i wanna go to', 'i wanna go',
+    'please take me to', 'take me to', 'bring me to', 'send me to',
+    'can you bring me to', 'can or not', 'go where',
+]
+
+# Chinese runs together with no spaces, so these are stripped as bare prefixes
+# rather than as whitespace-delimited phrases. Longest first, so that
+# "我要去到" is not half-eaten by "我要去".
+CN_LEAD_INS = sorted(
+    ['我要去到', '我想要去', '我要前往', '请带我去', '麻烦带我去', '我要去', '我想去',
+     '带我去', '我要到', '我想到', '前往', '去到', '要去', '去', '到'],
+    key=len,
+    reverse=True,
+)
+CN_TRAILING = ['吗', '啊', '呢', '吧', '嘛', '啦', '咯', '喽', '好吗', '怎么走', '怎么去']
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +84,7 @@ class BusSmartEngine:
         self.berth_map = self._load_berth_map(base_path)
         self.berth_lookup = self._build_berth_lookup()
         self.nearby_places_data = self._load_nearby_places(base_path)
+        self.places, self.place_alias_index = self._load_place_aliases(base_path)
 
         self._initialize_data()
 
@@ -63,6 +112,19 @@ class BusSmartEngine:
                 return json.load(f)
         except FileNotFoundError:
             return {}
+
+    def _load_place_aliases(self, base_path):
+        try:
+            with open(os.path.join(base_path, "places_aliases.json"), 'r', encoding='utf-8') as f:
+                places = json.load(f).get('places', [])
+        except FileNotFoundError:
+            return [], {}
+
+        index = {}
+        for place in places:
+            for alias in place.get('aliases', []):
+                index.setdefault(self.normalize_query(alias), (place, alias))
+        return places, index
 
     def _load_nearby_places(self, base_path):
         try:
@@ -419,6 +481,121 @@ class BusSmartEngine:
                 'distance_km': float(r.get('Distance', 0)),
             })
         return {'service': service_no, 'directions': grouped}
+
+    # ─── Place resolution ─────────────────────────────────────────────────────
+
+    def normalize_query(self, text):
+        """Fold a spoken or typed query to a comparable form.
+
+        Punctuation goes, case goes, and the short forms locals actually use are
+        expanded. Chinese is left alone apart from spacing — it has no case and
+        the alias table carries the Chinese names verbatim.
+        """
+        if not text:
+            return ''
+
+        lowered = str(text).lower()
+        # Full-width punctuation shows up in Chinese voice transcripts.
+        lowered = re.sub(r"[^\w一-鿿]+", ' ', lowered)
+        tokens = [SHORT_FORMS.get(token, token) for token in lowered.split() if token]
+        return ' '.join(tokens).strip()
+
+    def _strip_filler(self, normalized):
+        """Drop Singlish particles and lead-ins.
+
+        Only ever called after a clean match has already failed: 'one' and 'can'
+        are particles in "go tampines mall one" and names in "One Raffles
+        Place" and "Canberra". Trying this first would eat the second kind.
+        """
+        text = normalized
+        for prefix in CN_LEAD_INS:
+            if text.startswith(prefix) and len(text) > len(prefix):
+                text = text[len(prefix):]
+                break
+        for suffix in CN_TRAILING:
+            if text.endswith(suffix) and len(text) > len(suffix):
+                text = text[: -len(suffix)]
+                break
+        for phrase in LEAD_IN_PHRASES:
+            text = re.sub(r'(^|\s)' + re.escape(phrase) + r'(\s|$)', ' ', text)
+        tokens = [t for t in text.split() if t not in FILLER_WORDS]
+        return ' '.join(tokens).strip()
+
+    def _join_spelled_letters(self, normalized):
+        """"c g h" and "c.g.h." both reach us as single letters — rejoin them.
+
+        Speech recognition spells acronyms out, and so do people typing them.
+        """
+        tokens = normalized.split()
+        if len(tokens) >= 2 and all(len(t) == 1 and t.isalpha() for t in tokens):
+            return ''.join(tokens)
+        return ''
+
+    def _alias_candidates(self, query):
+        """Score every alias against the query. Exact beats containment beats overlap."""
+        if not query:
+            return {}
+
+        query_tokens = set(query.split())
+        scored = {}
+
+        for alias_key, (place, alias) in self.place_alias_index.items():
+            score = 0
+            if alias_key == query:
+                score = 100
+            elif query.startswith(alias_key + ' ') or query.endswith(' ' + alias_key) or f' {alias_key} ' in f' {query} ':
+                # The alias appears whole inside the query: "go to tampines mall".
+                score = 80 + len(alias_key) / 100
+            elif alias_key.startswith(query + ' ') or alias_key.endswith(' ' + query):
+                # The query is a prefix or suffix of a longer alias.
+                score = 60 + len(query) / 100
+            else:
+                alias_tokens = set(alias_key.split())
+                shared = query_tokens & alias_tokens
+                if shared and len(shared) == len(alias_tokens):
+                    score = 50 + len(shared)
+                elif len(shared) >= 2:
+                    score = 30 + len(shared)
+
+            if score and score > scored.get(place['id'], (0, None))[0]:
+                scored[place['id']] = (score, alias)
+
+        return scored
+
+    def resolve_place(self, query, limit=3):
+        """Curated Singapore places, matched the way people actually ask for them."""
+        normalized = self.normalize_query(query)
+        if not normalized:
+            return []
+
+        # Try the query as spoken first. Only when that finds nothing do we
+        # start removing words — otherwise "One Raffles Place" loses its name.
+        scored = self._alias_candidates(normalized)
+        for fallback in (self._join_spelled_letters(normalized), self._strip_filler(normalized)):
+            if scored:
+                break
+            if fallback and fallback != normalized:
+                scored = self._alias_candidates(fallback)
+
+        if not scored:
+            return []
+
+        by_id = {p['id']: p for p in self.places}
+        ranked = sorted(scored.items(), key=lambda item: (-item[1][0], item[0]))
+        results = []
+        for place_id, (score, alias) in ranked[:limit]:
+            place = by_id[place_id]
+            results.append({
+                'id': place['id'],
+                'name_en': place['name_en'],
+                'name_zh': place['name_zh'],
+                'category': place['category'],
+                'lat': place['lat'],
+                'lon': place['lon'],
+                'score': round(score, 2),
+                'matched_alias': alias,
+            })
+        return results
 
     # ─── Walking distance ─────────────────────────────────────────────────────
 

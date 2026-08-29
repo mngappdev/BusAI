@@ -56,6 +56,17 @@ async def nearby_places(
     return engine.nearby_places(lat, lon)
 
 
+@app.get("/api/v1/resolve-place")
+async def resolve_place(q: str = Query(..., min_length=1), limit: int = Query(3, ge=1, le=10)):
+    """Curated Singapore places, matched the way people actually ask for them —
+    Chinese names, local abbreviations (CGH, SGH) and Singlish phrasing."""
+    return {
+        "query": q,
+        "normalized": engine.normalize_query(q),
+        "results": engine.resolve_place(q, limit=limit),
+    }
+
+
 @app.get("/api/v1/routes/{service_no}")
 async def route_summary(service_no: str):
     summary = engine.route_summary(service_no)

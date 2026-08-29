@@ -932,13 +932,33 @@
       return null;
     }
 
+    async function resolvePlaceFromAliases(query) {
+      // Curated Singapore places: Chinese names, local abbreviations (CGH,
+      // SGH) and Singlish phrasing, none of which OneMap's English search
+      // matches. Checked first because it is the most specific.
+      try {
+        const res = await fetch(`${apiBase}/api/v1/resolve-place?q=${encodeURIComponent(query)}&limit=1`);
+        const data = await res.json();
+        const hit = data?.results?.[0];
+        if (hit) {
+          return {
+            lat: hit.lat,
+            lon: hit.lon,
+            label: stateLang.ui === 'zh' ? (hit.name_zh || hit.name_en) : hit.name_en,
+          };
+        }
+      } catch (err) {
+        console.warn('place alias lookup failed', err);
+      }
+      return null;
+    }
+
     async function resolveLocationFromText(text) {
       const query = normalizeVoiceQuery(text);
       if (!query) return null;
 
-      if (/机场|t2|changi|airport/i.test(query)) {
-        return demoDestination;
-      }
+      const curated = await resolvePlaceFromAliases(query);
+      if (curated) return curated;
 
       try {
         const geoRes = await fetch(`https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${encodeURIComponent(query)}&returnGeom=Y&getAddrDetails=Y&pageNum=1`);
