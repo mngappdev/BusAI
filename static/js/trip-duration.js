@@ -11,7 +11,10 @@
   // bus shows up, not how long the trip itself takes.
   function computeDirectTripMinutes(best) {
     const travelMins = Math.max(4, (best?.stops ?? 5) * 2);
-    const walkMins = Math.round((best?.dist_km ?? 0.5) * 12);
+    // The engine measures this from the alighting stop to the destination.
+    // Never derive it from dist_km — that is the distance travelled ON the
+    // bus, and scaling it once turned a 2-minute walk into 101 minutes.
+    const walkMins = Math.max(1, best?.walk_to_dest_min ?? 5);
     return travelMins + walkMins;
   }
 

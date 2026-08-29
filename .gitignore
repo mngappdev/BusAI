@@ -1,3 +1,24 @@
+# ─── Secrets ──────────────────────────────────────────────────────────────
+# LTA_API_KEY, ONEMAP_EMAIL, ONEMAP_PASSWORD / ONEMAP_EMAIL_PASSWORD etc.
 .env
-*.pyc
+.env.*
+!.env.example
+*.pem
+credentials.json
+token.json
+
+# ─── Python ───────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
 .pytest_cache/
+.venv/
+venv/
+
+# ─── Editors / OS ─────────────────────────────────────────────────────────
+.vs/
+.idea/
+*.swp
+Thumbs.db
+ehthumbs.db
+Desktop.ini

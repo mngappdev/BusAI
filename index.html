@@ -303,9 +303,8 @@
       <div class="panel p-5 mb-6">
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 rounded-full overflow-hidden bg-slate-200">
-            <!-- <img src="bus2.jpg" alt="Concierge" class="w-full h-full object-cover"> -->
             <img
-              src="https://69d215411362132535daf948.imgix.net/bus2.jpg?w=200&q=80&auto=format&fit=crop"
+              src="/static/img/bus2.jpg"
               alt="Concierge"
               class="w-full h-full object-cover"
             />
@@ -335,9 +334,8 @@
           <div class="hero-chat">
             <div class="grid grid-cols-[92px_minmax(0,1fr)] gap-4 items-center">
               <div class="flex flex-col items-center">
-                <!-- <img src="bus2.jpg" alt="AI" class="w-24 h-24 rounded-[22px] object-cover ring-2 ring-white shadow-lg"> -->
                 <img
-                  src="https://69d215411362132535daf948.imgix.net/bus2.jpg?w=200&q=80&auto=format&fit=crop"
+                  src="/static/img/bus2.jpg"
                   alt="AI"
                   class="w-48 h-36 rounded-[44px] object-cover ring-2 ring-white shadow-lg"
                 />
@@ -1542,7 +1540,7 @@
       const waitMins  = leg1?.live?.minutes ?? 5;
       const travel1   = Math.max(4, leg1.stops * 2);
       const travel2   = Math.max(4, leg2.stops * 2);
-      const walkMins  = 5;
+      const walkMins  = Math.max(1, leg2?.walk_to_dest_min ?? 5);
       const departT   = new Date(now.getTime()    + waitMins  * 60000);
       const transferT = new Date(departT.getTime()  + travel1   * 60000);
       const alightT   = new Date(transferT.getTime()+ travel2   * 60000);
@@ -1595,7 +1593,7 @@
             <div class="tl-vline walk"></div>
             <div class="tl-leg-info">
               <span style="font-size:14px">🚶</span>
-              <span class="tl-leg-detail">${isZh ? '步行约 5 分钟' : 'Walk ~5 min'}</span>
+              <span class="tl-leg-detail">${isZh ? `步行约 ${walkMins} 分钟` : `Walk ~${walkMins} min`}</span>
             </div>
           </div>
           <div class="tl-row">
