@@ -460,6 +460,7 @@
   <script src="/static/js/quick-destinations.js"></script>
   <script src="/static/js/qr-payload.js"></script>
   <script src="/static/js/home-preview.js"></script>
+  <script src="/static/js/speech-errors.js"></script>
   <script>
     const apiBase = '';
     const defaultLocation = { lat: 1.373696, lon: 103.94845, label: 'Pasir Ris Bus Interchange'};
@@ -1849,7 +1850,15 @@
 
         await searchStops(text);
       };
-      recognitionInstance.onerror = () => setAssistantStatus(t('voiceError'));
+      recognitionInstance.onerror = (event) => {
+        const failure = KioskSpeechErrors.classify(event);
+        setAssistantStatus(t(failure.key));
+        if (failure.needsAttention) {
+          // Unattended kiosk: leave a trace an operator can read back, since
+          // "no microphone" and "nobody spoke" look identical on screen.
+          console.error('[speech] recognition failed:', failure.code, event);
+        }
+      };
     }
 
     langZhBtn.addEventListener('click', () => setLanguage('zh'));
