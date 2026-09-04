@@ -461,6 +461,7 @@
   <script src="/static/js/qr-payload.js"></script>
   <script src="/static/js/home-preview.js"></script>
   <script src="/static/js/speech-errors.js"></script>
+  <script src="/static/js/assistant-status.js"></script>
   <script>
     const apiBase = '';
     const defaultLocation = { lat: 1.373696, lon: 103.94845, label: 'Pasir Ris Bus Interchange'};
@@ -848,7 +849,9 @@
       }
       postcodeInput.placeholder = t('searchPlaceholder');
       document.getElementById('nearby-stops-title').textContent = `${t('nearbyStops')} | ${lang === 'zh' ? '附近站点' : 'Nearby Stops'}`;
-      document.querySelector('#assistant-status').textContent = t('ready');
+      // Re-render whatever the status currently says in the new language.
+      // Overwriting it with t('ready') threw away real state mid-flight.
+      document.querySelector('#assistant-status').textContent = assistantStatusStore.render(lang);
       document.getElementById('home-heading').textContent = t('homeHeading');
       document.getElementById('home-subheading').textContent = t('homeSubheading');
       document.getElementById('home-btn').setAttribute('title', t('home'));
@@ -988,14 +991,17 @@
       map.flyTo([location.lat, location.lon], 15, { duration: 0.5 });
       const suffix = sourceText ? ` (${sourceText})` : '';
       showToast(`${stateLang.ui === 'zh' ? '目的地已更新' : 'Destination updated'}: ${location.label}${suffix}`);
-      setAssistantStatus(stateLang.ui === 'zh'
-        ? `已识别目的地：${location.label}`
-        : `Destination resolved: ${location.label}`);
+      setAssistantStatus('destinationResolved', location.label);
       return true;
     }
 
-    function setAssistantStatus(text) {
-      assistantStatus.textContent = text;
+    const assistantStatusStore = KioskAssistantStatus.createStore(KioskI18n.translate);
+
+    // Takes an i18n key plus its arguments, never a finished string — that is
+    // what lets setLanguage re-render the current status instead of blanking it.
+    function setAssistantStatus(key, ...args) {
+      assistantStatusStore.set(key, ...args);
+      assistantStatus.textContent = assistantStatusStore.render(stateLang.ui);
     }
 
     function formatAlertText(item, type) {
@@ -1326,7 +1332,7 @@
 
     async function loadNearby(lat, lon) {
       try {
-        setAssistantStatus(t('searching'));
+        setAssistantStatus('searching');
         const res = await fetch(`${apiBase}/api/v1/nearby-stops?lat=${lat}&lon=${lon}&radius_m=900&limit=6`);
         const data = await res.json();
         const baseStops = data.stops || [];
@@ -1344,10 +1350,10 @@
         state.nearby = enrichedStops;
         renderNearbyStops(state.nearby);
         addStopMarkers(state.nearby);
-        setAssistantStatus(stateLang.ui === 'zh' ? `找到 ${state.nearby.length} 个附近站点。` : `Found ${state.nearby.length} nearby stops.`);
+        setAssistantStatus('foundNearby', state.nearby.length);
       } catch (err) {
         console.error(err);
-        setAssistantStatus(stateLang.ui === 'zh' ? '附近站点加载失败。' : 'Failed to load nearby stops.');
+        setAssistantStatus('nearbyFailed');
       }
     }
 
@@ -1462,14 +1468,14 @@
     // the quick-destination buttons use, so search and quick-dest agree.
     async function searchDestinationFromQuery(query) {
       try {
-        setAssistantStatus(stateLang.ui === 'zh' ? `正在搜索 ${query}…` : `Searching ${query}…`);
+        setAssistantStatus('searchingFor', query);
         let location = await geocodePostcode(query);
         if (!location) {
           location = await searchStopAsLocation(query);
         }
         if (!location) {
           showToast(t('postcodeNotFound'));
-          setAssistantStatus(stateLang.ui === 'zh' ? '未找到该目的地。' : 'No matching destination found.');
+          setAssistantStatus('destinationNotFound');
           return;
         }
 
@@ -1481,7 +1487,7 @@
       } catch (err) {
         console.error(err);
         showToast(stateLang.ui === 'zh' ? '搜索目的地失败' : 'Failed to resolve destination');
-        setAssistantStatus(stateLang.ui === 'zh' ? '无法解析该目的地。' : 'Unable to resolve that destination.');
+        setAssistantStatus('destinationUnresolvable');
       }
     }
     function fmtTime(date) {
@@ -1791,7 +1797,7 @@
 
     async function planJourney() {
       try {
-        setAssistantStatus(t('planning'));
+        setAssistantStatus('planning');
         const res = await fetch(`${apiBase}/api/v1/plan`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -1804,10 +1810,15 @@
         });
         const data = await res.json();
         renderTripSummary(data, { announce: currentView === 'wayfinding' });
+        // planJourney announced "planning"; it is responsible for taking it
+        // down. renderTripSummary returns through four branches and none of
+        // them touch the status.
+        const done = KioskAssistantStatus.planStatus(data);
+        setAssistantStatus(done.key, ...done.args);
       } catch (err) {
         console.error(err);
-        setAssistantStatus(stateLang.ui === 'zh' ? '路线规划失败。' : 'Route planning failed.');
-        if (currentView === 'wayfinding') showToast(stateLang.ui === 'zh' ? '规划失败' : 'Plan failed');
+        setAssistantStatus('routeFailed');
+        if (currentView === 'wayfinding') showToast(t('planFailed'));
       }
     }
 
@@ -1816,7 +1827,7 @@
       userMarker.setLatLng([stop.latitude, stop.longitude]);
       state.current = { lat: stop.latitude, lon: stop.longitude, label: stop.name };
       updateYouAreHereLabel();
-      setAssistantStatus(t('focusedOn', stop.name));
+      setAssistantStatus('focusedOn', stop.name);
       await loadNearby(stop.latitude, stop.longitude);
       await planJourney();
     }
@@ -1852,12 +1863,12 @@
 
       micBtn.addEventListener('click', () => {
         try { recognitionInstance.start(); } catch (e) {}
-        setAssistantStatus(t('listening'));
+        setAssistantStatus('listening');
       });
 
       recognitionInstance.onresult = async (event) => {
         const text = event.results[0][0].transcript;
-        setAssistantStatus(t('heard', text));
+        setAssistantStatus('heard', text);
         showToast(text);
         const destination = await resolveLocationFromText(text);
         if (destination) {
@@ -1872,7 +1883,7 @@
       };
       recognitionInstance.onerror = (event) => {
         const failure = KioskSpeechErrors.classify(event);
-        setAssistantStatus(t(failure.key));
+        setAssistantStatus(failure.key);
         if (failure.needsAttention) {
           // Unattended kiosk: leave a trace an operator can read back, since
           // "no microphone" and "nobody spoke" look identical on screen.

@@ -46,3 +46,32 @@ def test_index_loads_speech_errors_before_use():
     body = client.get("/").text
     assert '<script src="/static/js/speech-errors.js"></script>' in body
     assert "KioskSpeechErrors.classify" in body
+
+
+def test_serves_assistant_status_module():
+    response = client.get("/static/js/assistant-status.js")
+    assert response.status_code == 200
+    assert "planStatus" in response.text
+
+
+def test_index_wires_up_the_status_store():
+    """setAssistantStatus and setLanguage both depend on this module; a missing
+    script tag would throw on the first status update."""
+    body = client.get("/").text
+    assert '<script src="/static/js/assistant-status.js"></script>' in body
+    assert "KioskAssistantStatus.createStore" in body
+    assert "KioskAssistantStatus.planStatus" in body
+
+
+def test_planning_status_is_cleared_after_a_plan_renders():
+    """Regression: the line kept saying 正在规划最佳巴士方案… over a finished route."""
+    body = client.get("/").text
+    planning_at = body.index("setAssistantStatus('planning')")
+    clear_at = body.index("setAssistantStatus(done.key")
+    assert planning_at < clear_at, "nothing takes the planning status down"
+
+
+def test_language_switch_replays_status_instead_of_resetting():
+    body = client.get("/").text
+    assert "assistantStatusStore.render(lang)" in body
+    assert "#assistant-status').textContent = t('ready')" not in body
