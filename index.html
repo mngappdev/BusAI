@@ -685,7 +685,12 @@
 
     const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([defaultLocation.lat, defaultLocation.lon], 15);
     // CartoDB Voyager — clean street map, shows MRT stations, bus stops, transit routes (OSM data)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // CARTO started watermarking unauthenticated raster tiles "API KEY REQUIRED"
+    // in Aug 2026. The key is a usage counter, not an access secret — CARTO's
+    // own docs describe no domain-restriction mechanism for it — so it belongs
+    // in this client-side URL the same way a Google Maps JS key does.
+    const CARTO_BASEMAP_KEY = 'cb1_33nj_1_5f03848be69a22d963189965';
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CARTO_BASEMAP_KEY}`, {
       subdomains: 'abcd',
       maxZoom: 20,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'

@@ -75,3 +75,12 @@ def test_language_switch_replays_status_instead_of_resetting():
     body = client.get("/").text
     assert "assistantStatusStore.render(lang)" in body
     assert "#assistant-status').textContent = t('ready')" not in body
+
+
+def test_map_basemap_tile_url_carries_the_carto_api_key():
+    """CARTO started watermarking unauthenticated raster tiles "API KEY
+    REQUIRED" in Aug 2026; without ?key=... the whole map background breaks."""
+    body = client.get("/").text
+    assert "basemaps.cartocdn.com/rastertiles/voyager" in body
+    assert "?key=${CARTO_BASEMAP_KEY}" in body
+    assert "CARTO_BASEMAP_KEY = '" in body
