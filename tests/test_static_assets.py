@@ -77,6 +77,32 @@ def test_language_switch_replays_status_instead_of_resetting():
     assert "#assistant-status').textContent = t('ready')" not in body
 
 
+def test_serves_digital_human_module():
+    response = client.get("/static/js/digital-human.js")
+    assert response.status_code == 200
+    assert "setState" in response.text
+
+
+def test_serves_the_concierge_figure_image():
+    response = client.get("/static/img/concierge-figure.png")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("image/")
+
+
+def test_index_wires_the_digital_human_to_speech_events():
+    """The figure's idle/listening/speaking state is driven off the speech
+    lifecycle. If any hook is dropped the figure silently freezes."""
+    body = client.get("/").text
+    assert '<script src="/static/js/digital-human.js"></script>' in body
+    assert 'id="digital-human"' in body
+    # listening: recognition lifecycle, not the mic click
+    assert "recognitionInstance.onstart = () => dhSetState('listening')" in body
+    assert "recognitionInstance.onend = () => dhSetState('idle')" in body
+    # speaking: TTS utterance lifecycle
+    assert "utter.onstart = () => dhSetState('speaking')" in body
+    assert "utter.onend = () => dhSetState('idle')" in body
+
+
 def test_map_basemap_tile_url_carries_the_carto_api_key():
     """CARTO started watermarking unauthenticated raster tiles "API KEY
     REQUIRED" in Aug 2026; without ?key=... the whole map background breaks."""
