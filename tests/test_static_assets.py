@@ -112,10 +112,10 @@ def test_map_basemap_tile_url_carries_the_carto_api_key():
     assert "CARTO_BASEMAP_KEY = '" in body
 
 
-def test_hero_pills_are_bilingual_not_duplicated():
-    """Regression: setLanguage built each pill as `t(key)｜hardcoded-other`, and
+def test_hero_prompt_pill_is_bilingual_not_duplicated():
+    """Regression: setLanguage built the pill as `t(key)｜hardcoded-other`, and
     since t() already resolves to one language, both halves came out the same
-    ("您要去哪里？｜您要去哪里？"). The pills are a fixed EN｜中文 pair now."""
+    ("您要去哪里？｜您要去哪里？"). One fixed EN｜中文 pill now."""
     import re
 
     body = client.get("/").text
@@ -125,10 +125,9 @@ def test_hero_pills_are_bilingual_not_duplicated():
     assert left and right, f"pill-where is not a bilingual pair: {m.group(1)!r}"
     assert left.strip() != right.strip(), f"pill-where halves duplicated: {m.group(1)!r}"
 
-    # pill-arrival is hidden — keep it that way, and don't rebuild it from t()
-    m2 = re.search(r'id="pill-arrival"([^>]*)>', body)
-    assert m2 and "hidden" in m2.group(1), "pill-arrival should be hidden"
+    # The "when is my bus?" pill advertised a feature with no entry point — removed.
+    assert "pill-arrival" not in body
+    assert "巴士几时到" not in body
 
-    # setLanguage must not rebuild the pills from t() (that is what caused the repeat)
+    # setLanguage must not rebuild the pill from t() (that is what caused the repeat)
     assert "'pill-where').textContent = `${t(" not in body
-    assert "'pill-arrival').textContent" not in body
