@@ -119,13 +119,16 @@ def test_hero_pills_are_bilingual_not_duplicated():
     import re
 
     body = client.get("/").text
-    for pill_id in ("pill-where", "pill-arrival"):
-        m = re.search(rf'id="{pill_id}"[^>]*>([^<]+)<', body)
-        assert m, f"{pill_id} not found"
-        left, _, right = m.group(1).partition("｜")
-        assert left and right, f"{pill_id} is not a bilingual pair: {m.group(1)!r}"
-        assert left.strip() != right.strip(), f"{pill_id} halves duplicated: {m.group(1)!r}"
+    m = re.search(r'id="pill-where"[^>]*>([^<]+)<', body)
+    assert m, "pill-where not found"
+    left, _, right = m.group(1).partition("｜")
+    assert left and right, f"pill-where is not a bilingual pair: {m.group(1)!r}"
+    assert left.strip() != right.strip(), f"pill-where halves duplicated: {m.group(1)!r}"
 
-    # setLanguage must not rebuild them from t() (that is what caused the repeat)
+    # pill-arrival is hidden — keep it that way, and don't rebuild it from t()
+    m2 = re.search(r'id="pill-arrival"([^>]*)>', body)
+    assert m2 and "hidden" in m2.group(1), "pill-arrival should be hidden"
+
+    # setLanguage must not rebuild the pills from t() (that is what caused the repeat)
     assert "'pill-where').textContent = `${t(" not in body
-    assert "'pill-arrival').textContent = `${t(" not in body
+    assert "'pill-arrival').textContent" not in body
