@@ -389,8 +389,8 @@
               </div>
               <div class="space-y-3">
                 <div class="flex gap-3 flex-wrap">
-                  <div id="pill-where" class="chat-pill primary">Where to go?｜您要去哪里?</div>
-                  <div id="pill-arrival" class="chat-pill secondary">Which bus arrives when?｜哪辆巴士什么时候到?</div>
+                  <div id="pill-where" class="chat-pill primary">Where to go?｜您要去哪里？</div>
+                  <div id="pill-arrival" class="chat-pill secondary">When is my bus?｜巴士几时到？</div>
                 </div>
                 <div id="quick-dest-row" class="flex gap-2 flex-wrap"></div>
                 <div class="flex items-center gap-3">
@@ -891,8 +891,10 @@
       document.getElementById('sidebar-nearby').textContent = t('nearbyStops');
       document.getElementById('sidebar-saved').textContent = t('savedRoutes');
       document.getElementById('sidebar-ai').textContent = t('aiAssistant');
-      document.getElementById('pill-where').textContent = `${t('whereToGo')}｜${lang === 'zh' ? '您要去哪里？' : 'Where do you want to go?'}`;
-      document.getElementById('pill-arrival').textContent = `${t('whichBus')}｜${lang === 'zh' ? '哪辆巴士什么时候到？' : 'Which bus arrives when?'}`;
+      // Always bilingual EN｜中文 — t() already resolves to one language, so
+      // pairing it with a hardcoded half in the same language read as a repeat.
+      document.getElementById('pill-where').textContent = 'Where to go?｜您要去哪里？';
+      document.getElementById('pill-arrival').textContent = 'When is my bus?｜巴士几时到？';
       document.getElementById('destination-search-title').textContent = t('whereToGo');
       document.getElementById('destination-search-subtitle').textContent = t('searchDestinationSubtitle');
       if (state.destination?.label) {

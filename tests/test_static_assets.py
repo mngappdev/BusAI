@@ -110,3 +110,22 @@ def test_map_basemap_tile_url_carries_the_carto_api_key():
     assert "basemaps.cartocdn.com/rastertiles/voyager" in body
     assert "?key=${CARTO_BASEMAP_KEY}" in body
     assert "CARTO_BASEMAP_KEY = '" in body
+
+
+def test_hero_pills_are_bilingual_not_duplicated():
+    """Regression: setLanguage built each pill as `t(key)｜hardcoded-other`, and
+    since t() already resolves to one language, both halves came out the same
+    ("您要去哪里？｜您要去哪里？"). The pills are a fixed EN｜中文 pair now."""
+    import re
+
+    body = client.get("/").text
+    for pill_id in ("pill-where", "pill-arrival"):
+        m = re.search(rf'id="{pill_id}"[^>]*>([^<]+)<', body)
+        assert m, f"{pill_id} not found"
+        left, _, right = m.group(1).partition("｜")
+        assert left and right, f"{pill_id} is not a bilingual pair: {m.group(1)!r}"
+        assert left.strip() != right.strip(), f"{pill_id} halves duplicated: {m.group(1)!r}"
+
+    # setLanguage must not rebuild them from t() (that is what caused the repeat)
+    assert "'pill-where').textContent = `${t(" not in body
+    assert "'pill-arrival').textContent = `${t(" not in body
