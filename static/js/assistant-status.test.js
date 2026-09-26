@@ -39,6 +39,33 @@ test('no route found reports no route', () => {
   assert.equal(planStatus({ type: 'none' }).key, 'noRoute');
 });
 
+test('a direct plan with a comfortable deadline reports the depart-by time', () => {
+  const status = planStatus({
+    type: 'bus', mode: 'direct',
+    best: { service: '53', stops: 8 },
+    depart_by: '13:40', urgent: false,
+  });
+
+  assert.equal(status.key, 'statusDepartBy');
+  assert.deepEqual(status.args, ['13:40']);
+});
+
+test('a direct plan with an already-passed deadline reports urgency, not the time', () => {
+  const status = planStatus({
+    type: 'bus', mode: 'direct',
+    best: { service: '53', stops: 8 },
+    depart_by: '09:00', urgent: true,
+  });
+
+  assert.equal(status.key, 'statusUrgent');
+});
+
+test('a direct plan with no deadline still reports the best option as before', () => {
+  const status = planStatus({ type: 'bus', mode: 'direct', best: { service: '53', stops: 8 } });
+
+  assert.equal(status.key, 'bestOption');
+});
+
 test('every plan shape produces a terminal status', () => {
   const shapes = [
     { type: 'bus', mode: 'direct', best: { service: '53' } },
@@ -131,6 +158,7 @@ const REQUIRED_KEYS = [
   'planning', 'ready', 'noRoute', 'bestOption', 'routeFailed', 'planFailed',
   'foundNearby', 'statusWalkSuggested', 'destinationResolved', 'nearbyFailed',
   'searchingFor', 'destinationNotFound', 'destinationUnresolvable',
+  'statusDepartBy', 'statusUrgent',
 ];
 
 test('every status key is translated in both languages', () => {
