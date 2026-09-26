@@ -7,16 +7,23 @@ exactly as if this module didn't exist. See the design spec's "Error handling
 contract" section — this is the load-bearing property of the whole feature.
 """
 
+import json
+import logging
 import os
+import re
 import time
 from collections import defaultdict
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
+import anthropic
+
 load_dotenv()  # picks up ANTHROPIC_API_KEY from a .env file, if present. Also
                 # called by bus_engine.py; python-dotenv is safe to call from
                 # multiple modules — this makes ai_features.py self-sufficient
                 # rather than relying on import order with bus_engine.py.
+
+logger = logging.getLogger(__name__)
 
 
 class RateLimiter:
@@ -88,3 +95,82 @@ narrate_trip_limiter = RateLimiter(
 daily_budget = DailyBudget(
     max_calls_per_day=int(os.getenv('AI_DAILY_CALL_BUDGET', '2000')),
 )
+
+
+_HH_MM_RE = re.compile(r'^([01]\d|2[0-3]):([0-5]\d)$')
+_FALLBACK_INTENT = {'destination_query': None, 'target_arrival_time': None, 'confidence': 'low'}
+
+_anthropic_client = None
+_anthropic_client_checked = False
+
+
+def _get_anthropic_client():
+    """Lazily build the Anthropic client. Returns None (never raises) when no
+    API key is configured, so callers can treat "no key" the same as "call
+    failed" — both fall back."""
+    global _anthropic_client, _anthropic_client_checked
+    if _anthropic_client_checked:
+        return _anthropic_client
+    _anthropic_client_checked = True
+    api_key = os.getenv('ANTHROPIC_API_KEY')
+    if not api_key:
+        return None
+    _anthropic_client = anthropic.Anthropic(api_key=api_key, timeout=8.0)
+    return _anthropic_client
+
+
+def _first_text(response):
+    for block in response.content:
+        if getattr(block, 'type', None) == 'text':
+            return block.text
+    return None
+
+
+VOICE_INTENT_SYSTEM_PROMPT = """You extract structured intent from a Singapore bus \
+kiosk voice query. The commuter spoke this sentence aloud; you see only the transcript.
+
+Respond with ONLY a JSON object (no markdown fences, no explanation), exactly this shape:
+{"destination_query": string or null, "target_arrival_time": string or null, "confidence": "high" or "low"}
+
+Rules:
+- destination_query: the place name the commuter wants to go, in their own words. null if no destination is mentioned at all.
+- target_arrival_time: a 24-hour "HH:MM" time ONLY IF the commuter stated a specific deadline or appointment time (e.g. "by 3pm", "before 15:30"). null if no time was mentioned. NEVER invent or infer a time that wasn't said.
+- confidence: "high" only if you are confident of the destination_query extraction. "low" otherwise.
+"""
+
+
+def extract_voice_intent(text, lang):
+    client = _get_anthropic_client()
+    if client is None:
+        return dict(_FALLBACK_INTENT)
+
+    try:
+        response = client.messages.create(
+            model='claude-haiku-4-5',
+            max_tokens=200,
+            system=VOICE_INTENT_SYSTEM_PROMPT,
+            messages=[{'role': 'user', 'content': f'Language: {lang}\nTranscript: {text}'}],
+        )
+        raw_text = _first_text(response)
+        if not raw_text:
+            return dict(_FALLBACK_INTENT)
+
+        parsed = json.loads(raw_text)
+        destination_query = parsed.get('destination_query')
+        if not isinstance(destination_query, str) or not destination_query.strip():
+            destination_query = None
+
+        target_arrival_time = parsed.get('target_arrival_time')
+        if not isinstance(target_arrival_time, str) or not _HH_MM_RE.match(target_arrival_time):
+            target_arrival_time = None
+
+        confidence = 'high' if parsed.get('confidence') == 'high' else 'low'
+
+        return {
+            'destination_query': destination_query,
+            'target_arrival_time': target_arrival_time,
+            'confidence': confidence,
+        }
+    except Exception:
+        logger.exception('voice-intent extraction failed; falling back')
+        return dict(_FALLBACK_INTENT)
