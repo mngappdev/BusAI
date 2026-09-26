@@ -1,10 +1,12 @@
+import re
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+import ai_features
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from bus_engine import BusSmartEngine
 
 app = FastAPI()
@@ -42,6 +44,31 @@ class TripRequest(BaseModel):
     s_lon: float
     e_lat: float
     e_lon: float
+
+
+class VoiceIntentRequest(BaseModel):
+    text: str
+    lang: str = 'en'
+
+
+class NarrateTripRequest(BaseModel):
+    trip: dict
+    lang: str = 'en'
+
+
+class DeadlineTripRequest(BaseModel):
+    s_lat: float
+    s_lon: float
+    e_lat: float
+    e_lon: float
+    target_arrival_time: str
+
+    @field_validator('target_arrival_time')
+    @classmethod
+    def validate_time_format(cls, v):
+        if not re.match(r'^([01]\d|2[0-3]):([0-5]\d)$', v):
+            raise ValueError('target_arrival_time must be HH:MM (24-hour)')
+        return v
 
 
 @app.get("/")
@@ -146,6 +173,29 @@ async def stop_arrivals(stop_code: str, service_no: str | None = None):
 @app.post("/api/v1/plan")
 async def plan(request: TripRequest):
     return engine.plan_trip(request.s_lat, request.s_lon, request.e_lat, request.e_lon)
+
+
+@app.post("/api/v1/voice-intent")
+async def voice_intent(request: VoiceIntentRequest, req: Request):
+    client_id = req.client.host if req.client else 'unknown'
+    if not ai_features.voice_intent_limiter.allow(client_id) or not ai_features.daily_budget.consume():
+        return {"destination_query": None, "target_arrival_time": None, "confidence": "low"}
+    return ai_features.extract_voice_intent(request.text, request.lang)
+
+
+@app.post("/api/v1/plan-by-deadline")
+async def plan_by_deadline(request: DeadlineTripRequest):
+    return engine.plan_trip_by_deadline(
+        request.s_lat, request.s_lon, request.e_lat, request.e_lon, request.target_arrival_time,
+    )
+
+
+@app.post("/api/v1/narrate-trip")
+async def narrate_trip_endpoint(request: NarrateTripRequest, req: Request):
+    client_id = req.client.host if req.client else 'unknown'
+    if not ai_features.narrate_trip_limiter.allow(client_id) or not ai_features.daily_budget.consume():
+        return {"narrative": None}
+    return {"narrative": ai_features.narrate_trip(request.trip, request.lang)}
 
 @app.get("/health")
 async def health():
