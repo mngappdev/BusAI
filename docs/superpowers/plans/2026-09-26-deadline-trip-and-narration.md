@@ -120,6 +120,12 @@ import os
 import time
 from collections import defaultdict
 from datetime import datetime, timezone
+from dotenv import load_dotenv
+
+load_dotenv()  # picks up ANTHROPIC_API_KEY from a .env file, if present. Also
+                # called by bus_engine.py; python-dotenv is safe to call from
+                # multiple modules — this makes ai_features.py self-sufficient
+                # rather than relying on import order with bus_engine.py.
 
 
 class RateLimiter:
