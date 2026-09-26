@@ -178,3 +178,36 @@ def extract_voice_intent(text, lang):
     except Exception:
         logger.exception('voice-intent extraction failed; falling back')
         return dict(_FALLBACK_INTENT)
+
+
+NARRATE_TRIP_SYSTEM_PROMPT = """You narrate a Singapore bus trip for a kiosk to speak \
+aloud to a commuter. You will receive the trip's already-computed fields as JSON — \
+treat them as ground truth, do not invent or alter any detail (service number, stop \
+count, berth, names). Reply with 2-3 short, calm sentences in the requested language: \
+mention the walk to the berth, which bus service to board, roughly how many stops, and \
+— only if a depart_by field is present — when to leave. Reply with plain sentences only, \
+no JSON, no markdown, no preamble."""
+
+
+def narrate_trip(trip_fields, lang):
+    client = _get_anthropic_client()
+    if client is None:
+        return None
+
+    try:
+        response = client.messages.create(
+            model='claude-haiku-4-5',
+            max_tokens=300,
+            system=NARRATE_TRIP_SYSTEM_PROMPT,
+            messages=[{
+                'role': 'user',
+                'content': f'Language: {lang}\nTrip fields: {json.dumps(trip_fields)}',
+            }],
+        )
+        text = _first_text(response)
+        if not text or not text.strip():
+            return None
+        return text.strip()
+    except Exception:
+        logger.exception('trip narration failed; falling back')
+        return None

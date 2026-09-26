@@ -151,3 +151,68 @@ def test_extract_voice_intent_falls_back_when_time_is_not_hh_mm(monkeypatch):
 
     assert result['destination_query'] == 'changi airport'
     assert result['target_arrival_time'] is None, "an unparseable time must not reach the caller"
+
+
+from ai_features import narrate_trip
+
+
+def test_narrate_trip_returns_the_model_text(monkeypatch):
+    fake_client = MagicMock()
+    response = MagicMock()
+    response.content = [_FakeTextBlock('Walk to Berth B1, board the blue 53, about 8 stops.')]
+    fake_client.messages.create.return_value = response
+    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+
+    trip_fields = {
+        'service': '53', 'stops': 8, 'berth': 'B1',
+        'walk_to_dest_min': 2, 'from_name': 'Pasir Ris Int', 'to_name': 'Tampines Mall',
+    }
+    result = narrate_trip(trip_fields, 'en')
+
+    assert result == 'Walk to Berth B1, board the blue 53, about 8 stops.'
+    call_kwargs = fake_client.messages.create.call_args.kwargs
+    assert call_kwargs['model'] == 'claude-haiku-4-5'
+    assert '"service": "53"' in call_kwargs['messages'][0]['content'] or "'53'" in str(call_kwargs['messages'])
+
+
+def test_narrate_trip_returns_none_when_client_unavailable(monkeypatch):
+    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: None)
+
+    assert narrate_trip({'service': '53', 'stops': 8}, 'en') is None
+
+
+def test_narrate_trip_returns_none_on_api_error(monkeypatch):
+    fake_client = MagicMock()
+    fake_client.messages.create.side_effect = RuntimeError('boom')
+    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+
+    assert narrate_trip({'service': '53', 'stops': 8}, 'en') is None
+
+
+def test_narrate_trip_returns_none_when_response_is_empty(monkeypatch):
+    fake_client = MagicMock()
+    response = MagicMock()
+    response.content = []
+    fake_client.messages.create.return_value = response
+    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+
+    assert narrate_trip({'service': '53', 'stops': 8}, 'en') is None
+
+
+def test_narrate_trip_includes_deadline_fields_when_present(monkeypatch):
+    fake_client = MagicMock()
+    response = MagicMock()
+    response.content = [_FakeTextBlock('Leave by 1:40pm to make your 3pm appointment.')]
+    fake_client.messages.create.return_value = response
+    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+
+    trip_fields = {
+        'service': '53', 'stops': 8, 'berth': 'B1', 'walk_to_dest_min': 2,
+        'from_name': 'Pasir Ris Int', 'to_name': 'Changi General Hospital',
+        'depart_by': '13:40', 'urgent': False,
+    }
+    result = narrate_trip(trip_fields, 'en')
+
+    assert result == 'Leave by 1:40pm to make your 3pm appointment.'
+    sent_content = str(fake_client.messages.create.call_args.kwargs['messages'])
+    assert '13:40' in sent_content
