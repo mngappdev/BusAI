@@ -106,8 +106,8 @@ _anthropic_client_checked = False
 
 def _get_anthropic_client():
     """Lazily build the Anthropic client. Returns None (never raises) when no
-    API key is configured, so callers can treat "no key" the same as "call
-    failed" — both fall back."""
+    API key is configured or client construction fails, so callers can treat
+    "no key" and "construction failed" the same as "call failed" — all fall back."""
     global _anthropic_client, _anthropic_client_checked
     if _anthropic_client_checked:
         return _anthropic_client
@@ -115,7 +115,11 @@ def _get_anthropic_client():
     api_key = os.getenv('ANTHROPIC_API_KEY')
     if not api_key:
         return None
-    _anthropic_client = anthropic.Anthropic(api_key=api_key, timeout=8.0)
+    try:
+        _anthropic_client = anthropic.Anthropic(api_key=api_key, timeout=8.0)
+    except Exception:
+        logger.exception('anthropic client construction failed; falling back')
+        return None
     return _anthropic_client
 
 
