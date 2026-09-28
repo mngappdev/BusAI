@@ -16,6 +16,7 @@ ONEMAP_API_BASE = "https://www.onemap.gov.sg/api"
 WALK_SPEED_M_PER_MIN = 80   # project-wide walking pace, also used by nearby-stop cards
 WALK_DETOUR_FACTOR = 1.3    # straight line -> street network, when OneMap is unavailable
 DEADLINE_BUFFER_MIN = 5     # safety margin subtracted from a deadline-derived depart_by time
+SGT = timezone(timedelta(hours=8))  # Singapore Standard Time, no DST
 
 # What a Singapore passenger says vs what the alias table stores.
 SHORT_FORMS = {
@@ -483,9 +484,9 @@ class BusSmartEngine:
             return plan
 
         best = plan['best']
-        total_minutes = max(4, best['stops'] * 2) + best['walk_to_dest_min']
+        total_minutes = max(4, best['stops'] * 2) + max(1, best.get('walk_to_dest_min', 5))
 
-        now = now or datetime.now()
+        now = now or datetime.now(SGT)
         target_hour, target_minute = (int(p) for p in target_arrival_time.split(':'))
         target_dt = now.replace(hour=target_hour, minute=target_minute, second=0, microsecond=0)
 

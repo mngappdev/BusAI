@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from bus_engine import BusSmartEngine
 
 app = FastAPI()
@@ -47,12 +47,26 @@ class TripRequest(BaseModel):
 
 
 class VoiceIntentRequest(BaseModel):
-    text: str
+    text: str = Field(max_length=500)
     lang: str = 'en'
 
 
+class NarrateTripFields(BaseModel):
+    """Explicit whitelist of the fields narrate_trip actually uses (see
+    ai_features.NARRATE_TRIP_SYSTEM_PROMPT and index.html's narrationFields) —
+    closes off forwarding an arbitrary client-supplied dict into the prompt."""
+    service: str
+    stops: int
+    walk_to_dest_min: int
+    from_name: str
+    to_name: str
+    berth: str | None = None
+    depart_by: str | None = None
+    urgent: bool | None = None
+
+
 class NarrateTripRequest(BaseModel):
-    trip: dict
+    trip: NarrateTripFields
     lang: str = 'en'
 
 
@@ -195,7 +209,7 @@ async def narrate_trip_endpoint(request: NarrateTripRequest, req: Request):
     client_id = req.client.host if req.client else 'unknown'
     if not ai_features.narrate_trip_limiter.allow(client_id) or not ai_features.daily_budget.consume():
         return {"narrative": None}
-    return {"narrative": ai_features.narrate_trip(request.trip, request.lang)}
+    return {"narrative": ai_features.narrate_trip(request.trip.model_dump(exclude_none=True), request.lang)}
 
 @app.get("/health")
 async def health():

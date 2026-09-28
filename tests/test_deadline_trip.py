@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from bus_engine import BusSmartEngine, DEADLINE_BUFFER_MIN
+from bus_engine import BusSmartEngine, DEADLINE_BUFFER_MIN, SGT
 
 # Pasir Ris Bus Interchange -> Tampines Mall (a real direct-route pair used
 # elsewhere in this test suite)
@@ -95,3 +95,25 @@ def test_direct_mode_with_no_best_passes_through(engine, monkeypatch):
     result = engine.plan_trip_by_deadline(*DEMO_START, *DEMO_END, "15:00")
 
     assert 'depart_by' not in result
+
+
+def test_urgent_with_timezone_aware_sgt_now_close_to_deadline(engine, monkeypatch):
+    # Regression test: in production (Azure code deployment, not the
+    # Dockerfile), the server OS clock is UTC, so a naive `datetime.now()`
+    # default silently made `urgent` compare against the wrong wall-clock
+    # time against a Singapore-local target_arrival_time. Passing an
+    # explicit, timezone-AWARE `now` (as the SGT-aware default now
+    # produces) must still correctly flag urgency when close to a deadline.
+    monkeypatch.setattr(engine, 'plan_trip', lambda *a, **k: {
+        'type': 'bus', 'mode': 'direct',
+        'best': {'service': '53', 'stops': 4, 'walk_to_dest_min': 2},
+        'options': [],
+    })
+
+    now = datetime(2026, 1, 1, 14, 50, tzinfo=SGT)
+    result = engine.plan_trip_by_deadline(*DEMO_START, *DEMO_END, "15:00", now=now)
+
+    # total_minutes = max(4, 4*2) + 2 = 10; depart_by = 15:00 - (10+5)min = 14:45
+    # which is before "now" (14:50), so this trip must be urgent.
+    assert result['depart_by'] == '14:45'
+    assert result['urgent'] is True

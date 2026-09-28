@@ -89,7 +89,13 @@ set ANTHROPIC_API_KEY=你的Anthropic_API_Key
 - `ANTHROPIC_API_KEY`：用于两个 AI 功能（语音意图抽取、行程语音简述）。未配置时两个功能自动禁用，
   kiosk 行为与今天完全一致——这两个功能只做"锦上添花"，绝不阻断已有流程。
 - `AI_RATE_LIMIT_MAX_CALLS` / `AI_RATE_LIMIT_WINDOW_SECONDS`：单个来源每个时间窗口允许调用 AI 接口的
-  次数，默认 20 次 / 60 秒。
+  次数，默认 20 次 / 60 秒。**注意**：这里的"来源"取自 `req.client.host`（直连客户端 IP）。在本文档推荐
+  的 Azure Web App（代码部署，`gunicorn -k uvicorn.workers.UvicornWorker`）路径下，`UvicornWorker`
+  默认不信任 Azure 前端代理传入的 `X-Forwarded-For`，所有请求的 `req.client.host` 会是同一个反向代理
+  地址——也就是说，该限流在此部署路径下实际上会退化为**全局限流**（所有客户端共享同一份配额），而不是
+  真正按客户端区分的限流。这不会带来超支风险（结果是更严格而非更宽松），但请按实际行为理解这项配置；
+  是否要让服务信任 `X-Forwarded-For` 以恢复按来源限流，是一个需要单独评估的安全决策，本次修复不包含
+  该改动。
 - `AI_DAILY_CALL_BUDGET`：AI 接口每天（UTC）总调用次数上限，默认 2000，超出后当天自动禁用（回退为
   今天的行为），避免公开无人值守 kiosk 被刷调用产生意外账单。
 

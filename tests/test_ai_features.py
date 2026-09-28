@@ -1,10 +1,8 @@
 import json
 from unittest.mock import MagicMock
 
-import pytest
-
 import ai_features
-from ai_features import RateLimiter, DailyBudget, extract_voice_intent
+from ai_features import RateLimiter, DailyBudget, extract_voice_intent, narrate_trip
 
 
 def test_rate_limiter_allows_up_to_the_limit():
@@ -127,7 +125,6 @@ def test_extract_voice_intent_falls_back_on_api_error(monkeypatch):
 
 def test_extract_voice_intent_falls_back_on_malformed_json(monkeypatch):
     fake_client = MagicMock()
-    fake_client.messages.create.return_value = _fake_response.__wrapped__ if False else None
     response = MagicMock()
     response.content = [_FakeTextBlock('not json at all')]
     fake_client.messages.create.return_value = response
@@ -151,9 +148,6 @@ def test_extract_voice_intent_falls_back_when_time_is_not_hh_mm(monkeypatch):
 
     assert result['destination_query'] == 'changi airport'
     assert result['target_arrival_time'] is None, "an unparseable time must not reach the caller"
-
-
-from ai_features import narrate_trip
 
 
 def test_narrate_trip_returns_the_model_text(monkeypatch):

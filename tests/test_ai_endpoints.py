@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock
-
 import ai_features
 import main
 from main import app

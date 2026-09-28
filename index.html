@@ -528,6 +528,9 @@
 
     let currentView = 'home';
     let nearbyPlacesFilter = 'all';
+    // Generation counter so a slow narration fetch from an earlier trip plan
+    // can never be spoken over a newer one (see renderTripSummary).
+    let narrationToken = 0;
 
     function getViewEls() {
       return document.querySelectorAll('[data-view]');
@@ -1863,8 +1866,12 @@
               walk_to_dest_min: best.walk_to_dest_min, from_name: best.from_name, to_name: best.to_name,
               ...(departInfo ? { depart_by: departInfo.departBy, urgent: departInfo.urgent } : {}),
             };
+            const thisToken = ++narrationToken;
             KioskAIFeatures.fetchTripNarration({ trip: narrationFields, lang: stateLang.ui })
-              .then((narrative) => speak(narrative || fallbackLine));
+              .then((narrative) => {
+                if (thisToken !== narrationToken) return; // a newer trip plan has started; let it speak instead
+                speak(narrative || fallbackLine);
+              });
             showToast(t('bestOption', best.service));
           }
         } else if (shouldAnnounce()) {
@@ -1891,6 +1898,10 @@
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(body)
         });
+        if (!res.ok) {
+          if (targetArrivalTime) return planJourney(null);
+          throw new Error(`plan request failed: ${res.status}`);
+        }
         const data = await res.json();
         renderTripSummary(data, { announce: currentView === 'wayfinding' });
         // planJourney announced "planning"; it is responsible for taking it
@@ -1966,9 +1977,8 @@
         const intent = await KioskAIFeatures.fetchVoiceIntent({ text, lang: stateLang.ui });
         const useExtracted = intent && intent.destination_query && intent.confidence === 'high';
 
-        const destination = useExtracted
-          ? await resolveLocationFromText(intent.destination_query)
-          : await resolveLocationFromText(text);
+        let destination = useExtracted ? await resolveLocationFromText(intent.destination_query) : null;
+        if (!destination) destination = await resolveLocationFromText(text);
 
         if (destination) {
           const updated = await setDestinationLocation(destination, text);
