@@ -59,6 +59,11 @@
 
     const best = data.best || (data.options || [])[0];
     if (best && best.service) {
+      if (data.depart_by) {
+        return data.urgent
+          ? { key: 'statusUrgent', args: [] }
+          : { key: 'statusDepartBy', args: [data.depart_by] };
+      }
       return { key: 'bestOption', args: [best.service] };
     }
     return { key: 'noRoute', args: [] };

@@ -508,6 +508,7 @@
   <script src="/static/js/speech-errors.js"></script>
   <script src="/static/js/assistant-status.js"></script>
   <script src="/static/js/digital-human.js"></script>
+  <script src="/static/js/ai-features.js"></script>
   <script>
     const apiBase = '';
     const defaultLocation = { lat: 1.373696, lon: 103.94845, label: 'Pasir Ris Bus Interchange'};
@@ -527,6 +528,9 @@
 
     let currentView = 'home';
     let nearbyPlacesFilter = 'all';
+    // Generation counter so a slow narration fetch from an earlier trip plan
+    // can never be spoken over a newer one (see renderTripSummary).
+    let narrationToken = 0;
 
     function getViewEls() {
       return document.querySelectorAll('[data-view]');
@@ -1556,7 +1560,7 @@
       return date.toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', hour12: true });
     }
 
-    function buildDirectTimeline(best, isZh) {
+    function buildDirectTimeline(best, isZh, departInfo = null) {
       const now = new Date();
       const waitMins  = best?.live?.minutes ?? 5;
       const totalMins = KioskTripDuration.computeDirectTripMinutes(best);
@@ -1571,11 +1575,17 @@
       const walkLabel = isZh
         ? `步行约 ${walkMins} 分钟`
         : `Walk ~${walkMins} min`;
+      const departByLine = departInfo
+        ? `<div class="small-label" style="margin-top:6px">${
+            departInfo.urgent ? t('statusUrgent') : t('statusDepartBy', departInfo.departBy)
+          }</div>`
+        : '';
       return `
         <div class="tl-header">
           <div>
             <div class="tl-timerange">${fmtTime(departT)} – ${fmtTime(arriveT)}</div>
             <span class="tl-duration">${totalMins} min</span>
+            ${departByLine}
           </div>
           <div class="tl-modes">
             <div class="tl-mode">🚌</div>
@@ -1828,7 +1838,8 @@
 
         // Direct mode
         const best = data.best || data.options?.[0];
-        summary.innerHTML = buildDirectTimeline(best, isZh);
+        const departInfo = data.depart_by ? { departBy: data.depart_by, urgent: !!data.urgent } : null;
+        summary.innerHTML = buildDirectTimeline(best, isZh, departInfo);
         if (best) {
           renderBerthCard(best.berth, best.berth_options, best.service, best.from_code, best.from_name);
           renderTripQr(KioskQrPayload.buildDirectTripPayload({
@@ -1849,7 +1860,18 @@
         if (best) {
           if (shouldAnnounce()) {
             const etaText = KioskTripDuration.computeDirectTripMinutes(best);
-            speak(t('welcomeSpeak', best.service, etaText));
+            const fallbackLine = t('welcomeSpeak', best.service, etaText);
+            const narrationFields = {
+              service: best.service, stops: best.stops, berth: best.berth,
+              walk_to_dest_min: best.walk_to_dest_min, from_name: best.from_name, to_name: best.to_name,
+              ...(departInfo ? { depart_by: departInfo.departBy, urgent: departInfo.urgent } : {}),
+            };
+            const thisToken = ++narrationToken;
+            KioskAIFeatures.fetchTripNarration({ trip: narrationFields, lang: stateLang.ui })
+              .then((narrative) => {
+                if (thisToken !== narrationToken) return; // a newer trip plan has started; let it speak instead
+                speak(narrative || fallbackLine);
+              });
             showToast(t('bestOption', best.service));
           }
         } else if (shouldAnnounce()) {
@@ -1857,19 +1879,29 @@
         }
     }
 
-    async function planJourney() {
+    async function planJourney(targetArrivalTime = null) {
       try {
         setAssistantStatus('planning');
-        const res = await fetch(`${apiBase}/api/v1/plan`, {
+        const body = {
+          s_lat: state.current.lat,
+          s_lon: state.current.lon,
+          e_lat: state.destination.lat,
+          e_lon: state.destination.lon,
+        };
+        const endpoint = targetArrivalTime
+          ? `${apiBase}/api/v1/plan-by-deadline`
+          : `${apiBase}/api/v1/plan`;
+        if (targetArrivalTime) body.target_arrival_time = targetArrivalTime;
+
+        const res = await fetch(endpoint, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            s_lat: state.current.lat,
-            s_lon: state.current.lon,
-            e_lat: state.destination.lat,
-            e_lon: state.destination.lon,
-          })
+          body: JSON.stringify(body)
         });
+        if (!res.ok) {
+          if (targetArrivalTime) return planJourney(null);
+          throw new Error(`plan request failed: ${res.status}`);
+        }
         const data = await res.json();
         renderTripSummary(data, { announce: currentView === 'wayfinding' });
         // planJourney announced "planning"; it is responsible for taking it
@@ -1937,11 +1969,21 @@
         const text = event.results[0][0].transcript;
         setAssistantStatus('heard', text);
         showToast(text);
-        const destination = await resolveLocationFromText(text);
+
+        // Try to extract a destination + optional deadline with Claude first.
+        // Any failure (network, timeout, low confidence) resolves to null,
+        // and the very next line is the exact call this replaces — the
+        // fallback is not a rewrite, it's literally not using this result.
+        const intent = await KioskAIFeatures.fetchVoiceIntent({ text, lang: stateLang.ui });
+        const useExtracted = intent && intent.destination_query && intent.confidence === 'high';
+
+        let destination = useExtracted ? await resolveLocationFromText(intent.destination_query) : null;
+        if (!destination) destination = await resolveLocationFromText(text);
+
         if (destination) {
           const updated = await setDestinationLocation(destination, text);
           if (updated) {
-            await planJourney();
+            await planJourney(useExtracted ? intent.target_arrival_time : null);
           }
           return;
         }

@@ -4,7 +4,7 @@ import math
 import re
 import requests
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 from dotenv import load_dotenv
 
@@ -15,6 +15,8 @@ ONEMAP_API_BASE = "https://www.onemap.gov.sg/api"
 
 WALK_SPEED_M_PER_MIN = 80   # project-wide walking pace, also used by nearby-stop cards
 WALK_DETOUR_FACTOR = 1.3    # straight line -> street network, when OneMap is unavailable
+DEADLINE_BUFFER_MIN = 5     # safety margin subtracted from a deadline-derived depart_by time
+SGT = timezone(timedelta(hours=8))  # Singapore Standard Time, no DST
 
 # What a Singapore passenger says vs what the alias table stores.
 SHORT_FORMS = {
@@ -463,6 +465,35 @@ class BusSmartEngine:
 
     def plan_trip(self, s_lat, s_lon, e_lat, e_lon):
         return self.best_route_candidates(s_lat, s_lon, e_lat, e_lon)
+
+    def plan_trip_by_deadline(self, s_lat, s_lon, e_lat, e_lon, target_arrival_time, now=None):
+        """Same as plan_trip, but works backward from a target arrival time
+        instead of forward from "now". Scoped to direct-mode trips only —
+        transfer trips use a different duration formula (see
+        buildTransferTimeline in index.html) and are deliberately not
+        covered here; see the design spec's Open Questions.
+
+        target_arrival_time is always interpreted as later today. A kiosk is
+        a walk-up, same-visit interaction — nobody asking it "when do I need
+        to leave to be there by 3pm" means 3pm tomorrow. A time that has
+        already passed today is correctly reported as urgent=True, not
+        silently rolled forward a day.
+        """
+        plan = self.plan_trip(s_lat, s_lon, e_lat, e_lon)
+        if plan.get('mode') != 'direct' or not plan.get('best'):
+            return plan
+
+        best = plan['best']
+        total_minutes = max(4, best['stops'] * 2) + max(1, best.get('walk_to_dest_min', 5))
+
+        now = now or datetime.now(SGT)
+        target_hour, target_minute = (int(p) for p in target_arrival_time.split(':'))
+        target_dt = now.replace(hour=target_hour, minute=target_minute, second=0, microsecond=0)
+
+        depart_dt = target_dt - timedelta(minutes=total_minutes + DEADLINE_BUFFER_MIN)
+        urgent = depart_dt <= now
+
+        return {**plan, 'depart_by': depart_dt.strftime('%H:%M'), 'urgent': urgent}
 
     # ─── Route summary ────────────────────────────────────────────────────────
 
