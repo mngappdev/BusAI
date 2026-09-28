@@ -131,3 +131,40 @@ def test_hero_prompt_pill_is_bilingual_not_duplicated():
 
     # setLanguage must not rebuild the pill from t() (that is what caused the repeat)
     assert "'pill-where').textContent = `${t(" not in body
+
+
+def test_serves_ai_features_module():
+    response = client.get("/static/js/ai-features.js")
+    assert response.status_code == 200
+    assert "fetchVoiceIntent" in response.text
+    assert "fetchTripNarration" in response.text
+
+
+def test_index_wires_ai_features_module():
+    body = client.get("/").text
+    assert '<script src="/static/js/ai-features.js"></script>' in body
+    assert "KioskAIFeatures.fetchVoiceIntent" in body
+    assert "KioskAIFeatures.fetchTripNarration" in body
+
+
+def test_voice_intent_extraction_runs_before_falling_back_to_the_raw_transcript():
+    """Regression guard: the raw-transcript resolveLocationFromText(text) call
+    must still exist as the fallback — voice-intent extraction sits in front
+    of it, never replaces it."""
+    body = client.get("/").text
+    assert "await resolveLocationFromText(text)" in body
+    assert "KioskAIFeatures.fetchVoiceIntent(" in body
+
+
+def test_plan_journey_accepts_an_optional_deadline_and_defaults_to_the_plain_endpoint():
+    body = client.get("/").text
+    assert "async function planJourney(targetArrivalTime = null)" in body
+    assert "/api/v1/plan-by-deadline" in body
+    # the original, unconditional endpoint call must still be reachable when no deadline is given
+    assert "'/api/v1/plan'" in body or '"/api/v1/plan"' in body or "`${apiBase}/api/v1/plan`" in body
+
+
+def test_narration_falls_back_to_the_existing_welcome_speak_line():
+    body = client.get("/").text
+    assert "KioskAIFeatures.fetchTripNarration(" in body
+    assert "t('welcomeSpeak', best.service, etaText)" in body
