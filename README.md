@@ -78,7 +78,9 @@ set DATAGOVSG=你的DATA_GOV_SG_API_KEY
 set LTA_REFRESH_INTERVAL=900
 set ONEMAP_EMAIL=你的OneMap账号邮箱
 set ONEMAP_PASSWORD=你的OneMap账号密码
-set ANTHROPIC_API_KEY=你的Anthropic_API_Key
+set AZURE_OPENAI_ENDPOINT=你的Azure_OpenAI资源终结点
+set AZURE_OPENAI_API_KEY=你的Azure_OpenAI_API_Key
+set AZURE_OPENAI_DEPLOYMENT=你的gpt-4o-mini部署名称
 ```
 
 - `LTA_API_KEY`：LTA DataMall API Key
@@ -86,8 +88,11 @@ set ANTHROPIC_API_KEY=你的Anthropic_API_Key
 - `ONEMAP_EMAIL` / `ONEMAP_PASSWORD`：OneMap 账号（免费注册），用于查询下车站到目的地的**真实路网步行距离**。
   密码变量也接受 `ONEMAP_EMAIL_PASSWORD` 这个名字，两者等价。
   未配置、或账号无 API 权限时自动回退为直线距离 × 1.3 的估算，功能不受影响。
-- `ANTHROPIC_API_KEY`：用于两个 AI 功能（语音意图抽取、行程语音简述）。未配置时两个功能自动禁用，
-  kiosk 行为与今天完全一致——这两个功能只做"锦上添花"，绝不阻断已有流程。
+- `AZURE_OPENAI_ENDPOINT` / `AZURE_OPENAI_API_KEY` / `AZURE_OPENAI_DEPLOYMENT`：用于两个 AI 功能
+  （语音意图抽取、行程语音简述），底层调用 Azure OpenAI 上部署的 `gpt-4o-mini`。`AZURE_OPENAI_DEPLOYMENT`
+  是你在 Azure OpenAI 资源里给该模型起的**部署名称**（不是模型名本身），未设置时默认尝试 `gpt-4o-mini`
+  这个部署名。三者任一缺失、或客户端构建失败时两个功能自动禁用，kiosk 行为与今天完全一致——这两个功能
+  只做"锦上添花"，绝不阻断已有流程。另有 `AZURE_OPENAI_API_VERSION` 可选，默认 `2024-10-21`。
 - `AI_RATE_LIMIT_MAX_CALLS` / `AI_RATE_LIMIT_WINDOW_SECONDS`：单个来源每个时间窗口允许调用 AI 接口的
   次数，默认 20 次 / 60 秒。**注意**：这里的"来源"取自 `req.client.host`（直连客户端 IP）。在本文档推荐
   的 Azure Web App（代码部署，`gunicorn -k uvicorn.workers.UvicornWorker`）路径下，`UvicornWorker`
