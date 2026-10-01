@@ -58,26 +58,24 @@ def test_daily_budget_remaining_reflects_consumption():
     assert budget.remaining == 4
 
 
-class _FakeTextBlock:
-    def __init__(self, text):
-        self.type = 'text'
-        self.text = text
-
-
-def _fake_response(payload_dict):
+def _fake_response(text):
     response = MagicMock()
-    response.content = [_FakeTextBlock(json.dumps(payload_dict))]
+    response.choices = [MagicMock(message=MagicMock(content=text))]
     return response
+
+
+def _fake_json_response(payload_dict):
+    return _fake_response(json.dumps(payload_dict))
 
 
 def test_extract_voice_intent_parses_a_well_formed_response(monkeypatch):
     fake_client = MagicMock()
-    fake_client.messages.create.return_value = _fake_response({
+    fake_client.chat.completions.create.return_value = _fake_json_response({
         'destination_query': 'changi general hospital',
         'target_arrival_time': '15:00',
         'confidence': 'high',
     })
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     result = extract_voice_intent('i need to be at changi general hospital by 3pm', 'en')
 
@@ -86,17 +84,17 @@ def test_extract_voice_intent_parses_a_well_formed_response(monkeypatch):
         'target_arrival_time': '15:00',
         'confidence': 'high',
     }
-    fake_client.messages.create.assert_called_once()
-    call_kwargs = fake_client.messages.create.call_args.kwargs
-    assert call_kwargs['model'] == 'claude-haiku-4-5'
+    fake_client.chat.completions.create.assert_called_once()
+    call_kwargs = fake_client.chat.completions.create.call_args.kwargs
+    assert call_kwargs['model'] == 'gpt-4o-mini'
 
 
 def test_extract_voice_intent_defaults_missing_fields_to_none(monkeypatch):
     fake_client = MagicMock()
-    fake_client.messages.create.return_value = _fake_response({
+    fake_client.chat.completions.create.return_value = _fake_json_response({
         'destination_query': 'white sands',
     })
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     result = extract_voice_intent('take me to white sands', 'en')
 
@@ -106,7 +104,7 @@ def test_extract_voice_intent_defaults_missing_fields_to_none(monkeypatch):
 
 
 def test_extract_voice_intent_falls_back_when_client_is_unavailable(monkeypatch):
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: None)
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: None)
 
     result = extract_voice_intent('anything', 'en')
 
@@ -115,8 +113,8 @@ def test_extract_voice_intent_falls_back_when_client_is_unavailable(monkeypatch)
 
 def test_extract_voice_intent_falls_back_on_api_error(monkeypatch):
     fake_client = MagicMock()
-    fake_client.messages.create.side_effect = RuntimeError('network exploded')
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    fake_client.chat.completions.create.side_effect = RuntimeError('network exploded')
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     result = extract_voice_intent('anything', 'en')
 
@@ -125,10 +123,8 @@ def test_extract_voice_intent_falls_back_on_api_error(monkeypatch):
 
 def test_extract_voice_intent_falls_back_on_malformed_json(monkeypatch):
     fake_client = MagicMock()
-    response = MagicMock()
-    response.content = [_FakeTextBlock('not json at all')]
-    fake_client.messages.create.return_value = response
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    fake_client.chat.completions.create.return_value = _fake_response('not json at all')
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     result = extract_voice_intent('anything', 'en')
 
@@ -137,12 +133,12 @@ def test_extract_voice_intent_falls_back_on_malformed_json(monkeypatch):
 
 def test_extract_voice_intent_falls_back_when_time_is_not_hh_mm(monkeypatch):
     fake_client = MagicMock()
-    fake_client.messages.create.return_value = _fake_response({
+    fake_client.chat.completions.create.return_value = _fake_json_response({
         'destination_query': 'changi airport',
         'target_arrival_time': 'sometime this afternoon',
         'confidence': 'high',
     })
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     result = extract_voice_intent('go to changi airport this afternoon', 'en')
 
@@ -152,10 +148,10 @@ def test_extract_voice_intent_falls_back_when_time_is_not_hh_mm(monkeypatch):
 
 def test_narrate_trip_returns_the_model_text(monkeypatch):
     fake_client = MagicMock()
-    response = MagicMock()
-    response.content = [_FakeTextBlock('Walk to Berth B1, board the blue 53, about 8 stops.')]
-    fake_client.messages.create.return_value = response
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    fake_client.chat.completions.create.return_value = _fake_response(
+        'Walk to Berth B1, board the blue 53, about 8 stops.'
+    )
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     trip_fields = {
         'service': '53', 'stops': 8, 'berth': 'B1',
@@ -164,21 +160,21 @@ def test_narrate_trip_returns_the_model_text(monkeypatch):
     result = narrate_trip(trip_fields, 'en')
 
     assert result == 'Walk to Berth B1, board the blue 53, about 8 stops.'
-    call_kwargs = fake_client.messages.create.call_args.kwargs
-    assert call_kwargs['model'] == 'claude-haiku-4-5'
-    assert '"service": "53"' in call_kwargs['messages'][0]['content'] or "'53'" in str(call_kwargs['messages'])
+    call_kwargs = fake_client.chat.completions.create.call_args.kwargs
+    assert call_kwargs['model'] == 'gpt-4o-mini'
+    assert '"service": "53"' in call_kwargs['messages'][1]['content'] or "'53'" in str(call_kwargs['messages'])
 
 
 def test_narrate_trip_returns_none_when_client_unavailable(monkeypatch):
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: None)
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: None)
 
     assert narrate_trip({'service': '53', 'stops': 8}, 'en') is None
 
 
 def test_narrate_trip_returns_none_on_api_error(monkeypatch):
     fake_client = MagicMock()
-    fake_client.messages.create.side_effect = RuntimeError('boom')
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    fake_client.chat.completions.create.side_effect = RuntimeError('boom')
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     assert narrate_trip({'service': '53', 'stops': 8}, 'en') is None
 
@@ -186,19 +182,19 @@ def test_narrate_trip_returns_none_on_api_error(monkeypatch):
 def test_narrate_trip_returns_none_when_response_is_empty(monkeypatch):
     fake_client = MagicMock()
     response = MagicMock()
-    response.content = []
-    fake_client.messages.create.return_value = response
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    response.choices = []
+    fake_client.chat.completions.create.return_value = response
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     assert narrate_trip({'service': '53', 'stops': 8}, 'en') is None
 
 
 def test_narrate_trip_includes_deadline_fields_when_present(monkeypatch):
     fake_client = MagicMock()
-    response = MagicMock()
-    response.content = [_FakeTextBlock('Leave by 1:40pm to make your 3pm appointment.')]
-    fake_client.messages.create.return_value = response
-    monkeypatch.setattr(ai_features, '_get_anthropic_client', lambda: fake_client)
+    fake_client.chat.completions.create.return_value = _fake_response(
+        'Leave by 1:40pm to make your 3pm appointment.'
+    )
+    monkeypatch.setattr(ai_features, '_get_openai_client', lambda: fake_client)
 
     trip_fields = {
         'service': '53', 'stops': 8, 'berth': 'B1', 'walk_to_dest_min': 2,
@@ -208,5 +204,27 @@ def test_narrate_trip_includes_deadline_fields_when_present(monkeypatch):
     result = narrate_trip(trip_fields, 'en')
 
     assert result == 'Leave by 1:40pm to make your 3pm appointment.'
-    sent_content = str(fake_client.messages.create.call_args.kwargs['messages'])
+    sent_content = str(fake_client.chat.completions.create.call_args.kwargs['messages'])
     assert '13:40' in sent_content
+
+
+def test_get_openai_client_returns_none_when_not_configured(monkeypatch):
+    monkeypatch.delenv('AZURE_OPENAI_ENDPOINT', raising=False)
+    monkeypatch.delenv('AZURE_OPENAI_API_KEY', raising=False)
+    monkeypatch.setattr(ai_features, '_openai_client_checked', False)
+    monkeypatch.setattr(ai_features, '_openai_client', None)
+
+    assert ai_features._get_openai_client() is None
+
+
+def test_get_openai_client_returns_none_when_construction_fails(monkeypatch):
+    monkeypatch.setenv('AZURE_OPENAI_ENDPOINT', 'https://example.openai.azure.com')
+    monkeypatch.setenv('AZURE_OPENAI_API_KEY', 'fake-key')
+    monkeypatch.setattr(ai_features, '_openai_client_checked', False)
+    monkeypatch.setattr(ai_features, '_openai_client', None)
+    monkeypatch.setattr(
+        ai_features, 'AzureOpenAI',
+        MagicMock(side_effect=RuntimeError('bad endpoint')),
+    )
+
+    assert ai_features._get_openai_client() is None

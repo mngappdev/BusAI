@@ -16,9 +16,9 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
-import anthropic
+from openai import AzureOpenAI
 
-load_dotenv()  # picks up ANTHROPIC_API_KEY from a .env file, if present. Also
+load_dotenv()  # picks up AZURE_OPENAI_* vars from a .env file, if present. Also
                 # called by bus_engine.py; python-dotenv is safe to call from
                 # multiple modules — this makes ai_features.py self-sufficient
                 # rather than relying on import order with bus_engine.py.
@@ -100,34 +100,46 @@ daily_budget = DailyBudget(
 _HH_MM_RE = re.compile(r'^([01]\d|2[0-3]):([0-5]\d)$')
 _FALLBACK_INTENT = {'destination_query': None, 'target_arrival_time': None, 'confidence': 'low'}
 
-_anthropic_client = None
-_anthropic_client_checked = False
+_openai_client = None
+_openai_client_checked = False
+
+_AZURE_OPENAI_DEPLOYMENT_DEFAULT = 'gpt-4o-mini'
 
 
-def _get_anthropic_client():
-    """Lazily build the Anthropic client. Returns None (never raises) when no
-    API key is configured or client construction fails, so callers can treat
-    "no key" and "construction failed" the same as "call failed" — all fall back."""
-    global _anthropic_client, _anthropic_client_checked
-    if _anthropic_client_checked:
-        return _anthropic_client
-    _anthropic_client_checked = True
-    api_key = os.getenv('ANTHROPIC_API_KEY')
-    if not api_key:
+def _get_openai_client():
+    """Lazily build the Azure OpenAI client. Returns None (never raises) when
+    the endpoint/key are not configured or client construction fails, so
+    callers can treat "not configured" and "construction failed" the same as
+    "call failed" — all fall back."""
+    global _openai_client, _openai_client_checked
+    if _openai_client_checked:
+        return _openai_client
+    _openai_client_checked = True
+    endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+    api_key = os.getenv('AZURE_OPENAI_API_KEY')
+    if not endpoint or not api_key:
         return None
     try:
-        _anthropic_client = anthropic.Anthropic(api_key=api_key, timeout=8.0)
+        _openai_client = AzureOpenAI(
+            azure_endpoint=endpoint,
+            api_key=api_key,
+            api_version=os.getenv('AZURE_OPENAI_API_VERSION', '2024-10-21'),
+            timeout=8.0,
+        )
     except Exception:
-        logger.exception('anthropic client construction failed; falling back')
+        logger.exception('azure openai client construction failed; falling back')
         return None
-    return _anthropic_client
+    return _openai_client
 
 
-def _first_text(response):
-    for block in response.content:
-        if getattr(block, 'type', None) == 'text':
-            return block.text
-    return None
+def _openai_deployment():
+    return os.getenv('AZURE_OPENAI_DEPLOYMENT', _AZURE_OPENAI_DEPLOYMENT_DEFAULT)
+
+
+def _first_choice_text(response):
+    if not response.choices:
+        return None
+    return response.choices[0].message.content
 
 
 VOICE_INTENT_SYSTEM_PROMPT = """You extract structured intent from a Singapore bus \
@@ -144,18 +156,21 @@ Rules:
 
 
 def extract_voice_intent(text, lang):
-    client = _get_anthropic_client()
+    client = _get_openai_client()
     if client is None:
         return dict(_FALLBACK_INTENT)
 
     try:
-        response = client.messages.create(
-            model='claude-haiku-4-5',
+        response = client.chat.completions.create(
+            model=_openai_deployment(),
             max_tokens=200,
-            system=VOICE_INTENT_SYSTEM_PROMPT,
-            messages=[{'role': 'user', 'content': f'Language: {lang}\nTranscript: {text}'}],
+            response_format={'type': 'json_object'},
+            messages=[
+                {'role': 'system', 'content': VOICE_INTENT_SYSTEM_PROMPT},
+                {'role': 'user', 'content': f'Language: {lang}\nTranscript: {text}'},
+            ],
         )
-        raw_text = _first_text(response)
+        raw_text = _first_choice_text(response)
         if not raw_text:
             return dict(_FALLBACK_INTENT)
 
@@ -190,21 +205,20 @@ no JSON, no markdown, no preamble."""
 
 
 def narrate_trip(trip_fields, lang):
-    client = _get_anthropic_client()
+    client = _get_openai_client()
     if client is None:
         return None
 
     try:
-        response = client.messages.create(
-            model='claude-haiku-4-5',
+        response = client.chat.completions.create(
+            model=_openai_deployment(),
             max_tokens=300,
-            system=NARRATE_TRIP_SYSTEM_PROMPT,
-            messages=[{
-                'role': 'user',
-                'content': f'Language: {lang}\nTrip fields: {json.dumps(trip_fields)}',
-            }],
+            messages=[
+                {'role': 'system', 'content': NARRATE_TRIP_SYSTEM_PROMPT},
+                {'role': 'user', 'content': f'Language: {lang}\nTrip fields: {json.dumps(trip_fields)}'},
+            ],
         )
-        text = _first_text(response)
+        text = _first_choice_text(response)
         if not text or not text.strip():
             return None
         return text.strip()
